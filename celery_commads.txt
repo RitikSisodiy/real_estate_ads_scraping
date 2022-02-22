@@ -1,0 +1,6 @@
+for Linux
+
+celery -A tasks.celery_app worker --loglevel=info
+
+for Windows
+celery -A tasks.celery_app worker -l info -P eventlet

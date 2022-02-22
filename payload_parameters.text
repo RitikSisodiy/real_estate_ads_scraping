@@ -1,0 +1,63 @@
+Payload parameters
+
+Ventes immobilières : sales
+Locations : Rentals
+
+------------------------ Simple parameters  --------------------------------------
+real_estate_type =
+text = ""
+vendor_type =
+property_type =
+vendor_type =
+min_price =
+max_price =
+city =
+rooms = 
+
+------------------------- Detailed parameters ------------------------------------
+{
+  "ads_type": "buy",
+  "price": 0,
+  "area": 0,
+  "city": "string",
+  "declared_habitable_surface": 0,
+  "declared_land_surface": 0,
+  "declared_rooms": 0,
+  "declared_bedrooms": 0,
+  "rooms": 0,
+  "bedrooms": 0,
+  "title": "string",
+  "description": "string",
+  "postal_code": "string",
+  "longitude": 0,
+  "latitude": 0,
+  "agency": true,
+  "agency_name": "string",
+  "agency_details": {},
+  "available": true,
+  "last_checked_at": "2021-11-30T21:37:06.839Z",
+  "coloc_friendly": true,
+  "elevator": true,
+  "floor": 0,
+  "furnished": true,
+  "balcony": true,
+  "terrace": true,
+  "images_url": [
+    "string"
+  ],
+  "is_new": true,
+  "website": "string",
+  "property_type": "House",
+  "site_id": "string",
+  "published_at": "2021-11-30T21:37:06.839Z",
+  "created_at": "2021-11-30T21:37:06.839Z",
+  "others": {},
+  "sous_loc": true,
+  "short_term": true,
+  "geoloc_prob": 0,
+  "anomaly_detected": true,
+  "duplicate": 0,
+  "unique_id": 0,
+  "url": "string"
+}
+--------------------------------------------------------------------------------------------------------
