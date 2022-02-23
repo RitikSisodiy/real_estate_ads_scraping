@@ -45,6 +45,11 @@ Python 3.7+, pip and git
        [Verify the rabbitmq-server is woring by using below command]
        systemctl status rabbitmq-server.service
         ```
+    5. Install the Celery Package in Ubuntu:
+        ```bash
+        sudo apt install python-celery-common
+        ```
+
 * #### Run It
     Fire up the server using this one simple command and
     bind machine IP to API Gateway 
