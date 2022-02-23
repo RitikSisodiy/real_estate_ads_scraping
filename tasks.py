@@ -58,9 +58,7 @@ def scrape_paruvendu_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
     try:
-        # ParuvenduScraper(payload)
-        print("Scraper 1 ")
-        time.sleep(100)
+        ParuvenduScraper(payload)
     except Exception as e:
         print("Exception ==============>", e)
     # Scraping task obj start here

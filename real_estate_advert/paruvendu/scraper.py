@@ -52,6 +52,7 @@ class DriverOptions(object):
         self.options.add_argument('--single-process')
         self.options.add_argument('--disable-dev-shm-usage')
         self.options.add_argument("--incognito")
+        self.options.add_argument("--headless")
         self.options.add_argument('--disable-blink-features=AutomationControlled')
         self.options.add_argument('--disable-blink-features=AutomationControlled')
         self.options.add_experimental_option('useAutomationExtension', False)
@@ -87,7 +88,7 @@ class WebDriver(DriverOptions):
         # }
         # webdriver.DesiredCapabilities.CHROME['acceptSslCerts'] = True
 
-        path = os.path.join(os.getcwd(), 'chromedriver.exe')
+        path = os.path.join(os.getcwd(), 'chromedriver')
 
         driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.options)
 
