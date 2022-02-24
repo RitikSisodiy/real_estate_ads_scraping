@@ -3,17 +3,10 @@ import time
 from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
 from real_estate_advert.paruvendu.scraper import main_scraper as ParuvenduScraper
 from celery import Celery
+from settings import *
 
-celery_app = Celery("tasks", backend="rpc://", broker=f"pyamqp://guest:guest@localhost:5672")
+celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
 celery_app.config_from_object(__name__)
-
-
-# Rabbit MQ server setting
-# celery_app.conf.broker_url = os.environ.get("celery_app_BROKER_URL", "amqp://guest:guest@localhost:5672//")
-
-# Redis Broker Setting
-# celery_app.conf.broker_url = os.environ.get("celery_app_BROKER_URL", "redis://localhost:6379")
-# celery_app.conf.result_backend = os.environ.get("celery_app_RESULT_BACKEND", "redis://localhost:6379")
 
 
 @celery_app.task(name="real estate")

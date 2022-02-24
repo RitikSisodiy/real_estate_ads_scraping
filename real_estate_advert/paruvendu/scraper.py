@@ -18,14 +18,16 @@ try:
     from selenium.webdriver.support import expected_conditions as EC
     from selenium.common.exceptions import TimeoutException, NoSuchElementException
     import time
+    from kafka_publisher import KafkaTopicProducer
 
-    print('all module are loaded ')
+    print('all module are loaded ', os.getcwd())
 
 except Exception as e:
     print("Error ->>>: {} ".format(e))
 
 global driverinstance
 driverinstance = None
+producer = KafkaTopicProducer()
 
 
 class Spoofer(object):
@@ -117,11 +119,12 @@ def strip_text(text):
     return result
 
 
-def scrape_ad(url):
+def scrape_ad(url, page_number=0):
     time.sleep(2)
     global driverinstance
     driver = driverinstance
-    page_data = []
+
+
     driver.get(url)
 
     list_ads = driver.find_elements(by=By.XPATH,
@@ -129,15 +132,15 @@ def scrape_ad(url):
 
     for index, _ad in enumerate(list_ads):
         # image url , number of images , property name , city , price , text ,
-        ad_data = {"image_url": "", "city": "", "title": "", "price": "",
+        ad_data = {"page_number": page_number, "image_url": "", "city": "", "title": "", "price": "",
                    "description": "", "url": "", "number_of_photos": "",
                    "vendor_information": {"vendor_type": "", "vendor_url": "", "vendor_name": "",
                                           "advertisement": "", "logo_url": ""}}
         try:
-
             ad_data["image_url"] = _ad.find_element(by=By.XPATH, value=".//img[@class='imgblur']").get_attribute('src')
             ad_data["url"] = _ad.find_element(by=By.XPATH, value=".//*[@class='voirann']").get_attribute('href')
-            soup = BeautifulSoup(_ad.find_element(by=By.CLASS_NAME, value="ergov3-h3").get_attribute('innerHTML'), "html.parser")
+            soup = BeautifulSoup(_ad.find_element(by=By.CLASS_NAME, value="ergov3-h3").get_attribute('innerHTML'),
+                                 "html.parser")
             ad_data["title"] = strip_text(soup.text)
             ad_data["number_of_photos"] = _ad.find_element(by=By.XPATH, value=".//span[@class='re14_nbphotos']").text
             ad_data["city"] = strip_text(soup.find("cite").text)
@@ -164,51 +167,28 @@ def scrape_ad(url):
             time.sleep(random.randint(4, 5))
             body = driver.find_element_by_css_selector('body')
             body.send_keys(Keys.PAGE_DOWN)
-        page_data.append(ad_data)
-
-    return page_data
+        producer.kafka_producer_sync(topic="paruvendu-data", data=ad_data)
 
 
-def scrape_pages(page_url, total=10, ):
+def scrape_pages(page_url, total=10 ):
     print("======================>")
-    # all_data = []
-    # for p in range(0, total):
-    #     if p != 0:
-    #         url = url + f"&p={p}"
-    #     data = {"page_data": scrape_ad(driverinstance, url=url), "page_number": p}
-    #     all_data.append(data)
-    #
-    # return all_data
     for p in range(0, total):
         if p != 0:
             page_url = page_url + f"&p={p}"
-        data = {"page_data": scrape_ad(url=page_url), "page_number": p}
-        yield data
-
-        # while True:
-        #     try:
-        #         print("Data", next(ad_gen))
-        #         print("Send to ES")
-        #         data = {"page_data": scrape_ad(driverinstance, url=url), "page_number": p}
-        #         print("complete")
-        #     except StopIteration:
-        #         break
-
-
-"""
- tt=1 sale house : Vente Maison
- tt=2 sale land : Vente terrain
- tt=5 location : rental 
-
- ddlAffine = "text"
- px0  minimum price 
- px1 maximum price
- codeINSEE
-
-"""
+            scrape_ad(url=page_url, page_number=p)
 
 
 def scrape_rental_ads(mini_price, maxi_price, text):
+    """
+     tt=1 sale house : Vente Maison
+     tt=2 sale land : Vente terrain
+     tt=5 location : rental
+
+     ddlAffine = "text"
+     px0  minimum price
+     px1 maximum price
+     codeINSEE
+    """
     rental_code = "5"
     total_pages = 5
     min_price = f"&px0={mini_price}"
@@ -218,16 +198,7 @@ def scrape_rental_ads(mini_price, maxi_price, text):
     if len(text) > 3:
         text = f"&ddlAffine={text}"
         url = f"https://www.paruvendu.fr/immobilier/annonceimmofo/liste/listeAnnonces?tt={rental_code}&tbApp=1&tbDup=1&tbChb=1&tbLof=1&tbAtl=1&tbPla=1&tbMai=1&tbVil=1&tbCha=1&tbPro=1&tbHot=1&tbMou=1&tbFer=1&at=1{min_price}{max_price}&pa=FR&lol=0&ray=50{text} {codeINSEE},"
-
-        pag_gen = scrape_pages(url)
-        while True:
-            try:
-                print("Data", next(pag_gen))
-
-                print("Send to ES")
-                print("complete")
-            except StopIteration:
-                break
+        scrape_pages(url, total=total_pages)
 
 
 def scrape_sale_ads(mini_price, maxi_price, text):

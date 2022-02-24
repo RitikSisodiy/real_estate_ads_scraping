@@ -31,6 +31,7 @@ idna==3.3
 iniconfig==1.1.1
 itsdangerous==2.0.1
 Jinja2==3.0.3
+kafka-python==2.0.2
 kombu==4.6.11
 lxml==4.7.1
 MarkupSafe==2.0.1
