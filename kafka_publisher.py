@@ -1,12 +1,7 @@
 from kafka import KafkaProducer
 import json
+from settings import *
 
-""" Kafka Producer Configurations """
-
-BROKER_IPS = [f"10.100.103.101:6667 "]
-TIMEOUT = 60
-
-""" Kafka Topic  Producer Configurations """
 
 
 class KafkaTopicProducer(object):

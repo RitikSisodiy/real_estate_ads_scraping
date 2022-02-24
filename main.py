@@ -2,13 +2,11 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 from api import router as real_estate_router
+from settings import API_V1_STR, DEBUG, title
 
 """---------------------------------------- Application Settings  ---------------------------------------- """
 
-API_V1_STR = "/api/v1"
-DEBUG = True
-
-app = FastAPI(title="Web Scrapping Server ", openapi_url="/api/v1/openapi.json", debug=DEBUG)
+app = FastAPI(title=title, openapi_url="/api/v1/openapi.json", debug=DEBUG)
 
 # CORS
 origins = []
@@ -21,4 +19,3 @@ app.add_middleware(
 ),
 # ROUTES
 app.include_router(real_estate_router, prefix=API_V1_STR)
-
