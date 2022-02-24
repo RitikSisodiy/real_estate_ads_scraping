@@ -8,7 +8,6 @@ from real_estate_advert.models import RealStateParameter, VendorType, RealStateT
 # Declaring test client
 client = TestClient(app)
 
-
 '''---------------------------------- END Point Testing --------------------------------------'''
 
 
@@ -22,8 +21,6 @@ def test_real_estate():
         "rooms": 0
     })
     assert response.status_code == 200
-    assert response.json() == {"message": "scraping request is successfully added to web scrapping server",
-                               "status": 200}
 
 
 def test_scrape_leboncoin():
@@ -36,8 +33,6 @@ def test_scrape_leboncoin():
         "rooms": 0
     })
     assert response.status_code == 200
-    assert response.json() == {"message": "scraping request is successfully added to web scrapping server",
-                               "status": 200}
 
 
 def test_scrape_pap():
@@ -50,8 +45,6 @@ def test_scrape_pap():
         "rooms": 0
     })
     assert response.status_code == 200
-    assert response.json() == {"message": "scraping request is successfully added to web scrapping server",
-                               "status": 200}
 
 
 def test_scrape_paruvendu():
@@ -64,8 +57,6 @@ def test_scrape_paruvendu():
         "rooms": 0
     })
     assert response.status_code == 200
-    assert response.json() == {"message": "scraping request is successfully added to web scrapping server",
-                               "status": 200}
 
 
 def test_scrape_seloger():
@@ -78,5 +69,3 @@ def test_scrape_seloger():
         "rooms": 0
     })
     assert response.status_code == 200
-    assert response.json() == {"message": "scraping request is successfully added to web scrapping server",
-                               "status": 200}
