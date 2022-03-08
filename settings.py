@@ -8,7 +8,7 @@ DEBUG = True
 
 """ Kafka Publisher Configurations """
 
-BROKER_IPS = [f"127.0.0.1:9091", f"127.0.0.1:9092", f"127.0.0.1:9093"]
+BROKER_IPS = [f"10.8.0.27:9091",f"10.8.0.27:9092", f"10.8.0.27:9093"]
 TIMEOUT = 60
 
 """Celery configurations """
