@@ -6,10 +6,7 @@ from settings import *
 
 class KafkaTopicProducer(object):
     def __init__(self):
-        try:
-            self.producer = KafkaProducer(bootstrap_servers=BROKER_IPS)
-        except Exception as e:
-            print("KAFKA ERROR >>>>>>> ", e)
+        self.producer = KafkaProducer(bootstrap_servers=BROKER_IPS , api_version = (0,3,3))
 
     @staticmethod
     def success(metadata):
@@ -38,7 +35,7 @@ class KafkaTopicProducer(object):
         finally:
             self.producer.flush()
 
-    def kafka_producer_async(self, topic="topic", data={}):
+    def kafka_producer_async(self, topic="paruvendu-data", data={}):
         """
         :param topic:
         :param data:
@@ -54,8 +51,9 @@ class KafkaTopicProducer(object):
         finally:
             self.producer.flush()
 
-# # How to use this producer.
-#
+# How to use this producer.
+
 # if __name__ == '__main__':
 #     producer = KafkaTopicProducer()
-#     producer.kafka_producer_sync("topic", "Data")
+#     producer.kafka_producer_sync("topic", {"Test":123})
+#
