@@ -28,7 +28,7 @@ class KafkaTopicProducer(object):
             data = json.dumps(data)
             msg = str(data).encode('utf-8')
             future = self.producer.send(topic, msg)
-            result = future.get(timeout=TIMEOUT)
+            #result = future.get(timeout=TIMEOUT)
             print("KAFKA STREAMING :============= >> ", topic)
         except Exception as e:
             print(e)
@@ -52,8 +52,3 @@ class KafkaTopicProducer(object):
             self.producer.flush()
 
 # How to use this producer.
-
-# if __name__ == '__main__':
-#     producer = KafkaTopicProducer()
-#     producer.kafka_producer_sync("topic", {"Test":123})
-#
