@@ -54,7 +54,7 @@ class DriverOptions(object):
         self.options.add_argument('--single-process')
         self.options.add_argument('--disable-dev-shm-usage')
         self.options.add_argument("--incognito")
-        # self.options.add_argument("--headless")
+        self.options.add_argument("--headless")
         self.options.add_argument('--disable-blink-features=AutomationControlled')
         self.options.add_argument('--disable-blink-features=AutomationControlled')
         self.options.add_experimental_option('useAutomationExtension', False)
