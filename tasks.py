@@ -2,6 +2,8 @@ import os
 import time
 from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
 from real_estate_advert.paruvendu.scraper import main_scraper as ParuvenduScraper
+from real_estate_advert.pap.scraper import pap_scraper as PapScraper
+
 from celery import Celery
 from settings import *
 
@@ -37,9 +39,7 @@ def scrape_leboncoin_task(payload):
 def scrape_pap_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
-
-    print("Scraper 2 ")
-    time.sleep(100)
+    PapScraper()
 
     # Scraping task obj start here
 
