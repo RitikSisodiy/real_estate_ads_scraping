@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 import json
 import time
 from kafka_publisher import KafkaTopicProducer
@@ -228,7 +229,7 @@ def pap_scraper():
     options = Options()
     options.add_argument("--headless")
     # initialize chrome and search the URL
-    driver = webdriver.Chrome(executable_path="chromedriver", chrome_options=options)
+    driver = webdriver.Chrome(ChromeDriverManager.install(), chrome_options=options)
     driver.get(URL)
 
     # select the filters
