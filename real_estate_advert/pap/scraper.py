@@ -229,7 +229,7 @@ def pap_scraper():
     options = Options()
     options.add_argument("--headless")
     # initialize chrome and search the URL
-    driver = webdriver.Chrome(ChromeDriverManager.install(), chrome_options=options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
     driver.get(URL)
 
     # select the filters
