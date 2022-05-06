@@ -227,7 +227,7 @@ def pap_scraper():
     # typesArr, piecesArr, area, price = get_input()
     producer = KafkaTopicProducer()
     options = Options()
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     # initialize chrome and search the URL
     driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
     driver.get(URL)
