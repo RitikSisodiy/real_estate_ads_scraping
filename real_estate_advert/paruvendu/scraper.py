@@ -58,6 +58,8 @@ class DriverOptions(object):
         self.options.add_argument('--disable-blink-features=AutomationControlled')
         self.options.add_argument('--disable-blink-features=AutomationControlled')
         self.options.add_experimental_option('useAutomationExtension', False)
+        self.options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36")
+
         self.options.add_experimental_option("excludeSwitches", ["enable-automation"])
         self.options.add_argument("disable-infobars")
 
@@ -320,7 +322,13 @@ def scrape_pages(page_url, driver, total=10):
             # scrape_ad(url=page_url, page_number=p)
             scrape_ad(page_url, driver)
 
-
+def GetintFromString(val):
+    f = ''
+    for t in val:
+        try:f+= str(int(t))
+        except:pass
+    try:return int(f)
+    except: return 0
 def scrape_rental_ads(mini_price, maxi_price, text, driver):
     """
      tt=1 sale house : Vente Maison
@@ -341,6 +349,16 @@ def scrape_rental_ads(mini_price, maxi_price, text, driver):
     if len(text) > 3:
         text = f"&ddlAffine={text}"
         url = f"https://www.paruvendu.fr/immobilier/annonceimmofo/liste/listeAnnonces?tt={rental_code}&tbApp=1&tbDup=1&tbChb=1&tbLof=1&tbAtl=1&tbPla=1&tbMai=1&tbVil=1&tbCha=1&tbPro=1&tbHot=1&tbMou=1&tbFer=1&at=1{min_price}{max_price}&pa=FR&lol=0&ray=50{text} {codeINSEE},"
+        wait = WebDriverWait(driver, 5)
+        driverinstance.get(url)
+        total_result = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="head17-affin"]/div/div[2]/div/a')))
+        total_pages = GetintFromString(total_result.text.strip())
+        list_ads = driver.find_elements(by=By.XPATH,
+                                    value="//div[@class=' ergov3-annonce ' or @class='lazyload_bloc ergov3-annonce ' ]")
+        if total_pages:
+            total_pages = total_pages/len(list_ads)
+            total_pages = int(total_pages)+1 if int(total_pages)<total_pages else total_pages
+        print(total_pages,"++++++++++++====")
         scrape_pages(url, total=total_pages, driver=driver)
 
 
@@ -355,7 +373,6 @@ def scrape_sale_ads(mini_price, maxi_price, text):
         url = f"https://www.paruvendu.fr/immobilier/annonceimmofo/liste/listeAnnonces?tt={rental_code}&tbApp=1&tbDup=1&tbChb=1&tbLof=1&tbAtl=1&tbPla=1&tbMai=1&tbVil=1&tbCha=1&tbPro=1&tbHot=1&tbMou=1&tbFer=1&at=1{min_price}{max_price}&pa=FR&lol=0&ray=50{text} {codeINSEE},"
     else:
         url = f"https://www.paruvendu.fr/immobilier/annonceimmofo/liste/listeAnnonces?tt={rental_code}&tbApp=1&tbDup=1&tbChb=1&tbLof=1&tbAtl=1&tbPla=1&tbMai=1&tbVil=1&tbCha=1&tbPro=1&tbHot=1&tbMou=1&tbFer=1&at=1&pa=FR&lol=0&ray=50{codeINSEE},"
-
     scrape_pages(url, total=total_pages)
     driverinstance.quit()
 
@@ -371,7 +388,9 @@ def main_scraper(paylaod):
     accept_cookies(driverinstance, url)
 
     if paylaod["real_state_type"] == "sale":
+        print("sales code is working")
         scrape_sale_ads(paylaod["min_price"], paylaod["max_price"], paylaod["text"])
 
     elif paylaod["real_state_type"] == "rental":
+        print("real code is working")
         scrape_rental_ads(paylaod["min_price"], paylaod["max_price"], paylaod["text"], driverinstance)
