@@ -386,6 +386,7 @@ def main_scraper(paylaod):
     url = "https://www.paruvendu.fr"
 
     accept_cookies(driverinstance, url)
+    print("this is the payload++++++++++++++++++++",paylaod)
 
     if paylaod["real_state_type"] == "sale":
         print("sales code is working")
