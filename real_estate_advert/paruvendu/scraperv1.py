@@ -109,7 +109,7 @@ async def scrape_ad(session,url,proxy,producer=producer):
             ad_data['image_urls'].append(img.attrs.get('src'))
     ad_data = json.dumps(ad_data)
     with open("outputparu2.json",'a') as file:
-        file.write(+"\n") 
+        file.write(ad_data+"\n") 
     await producer.kafka_producer_async(topic="paruvendu-data_v1", data=ad_data)
     await asyncio.sleep(1)
 async def scrape_pages(session,url,proxy=None,first = True,producer=producer):
