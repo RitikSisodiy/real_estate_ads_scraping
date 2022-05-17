@@ -121,7 +121,7 @@ async def scrape_pages(session,url,proxy=None,first = True,producer=producer):
         proxies = []
         port = 9050
         for i in range(2,22):
-            portno= port+1
+            portno= port+i
             # print(portno)
             prxy = {'http':f'socks4://127.0.0.1:{portno}','https':f'socks4://127.0.0.1:{portno}'}
             proxies.append(prxy)
