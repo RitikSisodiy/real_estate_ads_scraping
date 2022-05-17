@@ -1,7 +1,7 @@
 import os
 import time
 from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
-from real_estate_advert.paruvendu.scraper import main_scraper as ParuvenduScraper
+from real_estate_advert.paruvendu.scraperv1 import main_scraper as ParuvenduScraper
 from real_estate_advert.pap.scraper import pap_scraper as PapScraper
 
 from celery import Celery
