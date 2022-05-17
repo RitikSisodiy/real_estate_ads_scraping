@@ -4,10 +4,10 @@ from tkinter.tix import Tree
 import aiohttp
 import json
 from unidecode import unidecode
-try:
-    from .getFilters import getFilter
-except:
-    from getFilters import getFilter
+# try:
+#     from .getFilters import getFilter
+# except:
+#     from getFilters import getFilter
 
 from requests import request
 from kafka_publisher import KafkaTopicProducer
