@@ -13,7 +13,7 @@ except:
     from GetFilter import getFilter
 import ast
 ua = fake_useragent.UserAgent(fallback='Your favorite Browser')
-from kafka_publisher import KafkaTopicProducer
+from kafka_publisher import KafkaTopicProducer,AsyncKafkaTopicProducer
 producer = KafkaTopicProducer()
 def getHeaders():
     return ua.random
@@ -61,7 +61,7 @@ def GetTotalPage(r):
                 return 0 
         except:return 0
     else:return 0
-async def scrape_ad(session,url,proxy):
+async def scrape_ad(session,url,proxy,producer=producer):
     print("scrapin add ", proxy)
     r = await fetch(session,url,proxy)
     print("in last" ,url, proxy)
@@ -107,11 +107,12 @@ async def scrape_ad(session,url,proxy):
         imgs = r.find(".slides img")
         for img in imgs:
             ad_data['image_urls'].append(img.attrs.get('src'))
+    ad_data = json.dumps(ad_data)
     with open("outputparu2.json",'a') as file:
-        file.write(json.dumps(ad_data)+"\n") 
-    producer.kafka_producer_sync(topic="paruvendu-data_v1", data=ad_data)
+        file.write(+"\n") 
+    await producer.kafka_producer_async(topic="paruvendu-data_v1", data=ad_data)
     await asyncio.sleep(1)
-async def scrape_pages(session,url,proxy=None,first = True):
+async def scrape_pages(session,url,proxy=None,first = True,producer=producer):
     r = await fetch(session,url)
     iniurl = url
     if first:
@@ -136,7 +137,7 @@ async def scrape_pages(session,url,proxy=None,first = True):
                 nexpageurl = f"{url}?p={i}"
             else:
                 nexpageurl = f"{url}&p={i}"
-            tasks.append(asyncio.ensure_future(scrape_pages(session,nexpageurl,proxy,False)))
+            tasks.append(asyncio.ensure_future(scrape_pages(session,nexpageurl,proxy,False,producer=producer)))
             count +=1
             if count%len(proxies)==0 or count == totalpage:
                 await asyncio.gather(*tasks)
@@ -151,7 +152,7 @@ async def scrape_pages(session,url,proxy=None,first = True):
         url = ad.find('a')[1].attrs.get('href')
         url = r._make_absolute(url)
         url = url.replace("https://example.org/",'https://www.paruvendu.fr/')
-        tasks.append(asyncio.ensure_future(scrape_ad(session,url,proxy)))
+        tasks.append(asyncio.ensure_future(scrape_ad(session,url,proxy,producer=producer)))
         count +=1
         # if  or count == len(ads):
         await asyncio.gather(*tasks)
@@ -194,6 +195,8 @@ async def scrape_rental_ads(mini_price, maxi_price, text,totalpages=None):
 async def scrape_sale_ads(mini_price, maxi_price, text):
     # async with aiohttp.ClientSession() as session:
         session = AsyncHTMLSession()
+        producer= AsyncKafkaTopicProducer()
+        await producer.start()
         rental_code = "1"
         min_price = f"&px0={mini_price}"
         max_price = f"&px0={maxi_price}"
@@ -203,7 +206,8 @@ async def scrape_sale_ads(mini_price, maxi_price, text):
             url = f"https://www.paruvendu.fr/immobilier/annonceimmofo/liste/listeAnnonces?tt={rental_code}&tbApp=1&tbDup=1&tbChb=1&tbLof=1&tbAtl=1&tbPla=1&tbMai=1&tbVil=1&tbCha=1&tbPro=1&tbHot=1&tbMou=1&tbFer=1&at=1{min_price}{max_price}&pa=FR&lol=0&ray=50{text} {codeINSEE},"
         else:
             url = f"https://www.paruvendu.fr/immobilier/annonceimmofo/liste/listeAnnonces?tt={rental_code}&tbApp=1&tbDup=1&tbChb=1&tbLof=1&tbAtl=1&tbPla=1&tbMai=1&tbVil=1&tbCha=1&tbPro=1&tbHot=1&tbMou=1&tbFer=1&at=1&pa=FR&lol=0&ray=50{codeINSEE},"
-        await  asyncio.gather(asyncio.ensure_future(scrape_pages(session,url)))
+        await  asyncio.gather(asyncio.ensure_future(scrape_pages(session,url,producer=producer)))
+        await producer.close()
 
 
 
