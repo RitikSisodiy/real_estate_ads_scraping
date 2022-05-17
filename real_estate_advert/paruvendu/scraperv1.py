@@ -187,7 +187,7 @@ async def scrape_rental_ads(mini_price, maxi_price, text,totalpages=None):
         url = f"https://www.paruvendu.fr/immobilier/annonceimmofo/liste/listeAnnonces?tt={rental_code}&tbApp=1&tbDup=1&tbChb=1&tbLof=1&tbAtl=1&tbPla=1&tbMai=1&tbVil=1&tbCha=1&tbPro=1&tbHot=1&tbMou=1&tbFer=1&at=1&pa=FR&lol=0&ray=50"
     urls = getFilter(url)
     print(len(urls), " filters available do you wnat to continue")
-    input()
+    # input()
     for url in urls:
         await asyncio.gather(asyncio.ensure_future(scrape_pages(session,url)))
 
