@@ -109,7 +109,7 @@ async def scrape_ad(session,url,proxy):
             ad_data['image_urls'].append(img.attrs.get('src'))
     with open("outputparu2.json",'a') as file:
         file.write(json.dumps(ad_data)+"\n") 
-    producer.kafka_producer_sync(topic="paruvendu-data_v1", data=ad_data)
+    # producer.kafka_producer_sync(topic="paruvendu-data_v1", data=ad_data)
     await asyncio.sleep(1)
 async def scrape_pages(session,url,proxy=None,first = True):
     r = await fetch(session,url)
@@ -225,4 +225,5 @@ async def main():
         tasks  =  [ asyncio.ensure_future(fetch(session,url)) for i in range(0,100)]
         r = await asyncio.gather(*tasks)
         # print(r)
-# asyncio.run(scrape_rental_ads(0, 0, ''))
+if __name__=="__main__":
+    asyncio.run(scrape_rental_ads(0, 0, ''))
