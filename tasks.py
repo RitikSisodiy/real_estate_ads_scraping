@@ -1,8 +1,9 @@
 import os
 import time
-from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
+from real_estate_advert.leboncoin.scraper import main_scraper as leboncoinAd
 from real_estate_advert.paruvendu.scraper import main_scraper as ParuvenduScraper
-from real_estate_advert.pap.scraper import pap_scraper as PapScraper
+from real_estate_advert.pap.scraper import main_scraper as PapScraper
+from real_estate_advert.seloger.scraper import main_scraper as SelogerScraper
 
 from celery import Celery
 from settings import *
@@ -15,8 +16,6 @@ celery_app.config_from_object(__name__)
 def real_estate_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
-    obj = leboncoinAd()
-    obj.visit_url()
 
     # Scraping task obj start here
 
@@ -27,11 +26,9 @@ def real_estate_task(payload):
 def scrape_leboncoin_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
-
     # Scraping task obj start here
     print("Scraper 3 ")
-    time.sleep(100)
-
+    leboncoinAd()
     print("Task End ================> ")
 
 
@@ -63,6 +60,7 @@ def scrape_paruvendu_task(payload):
 def scrape_seloger_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
+    SelogerScraper()
 
     # Scraping task obj start here
 

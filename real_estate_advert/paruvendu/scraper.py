@@ -1,9 +1,8 @@
 try:
-
     import sys
     import pickle
     import os
-    from webdriver_manager.chrome import ChromeDriverManager
+    # from webdriver_manager.chrome import ChromeDriverManager
     # from fp.fp import FreeProxy
     from fake_useragent import UserAgent
     from bs4 import BeautifulSoup
@@ -20,15 +19,15 @@ try:
     import time
 
     from kafka_publisher import KafkaTopicProducer
-
     print('all module are loaded ', os.getcwd())
-
 except Exception as e:
     print("Error ->>>: {} ".format(e))
 
 global driverinstance
 driverinstance = None
 producer = KafkaTopicProducer()
+
+
 
 class Spoofer(object):
 
@@ -40,7 +39,7 @@ class Spoofer(object):
 
     def get(self):
         ua = UserAgent()
-        ip = f"170.155.5.235:8080"
+        ip = f"169.57.1.85:8123"
         return ua.random, ip
 
 
@@ -92,7 +91,8 @@ class WebDriver(DriverOptions):
 
         path = os.path.join(os.getcwd(), 'chromedriver')
 
-        driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.options)
+        # driver = webdriver.Chrom(ChromeDriverManager().install(), options=self.options)
+        driver = webdriver.Chrome(options=self.options)
 
         return driver
 
@@ -118,10 +118,12 @@ def strip_text(text):
     result = result.replace('\t', '')
     return result
 
+
 def scrape_ad(url, driver):
     time.sleep(2)
     global driverinstance
     driver = driverinstance
+    print(url)
     # producer = KafkaTopicProducer()
 
     driver.get(url)
@@ -131,6 +133,10 @@ def scrape_ad(url, driver):
     for i in range(1, len(list_ads)):
         url = list_ads[i].find_elements(By.TAG_NAME, 'a')[-1].get_attribute('href')
         scrape_ad_url(url, driver)
+        global TOTAL
+        TOTAL += 1
+
+    print(TOTAL)
 
 
 def extract_html(URL):
@@ -145,15 +151,7 @@ def extract_html(URL):
     return soup
 
 
-# def close_notification_pop_up():
-#     global driverinstance
-#     driver = driverinstance
-
-#     try:
-#         driver.find_element('')
-
 def scrape_ad_url(url, driver):
-    print('here')
     ad_data = {"image_urls": [], "3d_view": "", "location": "", "title": "", "price": "",
                "description": "", "location_url": "", "opening_timings": "", "features": [],
                "visting_form": "", "connectivity_index": "", "fiber_eligibility_rate": "",
@@ -279,13 +277,11 @@ def scrape_ad_url(url, driver):
 
     except:
         print('ERROR: -------> Vendor Information  ')
-
     ## open photo gallery
     try:
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "(//a[@title='Photo annonce']//span)[3]")))
         driver.find_element(By.XPATH, "(//a[@title='Photo annonce']//span)[3]").click()
-        # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "(//a[@title='Photo annonce']//span)[3]")))
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "flex-viewport")))
         srcs = BeautifulSoup(driver.find_element(By.CLASS_NAME, 'flex-viewport').get_attribute('innerHTML'),
                              'html.parser')
@@ -306,6 +302,7 @@ def scrape_ad_url(url, driver):
         print('ERROR: -------> 3d_view ')
 
     print(f"\n\n\n {url} -----------------------------------\n")
+    print(ad_data)
     producer.kafka_producer_sync(topic="paruvendu-data", data=ad_data)
     ## close the tab
     driver.execute_script("window.close();")
@@ -313,12 +310,23 @@ def scrape_ad_url(url, driver):
 
 
 def scrape_pages(page_url, driver, total=10):
-    print("======================>")
-    for p in range(0, total):
-        if p != 0:
-            page_url = page_url + f"&p={p}"
-            # scrape_ad(url=page_url, page_number=p)
-            scrape_ad(page_url, driver)
+    # print("======================>")
+    # for p in range(0, total):
+    #     if p != 0:
+    #         page_url = page_url + f"&p={p}"
+    #         # scrape_ad(url=page_url, page_number=p)
+    #         scrape_ad(page_url, driver)
+
+    driver.get(page_url)
+    scrape_ad(page_url, driver)
+    driver.implicitly_wait(10)
+    while True:
+        try:
+            next_page = driver.find_element(By.XPATH, '//div[@class="pv15-pagsuiv flol"]/a')
+            url = next_page.get_attribute('href')
+            scrape_ad(url, driver)
+        except Exception as e:
+            break
 
 
 def scrape_rental_ads(mini_price, maxi_price, text, driver):
@@ -360,9 +368,32 @@ def scrape_sale_ads(mini_price, maxi_price, text):
     driverinstance.quit()
 
 
+def scrape_student_rentals_ads():
+    url = 'https://www.paruvendu.fr/immobilier/logement-etudiant/'
+    driver = driverinstance
+    driver.get(url)
+    select_options = driver.find_element(By.XPATH, "//div[@class='locatetud-flecheselectinput']//select")
+    urls = []
+    for i in select_options.find_elements(By.TAG_NAME, 'option'):
+        if i.get_attribute('value') != "":
+            urls.append('https://www.paruvendu.fr' + i.get_attribute('value'))
+
+    for url in urls:
+        driver.get(url)
+        driver.find_element(By.XPATH, '//input[@id="btnOK_1"]').click()
+        page_url = driver.current_url
+        scrape_pages(page_url, driver)
+
+
+def scrape_sale_ads_2():
+    url = 'https://www.paruvendu.fr/immobilier/annonceimmofo/liste/listeAnnonces?tt=1&cat=18.nbp0=99&pa=FR&lo=&codeINSEE=&p=1'
+    driver = driverinstance
+    scrape_pages(url, driver)
+
+
 def main_scraper(paylaod):
     paylaod = {'text': 'house', 'min_price': 0.0, 'max_price': 0.0, 'city': 'string', 'rooms': 0,
-               'real_state_type': 'rental'}
+               'real_state_type': 'sale'}
     driver = WebDriver()
     global driverinstance
     driverinstance = driver.driver_instance
@@ -371,7 +402,14 @@ def main_scraper(paylaod):
     accept_cookies(driverinstance, url)
 
     if paylaod["real_state_type"] == "sale":
-        scrape_sale_ads(paylaod["min_price"], paylaod["max_price"], paylaod["text"])
+        # scrape_sale_ads(paylaod["min_price"], paylaod["max_price"], paylaod["text"])
+        scrape_sale_ads_2()
+
 
     elif paylaod["real_state_type"] == "rental":
         scrape_rental_ads(paylaod["min_price"], paylaod["max_price"], paylaod["text"], driverinstance)
+        scrape_student_rentals_ads()
+
+
+# TOTAL = 0
+# main_scraper({})

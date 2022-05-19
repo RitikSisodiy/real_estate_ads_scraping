@@ -18,8 +18,8 @@ try:
     from selenium.common.exceptions import TimeoutException, NoSuchElementException
     import undetected_chromedriver as uc
     import time
-    from capachasolver_v2 import isCaptcha
     from kafka_publisher import KafkaTopicProducer
+    from .capachasolver_v2 import isCaptcha
     print('all module are loaded ', os.getcwd())
 except Exception as e:
     print("Error ->>>: {} ".format(e))
@@ -229,7 +229,7 @@ def scrape_ads( driver, url):
 
 
         
-def main_scraper(paylaod):
+def main_scraper():
     paylaod = {'text': 'house', 'min_price': 0.0, 'max_price': 0.0, 'city': 'string', 'rooms': 0,
                'real_state_type': 'sale'}
     driver = WebDriver()
