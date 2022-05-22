@@ -1,0 +1,37 @@
+{
+    "limit_alu": 1,
+    "filters": {
+        "category": {
+            "id": "8"
+        },
+        "enums": {
+            "ad_type": [
+                "offer"
+            ]
+        },
+        "keywords": {
+            "type": "all"
+        },
+        "location": {
+            "area": {
+                "lat": 0.0,
+                "lng": 0.0,
+                "radius": 0
+            },
+            "shippable": false,
+            "locations": []
+        },
+        "owner": {
+            "no_salesmen": false
+        },
+        "ranges": {}
+    },
+    "include_inactive": false,
+    "limit": 100,
+    "listing_source": "pagination",
+    "owner_type": "all",
+    "//pivot": "{\"es_pivot\":\"1652979796000|1796633199\",\"page_number\":2049}",
+    "pivot": "0,0,0",
+    "sort_by": "time",
+    "sort_order": "desc"
+}
