@@ -34,7 +34,7 @@ def checkNext(res):
         return False
 def saveAds(res):
     ads = res.get('ads')
-    producer.PushDataList('test',ads)
+    producer.PushDataList('leboncoin-data_v1',ads)
     # totalads = ''
     # for ad in ads:
     #     totalads+= json.dumps(ad)+"\n"
@@ -61,7 +61,7 @@ def CrawlLeboncoin(parameter):
     response = urllib.request.urlopen(req, jsondataasbytes)
 
     # response = requests.post('https://api.leboncoin.fr/api/adfinder/v1/search', headers=headers, verify=False,json=parameter)
-    time.sleep(3)
+    time.sleep(5)
     print(response.status)
     if response.status==200:
         res= json.load(response)
@@ -69,11 +69,12 @@ def CrawlLeboncoin(parameter):
         return res
     else:
         print(response.status_code,"some issue do you wanna retry y/n")
-        ch = input()
-        if ch=="Y" or ch=="y":
-            return CrawlLeboncoin(parameter)
-        else:
-            return False
+        # ch = input()
+        # if ch=="Y" or ch=="y":
+        time.sleep(300)
+        return CrawlLeboncoin(parameter)
+        # else:
+        #     return False
 
 data = json.load(open('filter.json','r'))
 res = CrawlLeboncoin(data)
