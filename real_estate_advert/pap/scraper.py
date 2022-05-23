@@ -3,10 +3,11 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 import json
 import time
+
 from kafka_publisher import KafkaTopicProducer
+
 
 # get the source code of link
 def extract_html(driver, URL):
@@ -89,7 +90,6 @@ def ad_info(URL, driver=None):
 
     # create a dictionary
     place = {
-        'ad_url': URL,
         'name': name,
         'price': price,
         'images': images,
@@ -118,7 +118,7 @@ def transform(soup):
 
 
 # scrolling down
-def scroll_down(driver, SCROLL_PAUSE_TIME=3):
+def scroll_down(driver, SCROLL_PAUSE_TIME=2):
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     time.sleep(SCROLL_PAUSE_TIME)
     new_height = driver.execute_script("return document.body.scrollHeight")
@@ -149,23 +149,29 @@ def get_select_list(driver, class_name, xpath=False):
         By.CLASS_NAME if not xpath else By.XPATH,
         class_name).find_element(
         By.CLASS_NAME,
-        'optWrapper') .find_element(
-            By.TAG_NAME,
-            'ul').find_elements(
-                By.TAG_NAME,
+        'optWrapper').find_element(
+        By.TAG_NAME,
+        'ul').find_elements(
+        By.TAG_NAME,
         'li')
 
 
 # select the options of "types de bien"
 def select_types(driver, typeArr):
-    t = driver.find_element(By.XPATH, '//p[@title=" Types de bien"]')
-    t.click()
-    types = get_select_list(driver, 'sumo_typesbien')
-    for i in types:
-        if i.text.strip() in typeArr:
-            print(i.text.strip())
-            i.click()
-    t.click()
+    try:
+        t = driver.find_element(By.XPATH, '//p[@title=" Types de bien"]')
+        t.click()
+        types = get_select_list(driver, 'sumo_typesbien')
+        for i in types:
+            if i.text.strip() in typeArr:
+                print([i.text.strip()])
+                i.click()
+            # else:
+            #     print([i.text.strip(), typeArr])
+
+        t.click()
+    except Exception as e:
+        print(f'ERROR AT SELECT TYPES ----> {e}')
 
 
 # select the options of "Pieces"
@@ -175,7 +181,7 @@ def select_pieces(driver, pieceArr):
     pieces = driver.find_elements(By.XPATH, '//li[@class="opt"]')
     for i in pieces:
         if i.text.strip() in pieceArr:
-            print(i.text.strip())
+            print([i.text.strip()])
             i.click()
     s.click()
 
@@ -213,72 +219,128 @@ def get_input():
     typesArr = ['Maison', 'Appartement', 'Terrain',
                 'Garage, parking', 'Surfaces diverses']
     piecesArr = ['Studio', '3 pièces', '4 pièces', '5 pièces']
-    area = 0
+    area = 100
     price = -1
     return typesArr, piecesArr, area, price
-    # return typesArr, [], area, price
 
 
-def pap_scraper():
+def get_types_complete_list(driver):
+    types_list = []
+    t = driver.find_element(By.XPATH, '//p[@title=" Types de bien"]')
+    t.click()
+    types = get_select_list(driver, 'sumo_typesbien')
+    for i in types:
+        if i.text.strip() != '':
+            types_list.append(i.text.strip())
+    return types_list
 
-    URL = 'https://www.pap.fr/annonce/vente-appartement-bureaux-divers-fonds-de-commerce-garage-parking-immeuble-local-commercial-local-d-activite-maison-mobil-home-multipropriete-peniche-residence-avec-service-surface-a-amenager-terrain-viager-a-partir-du-studio'
-    # URL = 'https://www.pap.fr'
-    # typesArr, piecesArr, area, price = get_input()
+
+def get_pieces_complete_list(driver):
+    pieces_list = []
+    s = driver.find_element(By.XPATH, '//p[@title=" Pièces"]')
+    s.click()
+    pieces = driver.find_elements(By.XPATH, '//li[@class="opt"]')
+    for i in pieces:
+        pieces_list.append(i.text.strip())
+    return pieces_list
+
+
+def main_scraper():
+    # URL = 'https://www.pap.fr/annonce/vente-appartement-bureaux-divers-fonds-de-commerce-garage-parking-immeuble-local-commercial-local-d-activite-maison-mobil-home-multipropriete-peniche-residence-avec-service-surface-a-amenager-terrain-viager-a-partir-du-studio'
+    # URL by selecting only types de bien
+    # URL = 'https://www.pap.fr/annonce/vente-appartement-bureaux-divers-fonds-de-commerce-garage-parking-immeuble-local-commercial-local-d-activite-maison-mobil-home-multipropriete-peniche-residence-avec-service-surface-a-amenager-terrain-viager'
+    # only houses
+    # URL = 'https://www.pap.fr/annonce/vente-maisons'
+    # only appartment
+    # URL = 'https://www.pap.fr/annonce/vente-appartements'
+    WAIT_TIME = 2
+    SCROLL_COUNTER = 0
     producer = KafkaTopicProducer()
-    options = Options()
+    FILE_NAME = 'filters.json'
+    SCROLS = 0
+    TOTAL = 0
+    URL = 'https://www.pap.fr'
+
+    options = webdriver.ChromeOptions()
+    # options.addar
     options.add_argument("--headless")
-    # initialize chrome and search the URL
-    driver = webdriver.Chrome(executable_path="chromedriver", chrome_options=options)
+    options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0")
+
+    driver = webdriver.Chrome(options=options, executable_path="chromedriver")
+    # driver = webdriver.Chrome()
     driver.get(URL)
 
-    # select the filters
-    # select_types(driver, typesArr)
-    # select_pieces(driver, piecesArr)
-    # input_area(driver, area)
-    # input_price(driver, price)
+    types_list = get_types_complete_list(driver)
+    pieces_list = get_pieces_complete_list(driver)
 
-    # search(driver)
+    for typeDeBien in types_list:
+        for pieces in pieces_list:
+            # typesArr, piecesArr, area, price = get_input()
 
-    WAIT_TIME = 2
-    SCROLL_COUNTER = 100
+            # print([i], [j])
+            driver.delete_all_cookies()
+            driver.get(URL)
 
+            # # select the filters
+            driver.implicitly_wait(5)
+            select_types(driver, [typeDeBien])
+            select_pieces(driver, [pieces])
+            # select_types(driver, typesArr)
+            # select_pieces(driver, piecesArr)
+            # input_area(driver, area)
+            # input_price(driver, price)
 
-    link = None
-    t = time.time()
-    last_height = driver.execute_script("return document.body.scrollHeight")
-    while True:
-        # cancel the email confimation dialog pop-us
-        try:
-            WebDriverWait(driver, 0.5).until(
-                EC.visibility_of_element_located(
-                    (By.CLASS_NAME, 'btn-fermer-dialog '))
-            ).click()
-        except BaseException:
-            pass
-        if time.time() - t > WAIT_TIME:
-            html = driver.page_source
-            res = BeautifulSoup(html, 'html.parser')
-            links = transform(res)
+            # # submit and search the results
+            search(driver)
 
-            # get links after the prev
-            i = 0 if link is None else links.index(link) + 1
-            print(len(links))
-            for i in range(i, len(links)):
-                link = links[i]
-                data = ad_info(link, driver)
-                producer.kafka_producer_sync(topic="pap-data", data=data)
-
+            link = None
             t = time.time()
+            print(f'{t} ----------------------------------------------------------\n\n\n\n ')
+            last_height = driver.execute_script("return document.body.scrollHeight")
+            while True:
+                # cancel the email confimation dialog pop-us
+                try:
+                    WebDriverWait(driver, 0.5).until(
+                        EC.visibility_of_element_located(
+                            (By.CLASS_NAME, 'btn-fermer-dialog '))
+                    ).click()
+                except BaseException:
+                    pass
+                    # if time.time() - t > WAIT_TIME:
 
-            scroll_down(driver)
-            # Calculate new scroll height and compare with last scroll height
-            new_height = driver.execute_script(
-                "return document.body.scrollHeight")
-            if new_height == last_height:
-                SCROLL_COUNTER -= 1
-                if SCROLL_COUNTER == 0:
-                    print('Can not scroll more')
-                    break
-            last_height = new_height
-    driver.close()
+                    # t = time.time()
 
+                    scroll_down(driver)
+                    SCROLL_COUNTER += 1
+                    # Calculate new scroll height and compare with last scroll height
+                    new_height = driver.execute_script(
+                        "return document.body.scrollHeight")
+                    if new_height == last_height:
+                        # SCROLL_COUNTER -= 1
+                        # if SCROLL_COUNTER == 0:
+                        # print('Can not scroll more')
+                        # break
+                        # if not EC.visibility_of_element_located((By.CLASS_NAME, "loader")):
+                        #     break
+                        if not driver.find_element(By.ID, 'loader-next').is_displayed():
+                            print('loader is not there')
+                            html = driver.page_source
+                            res = BeautifulSoup(html, 'html.parser')
+                            links = transform(res)
+
+                            # get links after the prev
+                            i = 0 if link is None else links.index(link) + 1
+                            # print(len(links))
+                            for i in range(i, len(links)):
+                                link = links[i]
+                                TOTAL += 1
+                                print(f'\n\n{TOTAL} --- fetching data from {link}')
+                                data = ad_info(link, driver)
+                                producer.kafka_producer_sync(topic="pap-data", data=data)
+                                # update_json(FILE_NAME, data)
+                                print(data)
+                            print(SCROLL_COUNTER)
+                            break
+                        print('must have a loader')
+
+                    last_height = new_height
