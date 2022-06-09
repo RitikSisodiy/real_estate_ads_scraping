@@ -1,4 +1,5 @@
 import json
+import time
 def GetUrlFilterdDict(url):
     sdata = url.split("?")
     data = sdata[1].split("&")
@@ -86,12 +87,15 @@ def getFilter(params):
         print(iniinterval,">apending")
         print(filterurllist)
         filterurllist+=json.dumps(dic)
+        finalresult +=totalresult
     finallsit = [json.loads(d) for d in filterurllist.split(":\n")]
     print(finallsit)
     # paramslist = []
     # for par in finallsit:
     #     params['filters[P5M0]'],params['filters[P5M1]'] = par
     #     paramslist.append(params)
+    print("total result is : {acres} filtered result is: {finalresult}")
+    time.sleep(10)
     return finallsit
 if __name__=="__main__":
     params = {
