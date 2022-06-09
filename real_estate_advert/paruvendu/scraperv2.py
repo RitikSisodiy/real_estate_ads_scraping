@@ -57,7 +57,7 @@ async def startCrawling(session,filterParamList,**kwargs):
             tasks.append(asyncio.ensure_future(parstItems(session,param,**kwargs)))
         data = await asyncio.gather(*tasks)  
         for d in data:
-            await savedata(d)
+            await savedata(d,**kwargs)
 async def parstItems(session,param,**kwargs):
     data = await fetch(session,url,param)
     # data = json.load(res)
