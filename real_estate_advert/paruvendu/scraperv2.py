@@ -46,7 +46,6 @@ async def startCrawling(session,filterParamList,**kwargs):
         print(totalres,param)
         tasks = []
         print(totalpage,"this is total pages")
-        # await asyncio.sleep(10)
         for i in range(2,totalpage+1):
             param['p'] = i
             # print(param)
