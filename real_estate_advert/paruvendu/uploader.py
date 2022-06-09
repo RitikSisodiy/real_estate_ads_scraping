@@ -15,7 +15,7 @@ async def send_one(topic,data,producer):
         # data = json.dumps(data)
         # msg = str().encode('utf-8')
         msg = bytes(data, 'utf-8')
-        await producer.send_and_wait(topic, msg)
+        await producer.send(topic, msg)
         print("uploaded")
     except Exception as e:
         await send_one(topic,data,producer)
