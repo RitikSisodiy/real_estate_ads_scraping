@@ -4,3 +4,7 @@ celery -A tasks.celery_app worker --loglevel=info
 
 for Windows
 celery -A tasks.celery_app worker -l info -P eventlet
+
+
+to run scheduler
+celery -A tasks.celery_app beat -l info 
