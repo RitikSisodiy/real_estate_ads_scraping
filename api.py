@@ -137,10 +137,10 @@ async def scrape_paruvendu(real_args: RealStateParameter, real_state_type: RealS
     :return:
     """
     payload = dict(real_args)
-    print("this is payload )________((((((((",payload)
+    print("this is payload )________((((((((",real_state_type)
     if real_state_type:
         try:
-            # payload.update({"real_state_type": real_state_type})
+            payload.update({"real_state_type": real_state_type})
             if vendor:
                 payload.update({"vendor": vendor})
             if property_type:
