@@ -1,11 +1,13 @@
 import os
 import time
 from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
-from real_estate_advert.paruvendu.scraperv1 import main_scraper as ParuvenduScraper
+from real_estate_advert.leboncoin.scraperv4 import updateLebonCoin
+from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
 from real_estate_advert.pap.scraper import pap_scraper as PapScraper
-
 from celery import Celery
+from celery.schedules import crontab
 from settings import *
+
 
 celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
 celery_app.config_from_object(__name__)
@@ -32,6 +34,13 @@ def scrape_leboncoin_task(payload):
     print("Scraper 3 ")
     time.sleep(100)
 
+    print("Task End ================> ")
+
+@celery_app.task(name="real estate fetch latest ad")
+def update_leboncoin_ads():
+    print("Task start ================> ")
+    try:updateLebonCoin()
+    except Exception as e:print("Exception ================> ",e)
     print("Task End ================> ")
 
 
@@ -70,3 +79,10 @@ def scrape_seloger_task(payload):
 
 
 # 4 website 1 Core = 4 Core CPU
+
+
+@celery_app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    print("rnnnint periodic tasks")
+    # Calls update_leboncoin_ads in every 20 minutes
+    sender.add_periodic_task(10, update_leboncoin_ads.s(), name='add every 10')
