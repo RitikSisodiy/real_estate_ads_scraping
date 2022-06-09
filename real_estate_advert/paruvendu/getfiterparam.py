@@ -95,6 +95,7 @@ def getFilter(params):
     #     params['filters[P5M0]'],params['filters[P5M1]'] = par
     #     paramslist.append(params)
     print(f"total result is : {acres} filtered result is: {finalresult}")
+    print(filterurllist)
     time.sleep(10)
     return finallsit
 if __name__=="__main__":
