@@ -16,6 +16,8 @@ try:
 except:
     from .uploader import AsyncKafkaTopicProducer
 pagesize  = 100 # maxsize is 100
+url = "https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list"
+
 async def fetch(session,url,params = None,method="get",**kwargs):
     if params:
         query_string = urllib.parse.urlencode( params )
