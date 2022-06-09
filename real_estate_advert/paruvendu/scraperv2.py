@@ -15,10 +15,7 @@ try:
     from uploader import AsyncKafkaTopicProducer
 except:
     from .uploader import AsyncKafkaTopicProducer
-from kafka_publisher import KafkaTopicProducer
-
 pagesize  = 100 # maxsize is 100
-producer = KafkaTopicProducer()
 url = "https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list"
 
 async def fetch(session,url,params = None,method="get",**kwargs):
@@ -36,10 +33,8 @@ async def fetch(session,url,params = None,method="get",**kwargs):
 async def savedata(resjson,**kwargs):
     resstr = ''
     ads = resjson['feed']["row"]
-    # producer = kwargs["producer"]
-    for ad in ads:
-        producer.kafka_producer_sync(topic="paruvendu-data_v1", data=ad)
-    # await producer.TriggerPushDataList('paruvendu-data_v1',ads)
+    producer = kwargs["producer"]
+    await producer.TriggerPushDataList('paruvendu-data_v1',ads)
     # for ad in ads:
     #     resstr += json.dumps(ad)+"\n"
     # with open("output.json",'a') as file:

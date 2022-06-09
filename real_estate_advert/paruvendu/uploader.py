@@ -24,6 +24,7 @@ async def send_one(topic,data,producer):
         pass
 
 # producer = KafkaTopicProducer()
+
 async def main():
     producer = AIOKafkaProducer(
         bootstrap_servers=[f"10.8.0.27:9091",f"10.8.0.27:9092", f"10.8.0.27:9093"])
@@ -69,7 +70,7 @@ class AsyncKafkaTopicProducer:
             # data = json.dumps(data)
             # msg = str().encode('utf-8')
             msg = bytes(data, 'utf-8')
-            await self.producer.send_and_wait(topic, msg)
+            await self.producer.send(topic, msg)
             print("uploaded")
         except Exception as e:
             print(e)
