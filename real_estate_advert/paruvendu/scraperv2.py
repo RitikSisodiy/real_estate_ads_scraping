@@ -55,10 +55,13 @@ async def startCrawling(session,filterParamList,**kwargs):
         for i in tqdm(range(2,totalpage+1)):
             param['p'] = i
             tasks.append(asyncio.ensure_future(parstItems(session,param,**kwargs)))
-        await asyncio.gather(*tasks)  
+        data = await asyncio.gather(*tasks)  
+        for d in data:
+            await savedata(d)
 async def parstItems(session,param,**kwargs):
     data = await fetch(session,url,param)
     # data = json.load(res)
+    return data
     await savedata(data,**kwargs)
 async def main(adsType = ""):
     # catid info
