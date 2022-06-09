@@ -52,6 +52,8 @@ async def startCrawling(session,filterParamList,**kwargs):
         totalpage = int(totalpage) if totalpage==int(totalpage) else int(totalpage)+1
         print(totalres,param)
         tasks = []
+        print(totalpage,"this is total pages")
+        await asyncio.sleep(10)
         for i in tqdm(range(2,totalpage+1)):
             param['p'] = i
             tasks.append(asyncio.ensure_future(parstItems(session,param,**kwargs)))
