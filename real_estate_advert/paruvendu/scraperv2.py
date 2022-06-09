@@ -1,16 +1,9 @@
-from asyncio import tasks
-from urllib import response
-import urllib.request
-import urllib.parse
 import aiohttp
 import asyncio
-from tqdm import tqdm
-import json
 try:
     from getfiterparam import getFilter
 except:
     from .getfiterparam import getFilter
-from pytest import param
 try:
     from uploader import AsyncKafkaTopicProducer
 except:
@@ -19,9 +12,9 @@ pagesize  = 100 # maxsize is 100
 url = "https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list"
 
 async def fetch(session,url,params = None,method="get",**kwargs):
-    if params:
-        query_string = urllib.parse.urlencode( params )
-        url += "?"+query_string 
+    # if params:
+    #     query_string = urllib.parse.urlencode( params )
+    #     url += "?"+query_string 
     try:
         res = await session.get(url,params=params)
     except Exception as e:
@@ -53,15 +46,23 @@ async def startCrawling(session,filterParamList,**kwargs):
         print(totalres,param)
         tasks = []
         print(totalpage,"this is total pages")
-        await asyncio.sleep(10)
-        for i in tqdm(range(2,totalpage+1)):
+        # await asyncio.sleep(10)
+        for i in range(2,totalpage+1):
             param['p'] = i
-            tasks.append(asyncio.ensure_future(parstItems(session,param,**kwargs)))
+            # print(param)
+            tasks.append(asyncio.ensure_future(parstItems(session,param,page=i,**kwargs)))
         data = await asyncio.gather(*tasks)  
+        totaldata = 0
         for d in data:
+            results = len(d['feed']["row"])
+            print(results,"this is len of rows")
+            totaldata += results
             await savedata(d,**kwargs)
-async def parstItems(session,param,**kwargs):
+        print(totaldata)
+async def parstItems(session,param,page=None,**kwargs):
+    param.update({"p":page})
     data = await fetch(session,url,param)
+    # print(param['p'])
     # data = json.load(res)
     return data
     await savedata(data,**kwargs)
