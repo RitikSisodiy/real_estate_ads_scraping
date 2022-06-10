@@ -129,13 +129,13 @@ class LeboncoinScraper:
         ads = res.get('ads')
         if not ads:
             return 0
-        # producer.PushDataList('leboncoin-data_v1',ads)
-        totalads = ''
-        for ad in ads:
-            totalads+= json.dumps(ad)+"\n"
-        if totalads:
-            with open(f'{cpath}/{self.outputfile}.json','a') as file:
-                file.write(totalads)
+        producer.PushDataList('leboncoin-data_v1',ads)
+        # totalads = ''
+        # for ad in ads:
+        #     totalads+= json.dumps(ad)+"\n"
+        # if totalads:
+        #     with open(f'{cpath}/{self.outputfile}.json','a') as file:
+        #         file.write(totalads)
     def UpdataAds(self):
         self.autoSave = False
         try:

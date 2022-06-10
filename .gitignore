@@ -5,6 +5,9 @@ __pycache__/
 
 # C extensions
 *.so
+*.bak
+*.dat
+*.dir
 real_estate_advert/leboncoin/lastUpdate.json
 real_estate_advert/paruvendu/lastUpdate.json
 # Distribution / packaging
