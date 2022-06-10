@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 import time
 import os
+import gzip
 import requests
 try:
     from uploader import AsyncKafkaTopicProducer
@@ -63,24 +64,26 @@ class LeboncoinScraper:
         #     'X-LBC-CC': '7',
         #     'Accept': 'application/json,application/hal+json',
         #     'User-Agent': 'LBC;Android;7.1.2;ASUS_Z01QD;phone;a3ab60b8d97f0f1a;wifi;5.69.0;569000;0',
-        #     'Content-Type': 'application/json; charset=UTF-8',
+        #     'Content-Type': 'application/json; charset=utf-8',
         #     'Host': 'api.leboncoin.fr',
         #     'Connection': 'Keep-Alive',
         #     # 'Accept-Encoding': 'gzip',
         # }
         
         jsondata = json.dumps(parameter)
-        jsondataasbytes = jsondata.encode('utf-8')
-        # req = urllib.request.Request("https://api.leboncoin.fr/api/adfinder/v1/search",headers=self.headers)
-        # req.add_header('Content-Length', len(jsondataasbytes))
-        # response = urllib.request.urlopen(req, jsondataasbytes)
+        jsondataasbytes = jsondata.encode()  
+        req = urllib.request.Request("https://api.leboncoin.fr/api/adfinder/v1/search",headers=self.headers)
+        req.add_header('Content-Length', len(jsondataasbytes))
+        response = urllib.request.urlopen(req, jsondataasbytes)
         # response = opener.open(req, jsondataasbytes)
-        response = requests.post(self.searchurl, headers=self.headers, verify=False,json=parameter)
+        # response = requests.post(self.searchurl, headers=self.headers, verify=False,json=parameter)
         time.sleep(5)
-        print(response.status_code)
-        if response.status_code==200:
-            # resheaders = dict(response.headers._headers)
-            resheaders = response.headers
+        # print(response.status_code)
+        # if response.status_code==200:
+        print(response.getcode())
+        if response.getcode()==200:
+            resheaders = dict(response.headers._headers)
+            # resheaders = response.headers
             rescookies = resheaders.get('set-cookie')
             if rescookies:
                 rescookies = rescookies.split(";")
@@ -91,14 +94,16 @@ class LeboncoinScraper:
                         self.updateCookies()
                     except:pass
             # data = response.read()
+            data = gzip.decompress(response.read())
             # encoding = response.info().get_content_charset()
             # print(encoding)
             # data =data.decode("ISO-8859–1")
             # print(data)
-            # res= json.loads(data)
+            res= json.loads(data)
             # if self.autoSave:
             #     self.saveAds(res)
-            res= response.json()
+
+            # res= response.json()
             return res
         else:
             print(response.status_code,"some issue do you wanna retry y/n")
