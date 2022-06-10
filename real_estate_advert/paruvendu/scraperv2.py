@@ -105,8 +105,11 @@ async def main(adsType = ""):
 def main_scraper(paylaod):
     asyncio.run(main(paylaod["real_state_type"]))
 def getLastUpdates():
-    with open(f'{cpath}/lastUpdate.json','r') as file:
-        updates = json.load(file)
+    try:
+        with open(f'{cpath}/lastUpdate.json','r') as file:
+            updates = json.load(file)
+    except:
+        return {}
     return updates
 async def GetAdUpdate(session,adurl):
     updates = {}
@@ -158,6 +161,10 @@ async def CreatelastupdateLog(session,typ):
         file.write(json.dumps(updates))
 
 async def asyncUpdateParuvendu():
+    updates = getLastUpdates()
+    if not updates:
+        await CreatelastupdateLog(session,'rental')
+        await CreatelastupdateLog(session,'sale')
     updates = getLastUpdates()
     # print(updates)
     async with aiohttp.ClientSession() as session:
