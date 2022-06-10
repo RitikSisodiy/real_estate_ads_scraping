@@ -3,6 +3,7 @@ import time
 from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
 from real_estate_advert.leboncoin.scraperv4 import updateLebonCoin
 from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
+from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
 from real_estate_advert.pap.scraper import pap_scraper as PapScraper
 from celery import Celery
 from celery.schedules import crontab
@@ -36,10 +37,16 @@ def scrape_leboncoin_task(payload):
 
     print("Task End ================> ")
 
-@celery_app.task(name="real estate fetch latest ad")
+@celery_app.task(name="real estate fetch leboncoin latest ad")
 def update_leboncoin_ads():
     print("Task start ================> ")
     try:updateLebonCoin()
+    except Exception as e:print("Exception ================> ",e)
+    print("Task End ================> ")
+@celery_app.task(name="real estate fetch paruvedu latest ad")
+def update_paruvendu_ads():
+    print("Task start ================> ")
+    try:UpdateParuvendu()
     except Exception as e:print("Exception ================> ",e)
     print("Task End ================> ")
 
@@ -85,4 +92,7 @@ def scrape_seloger_task(payload):
 def setup_periodic_tasks(sender, **kwargs):
     print("rnnnint periodic tasks")
     # Calls update_leboncoin_ads in every 20 minutes
-    sender.add_periodic_task(10, update_leboncoin_ads.s(), name='add every 10')
+    sender.add_periodic_task(20*60, update_leboncoin_ads.s(), name='add every 20 minuts')
+    # Calls update_peruvendu_ads in every 20 minutes
+    sender.add_periodic_task(20*60, update_paruvendu_ads.s(), name='add every 20 minuts')
+    

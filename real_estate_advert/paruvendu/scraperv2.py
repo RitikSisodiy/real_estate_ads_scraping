@@ -1,5 +1,16 @@
+from ast import Return
+from datetime import datetime
+from errno import EXDEV
+import traceback
+from turtle import update
+from venv import create
 import aiohttp
 import asyncio
+import os
+from requests_html import HTML
+import json
+
+from urllib3 import Retry
 try:
     from getfiterparam import getFilter
 except:
@@ -9,8 +20,17 @@ try:
 except:
     from .uploader import AsyncKafkaTopicProducer
 pagesize  = 100 # maxsize is 100
+cpath =os.path.dirname(__file__)
 url = "https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list"
-
+params = {
+        'ver':'4.1.4',
+        'itemsPerPage':'12',
+        'mobId':'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd',
+        'p':'1',
+        'sortOn':'dateMiseEnLigne',
+        'sortTo':'DESC',
+        'key':'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh',
+    }
 async def fetch(session,url,params = None,method="get",**kwargs):
     # if params:
     #     query_string = urllib.parse.urlencode( params )
@@ -73,45 +93,106 @@ async def main(adsType = ""):
         catid = "IVH00000"
     else:
         catid = "ILH00000"
-    params = [
-    {
-        'ver':'4.1.4',
-        'itemsPerPage':'12',
-        'mobId':'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd',
-        'p':'1',
-        'catId':catid,
-        'filters[_R1]':catid,
-        'sortOn':'dateMiseEnLigne',
-        'sortTo':'DESC',
-        'key':'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh',
-    },
-    ]
+    params["catId"] = catid
+    params["filters[_R1]"] = catid
     # filterParamList = [*getFilter(param) for param in params
-    filterParamList = []
-    for param in params:
-        filterParamList+=getFilter(param)
-    # filterParamList = [{'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 0, 'filters[P5M1]': 33919}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 33920, 'filters[P5M1]': 50880}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 50881, 'filters[P5M1]': 68689}, 
-    # {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 
-    # 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 68690, 'filters[P5M1]': 87307}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 87308, 'filters[P5M1]': 106080}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 106081, 'filters[P5M1]': 128889}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 128890, 'filters[P5M1]': 
-    # 147437}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 147438, 'filters[P5M1]': 161225}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 161226, 'filters[P5M1]': 176302}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 176303, 'filters[P5M1]': 188953}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 188954, 'filters[P5M1]': 200486}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 200487, 'filters[P5M1]': 214870}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 214871, 'filters[P5M1]': 227984}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 227985, 'filters[P5M1]': 239478}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 239479, 'filters[P5M1]': 251552}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 251553, 'filters[P5M1]': 265522}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 265523, 'filters[P5M1]': 281726}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 281727, 'filters[P5M1]': 298920}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': 
-    # '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 298921, 'filters[P5M1]': 317163}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 317164, 'filters[P5M1]': 339917}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 
-    # 'filters[P5M0]': 339918, 'filters[P5M1]': 364304}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 
-    # 0, 'filters[P5M0]': 364305, 'filters[P5M1]': 394385}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 394386, 'filters[P5M1]': 431262}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 431263, 'filters[P5M1]': 483506}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 483507, 'filters[P5M1]': 570012}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 570013, 'filters[P5M1]': 746663}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 746664, 'filters[P5M1]': 1639784}, {'ver': '4.1.4', 'itemsPerPage': 1, 'mobId': 'dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd', 'p': '1', 'catId': 'IVH00000', 'filters[_R1]': 'IVH00000', 'sortOn': 'prix', 'sortTo': 'DESC', 'key': 'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh', 'showdetail': 0, 'filters[P5M0]': 1639785, 'filters[P5M1]': 317617372}]
     async with aiohttp.ClientSession() as session:
+        await CreatelastupdateLog(session,adsType)
+        filterParamList = getFilter(params)
         producer = AsyncKafkaTopicProducer()
         await startCrawling(session,filterParamList,producer=producer)
         await producer.stopProducer()
 def main_scraper(paylaod):
-    # paylaod = {'text': 'house', 'min_price': 0.0, 'max_price': 0.0, 'city': 'string', 'rooms': 0,
-    #            'real_state_type': 'rental'}
-    # if paylaod["real_state_type"] == "sale":
-    #     print("sales code is working")
-    #     asyncio.run(scrape_sale_ads(paylaod["min_price"], paylaod["max_price"], paylaod["text"]))
-
-    # elif paylaod["real_state_type"] == "rental":
-    #     print("real code is working")
-    #     asyncio.run(scrape_rental_ads(0, 0, ''))
     asyncio.run(main(paylaod["real_state_type"]))
+def getLastUpdates():
+    with open(f'{cpath}/lastUpdate.json','r') as file:
+        updates = json.load(file)
+    return updates
+async def GetAdUpdate(session,adurl):
+    updates = {}
+    headers = {
+        "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36"
+    }
+    res = await session.get(adurl,headers=headers)
+    doc = await res.text()
+    soup = HTML(html=doc)
+    print(adurl)
+    modifiedtime = soup.find("meta[property='og:url']",first=True).attrs.get("content").split("=")[1]
+    id = soup.find("div[data-id]",first=True).attrs['data-id'] 
+    nowtime  = datetime.now()
+    updates = {
+        "timestamp":nowtime.timestamp(),
+        "lastupdate":modifiedtime,
+        "lastadId":id,
+        "source":adurl
+    }
+    return updates
+
+async def CreatelastupdateLog(session,typ):
+    updates = getLastUpdates()
+    if typ == "sale":
+        catid = "IVH00000"
+    else:
+        catid = "ILH00000"
+    params.update({
+        'sortOn':'dateMiseEnLigne',
+        'sortTo':'DESC',
+        'catId':catid,
+        "filters[_R1]":catid,
+        'itemsPerPage':1
+        })
+    d = await fetch(session,url,params)
+    try:
+        data = d['feed']['row'][0]
+        adurl = data['shortURL']
+        latupdate = await GetAdUpdate(session,adurl=adurl)
+        # print(latupdate)
+        updates.update({typ:latupdate})
+    except Exception as e:
+        traceback.print_exc()
+        print("execption ======>" , e)
+        input()
+    # lastupdate = json.load(open(f'{cpath}/lastUpdate.json','r'))
+    print(updates)
+    with open(f'{cpath}/lastUpdate.json','w') as file:
+        file.write(json.dumps(updates))
+
+async def asyncUpdateParuvendu():
+    updates = getLastUpdates()
+    # print(updates)
+    async with aiohttp.ClientSession() as session:
+        for key,val in updates.items():
+            await CreatelastupdateLog(session,key)
+            if key == "sale":
+                catid = "IVH00000"
+            else:
+                catid = "ILH00000"
+            params.update({
+            'sortOn':'dateMiseEnLigne',
+            'sortTo':'DESC',
+            'catId':catid,
+            'itemsPerPage':100,
+            'showdetail':1
+            })
+            updated = False
+            p=1
+            producer = AsyncKafkaTopicProducer()
+            while not updated:
+                print(f"cheking page {p}")
+                adsres = await parstItems(session,params,page=p)
+                ads = adsres['feed']['row']
+                lastadurl = ads[len(ads)-1]['shortURL']
+                webupdates = await GetAdUpdate(session,lastadurl)
+                await savedata(adsres,producer=producer)
+                res = val['lastupdate']>webupdates['lastupdate']
+                print(f"{val['lastupdate']}>{webupdates['lastupdate']} ={res} and type {key}")
+                if res:
+                    updated = True
+                p+=1
+            await producer.stopProducer()
+
+def UpdateParuvendu():
+    asyncio.run(asyncUpdateParuvendu())
 if __name__=="__main__":
     url = "https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list"
     asyncio.run(main())

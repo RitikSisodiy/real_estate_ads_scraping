@@ -71,7 +71,7 @@ class AsyncKafkaTopicProducer:
             # msg = str().encode('utf-8')
             msg = bytes(data, 'utf-8')
             await self.producer.send(topic, msg)
-            print("uploaded")
+            # print("uploaded")
         except Exception as e:
             print(e)
             traceback.print_exc()

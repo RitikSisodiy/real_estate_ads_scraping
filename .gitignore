@@ -5,7 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
-
+real_estate_advert/leboncoin/lastUpdate.json
+real_estate_advert/paruvendu/lastUpdate.json
 # Distribution / packaging
 .Python
 env/
