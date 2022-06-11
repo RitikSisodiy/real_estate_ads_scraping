@@ -162,12 +162,12 @@ async def CreatelastupdateLog(session,typ):
 
 async def asyncUpdateParuvendu():
     updates = getLastUpdates()
-    if not updates:
-        await CreatelastupdateLog(session,'rental')
-        await CreatelastupdateLog(session,'sale')
-    updates = getLastUpdates()
     # print(updates)
     async with aiohttp.ClientSession() as session:
+        if not updates:
+            await CreatelastupdateLog(session,'rental')
+            await CreatelastupdateLog(session,'sale')
+        updates = getLastUpdates()
         for key,val in updates.items():
             await CreatelastupdateLog(session,key)
             if key == "sale":
