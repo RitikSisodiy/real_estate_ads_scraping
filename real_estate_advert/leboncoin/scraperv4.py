@@ -134,7 +134,7 @@ class LeboncoinScraper:
         ads = res.get('ads')
         if not ads:
             return 0
-        producer.PushDataList('leboncoin-data_v1',ads)
+        producer.PushDataList('leboncoin-data_v2',ads)
         # totalads = ''
         # for ad in ads:
         #     totalads+= json.dumps(ad)+"\n"
