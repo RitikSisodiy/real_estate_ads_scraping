@@ -1,3 +1,4 @@
+from ast import excepthandler
 from datetime import datetime
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
@@ -86,10 +87,14 @@ class PapScraper:
         return driver
 
     def getTotalResult(self,resp):
-        ads = resp['_embedded'].get("annonce")
-        if ads:
-            return len(ads)
-        else:
+        # print(resp)
+        try:
+            ads = resp['_embedded'].get("annonce")
+            if ads:
+                return len(ads)
+            else:
+                return 0
+        except:
             return 0
     def fetchJson(self,url,params=None):
         if params:
