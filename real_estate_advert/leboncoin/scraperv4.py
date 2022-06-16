@@ -194,9 +194,12 @@ def updateLebonCoin():
     ob = LeboncoinScraper(data,"newout1")
     # ob.IntCrawling()
     ob.UpdataAds()
-
+def leboncoinAd():
+    data = json.load(open(f'{cpath}/f ilter.json','r'))
+    ob = LeboncoinScraper(data,"newout1")
+    ob.IntCrawling()
 if __name__=="__main__":
-    data = json.load(open(f'{cpath}/filter.json','r'))
+    data = json.load(open(f'{cpath}/f ilter.json','r'))
     ob = LeboncoinScraper(data,"newout1")
     # ob.IntCrawling()
     ob.UpdataAds()    
