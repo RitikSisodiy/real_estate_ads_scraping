@@ -1,7 +1,7 @@
 import os
 import time
 from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
-from real_estate_advert.leboncoin.scraperv4 import updateLebonCoin
+from real_estate_advert.leboncoin.scraperv4 import updateLebonCoin,leboncoinAdScraper
 from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
 from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
 from real_estate_advert.pap.scraperf import pap_scraper as PapScraper
@@ -31,10 +31,9 @@ def real_estate_task(payload):
 def scrape_leboncoin_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
-
+    leboncoinAdScraper()
     # Scraping task obj start here
     print("Scraper 3 ")
-    time.sleep(100)
 
     print("Task End ================> ")
 
