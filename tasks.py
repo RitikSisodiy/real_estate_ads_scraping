@@ -6,6 +6,8 @@ from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScra
 from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
 from real_estate_advert.pap.scraperf import pap_scraper as PapScraper
 from real_estate_advert.pap.scraperf import UpdatePap
+from real_estate_advert.bienci.scraper import main_scraper as bienciScraper
+
 from celery import Celery
 from celery.schedules import crontab
 from settings import *
@@ -26,12 +28,21 @@ def real_estate_task(payload):
 
     print("Task End ================> ")
 
+@celery_app.task(name="bienci task")
+def scrap_bienci_task(payload):
+    print("Task start ================> ")
+    print("payload : ", payload)
+    try:bienciScraper()
+    except Exception as e:print("Exception ================> ",e)
+    # Scraping task obj start here
+    print("Task End ================> ")
 
 @celery_app.task(name="real estate leboncoin")
 def scrape_leboncoin_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
-    leboncoinAdScraper()
+    try:leboncoinAdScraper()
+    except Exception as e:print("Exception ================> ",e)
     # Scraping task obj start here
     print("Scraper 3 ")
 
