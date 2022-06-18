@@ -45,7 +45,9 @@ class SelogerScraper:
             }
             print(final_token,"<==========final token")
             return headers
-        except:return self.init_headers()
+        except Exception as e :
+            print("excepition==============>",e)
+            return self.init_headers()
     def fetch(self,url,method = "get",**kwargs):
         kwargs['headers'] = self.headers
         kwargs['proxies'] = proxy
@@ -56,7 +58,7 @@ class SelogerScraper:
         print(r)
         if r.status_code!=200:
             self.headers = self.init_headers()
-            return self.fetch(url,**kwargs)
+            return self.fetch(url,method=method,**kwargs)
         return r
     def GetAdInfo(self,addId:int):
         url = f"{ViewAddUrl}{addId}"
