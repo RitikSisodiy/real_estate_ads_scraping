@@ -3,6 +3,7 @@ import requests
 import json
 import urllib
 import os
+import traceback
 import time
 searchurl = 'https://api-seloger.svc.groupe-seloger.com/api/v1/listings/search'
 ViewAddUrl = "https://api-seloger.svc.groupe-seloger.com/api/v2/listings/"
@@ -47,6 +48,7 @@ class SelogerScraper:
             return headers
         except Exception as e :
             print("excepition==============>",e)
+            print(traceback.format_exc())
             return self.init_headers()
     def fetch(self,url,method = "get",**kwargs):
         kwargs['headers'] = self.headers
@@ -114,7 +116,8 @@ class SelogerScraper:
                 if totalresult < maxresult and maxresult-totalresult<=3000:
                     print("condition is stisfy going to next interval")
                     last = 1
-                    filterurllist += json.dumps(dic) + "/n/:"
+                    self.Crawlparam(dic)
+                    # filterurllist += json.dumps(dic) + "/n/:"
                     iniinterval[0] = iniinterval[1]+1
                     iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
                     finalresult +=totalresult
@@ -128,7 +131,8 @@ class SelogerScraper:
                     iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
                 print(totalresult,"-",maxresult)
                 print(iniinterval)
-            filterurllist+=json.dumps(dic)
+            self.Crawlparam(dic)
+            # filterurllist+=json.dumps(dic)
             finalresult +=totalresult
         print(finalresult,acres)
         filterurllist = [json.loads(query) for query in filterurllist.split("/n/:")]
@@ -157,8 +161,8 @@ class SelogerScraper:
                 self.Crawlparam(param,allPage=False)
     def CrawlSeloger(self):
         filterlist= self.genFilter()
-        for Filter in filterlist:
-            self.Crawlparam(Filter)
+        # for Filter in filterlist:
+        #     self.Crawlparam(Filter)
 def main_scraper(payload):
     data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
     ob = SelogerScraper(data)
