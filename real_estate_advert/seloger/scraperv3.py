@@ -156,8 +156,8 @@ class SelogerScraper:
         filterlist= self.genFilter()
         for Filter in filterlist:
             self.Crawlparam(Filter)
-data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
 def main_scraper(payload):
+    data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
     ob = SelogerScraper(data)
     data  = ob.CrawlSeloger()
     # print(data)
