@@ -53,11 +53,18 @@ class SelogerScraper:
     def fetch(self,url,method = "get",**kwargs):
         kwargs['headers'] = self.headers
         kwargs['proxies'] = proxy
-        if method=="post":
-            r = self.session.post(url,**kwargs)
-        else:
-            r = self.session.get(url,**kwargs)
-        print(r)
+        try:
+            if method=="post":
+                r = self.session.post(url,**kwargs)
+            else:
+                r = self.session.get(url,**kwargs)
+            print(r)
+        except Exception as e:
+            print(e)
+            time.sleep(1)
+            self.session.close()
+            self.session = requests.Session()
+            return self.fetch(url,method=method,**kwargs)
         if r.status_code!=200:
             print(url)
             print(method)
