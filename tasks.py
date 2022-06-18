@@ -104,15 +104,6 @@ def scrape_paruvendu_task(payload):
     print("Task End ================> ")
 
 
-@celery_app.task(name="real estate")
-def scrape_seloger_task(payload):
-    print("Task start ================> ")
-    print("payload : ", payload)
-
-    # Scraping task obj start here
-
-    print("Task End ================> ")
-
 
 # 4 website 1 Core = 4 Core CPU
 
