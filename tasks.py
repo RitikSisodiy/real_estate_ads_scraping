@@ -7,6 +7,7 @@ from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
 from real_estate_advert.pap.scraperf import pap_scraper as PapScraper
 from real_estate_advert.pap.scraperf import UpdatePap
 from real_estate_advert.bienci.scraper import main_scraper as bienciScraper
+from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
 
 from celery import Celery
 from celery.schedules import crontab
@@ -78,6 +79,16 @@ def scrape_pap_task(payload):
     # Scraping task obj start here
 
     print("Task End ================> ")
+@celery_app.task(name="real estate seloger")
+def scrape_seloger_task(payload):
+    print("Task start ================> ")
+    print("payload : ", payload)
+    selogerScraper(payload)
+
+    # Scraping task obj start here
+
+    print("Task End ================> ")
+
 
 
 @celery_app.task(name="real estate paruvendu")

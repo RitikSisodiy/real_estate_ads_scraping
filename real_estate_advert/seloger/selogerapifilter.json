@@ -1,0 +1,11 @@
+{
+    "pageIndex": 1,
+    "pageSize": 50,
+    "query": {
+        "realtyTypes": 3,
+        "regionIds": [
+        ],
+        "sortBy": 0,
+        "transactionType": 1
+    }
+}
