@@ -23,7 +23,6 @@ class SelogerScraper:
         self.headers = self.init_headers()
         self.producer = AsyncKafkaTopicProducer()
     def init_headers(self):
-        session = requests.Session()
         try:
             headers = {
                 'user-agent': 'okhttp/4.6.0',
@@ -33,11 +32,11 @@ class SelogerScraper:
             seloger_token_port = os.environ.get('HS_SELOGER_TOKEN_PORT', '8001')
 
             SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security"
-            time_token = session.get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=proxy).json()
+            time_token = self.session.get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=proxy).json()
             challenge_url = f"http://{seloger_token_host}:{seloger_token_port}/seloger-auth?{urllib.parse.urlencode(time_token, doseq=False)}"
-            token = session.get(challenge_url).text
+            token = self.session.get(challenge_url).text
             print(token,"self genrager troe")
-            final_token = session.get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=proxy).text[1:-1]
+            final_token = self.session.get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=proxy).text[1:-1]
 
             headers = {
                 'accept': 'application/json',
@@ -63,6 +62,8 @@ class SelogerScraper:
             print(url)
             print(method)
             print(kwargs)
+            self.session.close()
+            self.session = requests.Session()
             self.headers = self.init_headers()
             return self.fetch(url,method=method,**kwargs)
         return r
