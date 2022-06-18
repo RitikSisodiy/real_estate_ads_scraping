@@ -22,29 +22,30 @@ class SelogerScraper:
         self.headers = self.init_headers()
         self.producer = AsyncKafkaTopicProducer()
     def init_headers(self):
-        headers = {
-            'user-agent': 'okhttp/4.6.0',
-            'User-Agent': 'okhttp/4.6.0',
-        }
-        seloger_token_host = os.environ.get('HS_SELOGER_TOKEN_HOST', 'localhost')
-        seloger_token_port = os.environ.get('HS_SELOGER_TOKEN_PORT', '8001')
+        try:
+            headers = {
+                'user-agent': 'okhttp/4.6.0',
+                'User-Agent': 'okhttp/4.6.0',
+            }
+            seloger_token_host = os.environ.get('HS_SELOGER_TOKEN_HOST', 'localhost')
+            seloger_token_port = os.environ.get('HS_SELOGER_TOKEN_PORT', '8001')
 
-        SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security"
-        time_token = self.session.get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=proxy).json()
-        challenge_url = f"http://{seloger_token_host}:{seloger_token_port}/seloger-auth?{urllib.parse.urlencode(time_token, doseq=False)}"
-        token = self.session.get(challenge_url).text
-        print(token,"self genrager troe")
-        final_token = self.session.get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=proxy).text[1:-1]
+            SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security"
+            time_token = self.session.get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=proxy).json()
+            challenge_url = f"http://{seloger_token_host}:{seloger_token_port}/seloger-auth?{urllib.parse.urlencode(time_token, doseq=False)}"
+            token = self.session.get(challenge_url).text
+            print(token,"self genrager troe")
+            final_token = self.session.get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=proxy).text[1:-1]
 
-        headers = {
-            'accept': 'application/json',
-            'user-agent': 'Mobile;Android;SeLoger;6.4.2',
-            'authorization': f'Bearer {final_token}',
-            'content-type': 'application/json; charset=utf-8'
-        }
-        print(final_token,"<==========final token")
-        return headers
-
+            headers = {
+                'accept': 'application/json',
+                'user-agent': 'Mobile;Android;SeLoger;6.4.2',
+                'authorization': f'Bearer {final_token}',
+                'content-type': 'application/json; charset=utf-8'
+            }
+            print(final_token,"<==========final token")
+            return headers
+        except:return self.init_headers()
     def fetch(self,url,method = "get",**kwargs):
         kwargs['headers'] = self.headers
         kwargs['proxies'] = proxy
