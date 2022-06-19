@@ -10,6 +10,7 @@ ViewAddUrl = "https://api-seloger.svc.groupe-seloger.com/api/v2/listings/"
 resultcounturl = "https://api-seloger.svc.groupe-seloger.com/api/v1/listings/count/"
 session = requests.session()
 proxy = {'https': 'http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225', 'http': 'http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225'}
+
 try:
     from uploader import AsyncKafkaTopicProducer
 except:
@@ -22,6 +23,9 @@ class SelogerScraper:
         self.session = requests.Session()
         self.headers = self.init_headers()
         self.producer = AsyncKafkaTopicProducer()
+        self.logfile = open(f"{cpath}/error.log",'a')
+    def __exit__(self):
+        self.logfile.close()
     def init_headers(self):
         try:
             headers = {
@@ -48,7 +52,7 @@ class SelogerScraper:
             return headers
         except Exception as e :
             print("excepition==============>",e)
-            print(traceback.format_exc())
+            traceback.print_exc(file=self.logfile)
             return self.init_headers()
     def fetch(self,url,method = "get",retry=0,**kwargs):
         kwargs['headers'] = self.headers
@@ -60,6 +64,7 @@ class SelogerScraper:
                 r = self.session.get(url,**kwargs)
             print(r)
         except Exception as e:
+            traceback.print_exc(file=self.logfile)
             print(e)
             time.sleep(1)
             self.session.close()
