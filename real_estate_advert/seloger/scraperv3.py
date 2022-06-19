@@ -1,5 +1,8 @@
 import concurrent.futures
+from datetime import datetime
 import imp
+from fastapi import FastAPI
+from pytest import param
 import requests
 import json
 import urllib
@@ -110,7 +113,7 @@ class SelogerScraper:
         # 1 - prize INCREASING order
         # 2 - prize DECREASING order
         # 10 - DATE NEWEST FIRST
-        # 9 - prize OLDEST order
+        # 9 - ate OLDEST FIRST
         # 5 - GROWING SURFACE
         # 6 - DECREASING SURFACE
         param["query"]["sortBy"] =2
@@ -174,7 +177,77 @@ class SelogerScraper:
         print(f"{finalresult},{acres}")
         # filterurllist = [json.loads(query) for query in filterurllist.split("/n/:")]
         # return filterurllist
-    def Crawlparam(self,param,allPage = True):
+    def getLastUpdate(self):
+        try:
+            with open(f"{cpath}/lastUpdate.json",'r') as file:
+                data = json.load(file)
+            return data
+        except:
+            return {}
+    def getlatestAd(self):
+        param = self.paremeter
+        param["query"]["sortBy"] =10
+        data = self.Crawlparam(param,allPage=False,first=True)
+        return data
+    def getUpdateDicFromAd(self,ad):
+        nowtime  = datetime.now()
+        upd={
+                "timestamp": nowtime.timestamp(),
+                "lastupdate": self.getTimeStamp(ad.get('lastModified')),
+                "Rlastupdate": ad.get('lastModified'),
+                "created": self.getTimeStamp(ad.get('created')),
+                "rcreated": ad.get('created'),
+                "lastadId": ad.get("id"),
+                "source": ad.get('permalink')
+            }
+        return upd
+    def createNewUpdate(self,latestad=None):
+        if not latestad:
+            latestad = self.getlatestAd()
+        lastupd=self.getUpdateDicFromAd(latestad)
+        with open(f"{cpath}/lastUpdate.json",'w') as file:
+            file.write(json.dumps(lastupd))
+    def getTimeStamp(self,strtime):
+        formate = '%Y-%m-%dT%H:%M:%S'
+        # 2022-06-19T05:26:55
+        t = datetime.strptime(strtime,formate)
+        return t.timestamp()
+    def updateLatestAd(self):
+        updates = self.getLastUpdate()
+        if updates:
+            param = self.paremeter
+            param["query"]["sortBy"]= 10
+            updated = False
+            page =1
+            adcount = 0
+            while not updated and page<=201:
+                param.update({"pageIndex":page})
+                res = self.fetch(searchurl, method = "post", json=param, proxies=proxy)
+                ads = res.json()['items']
+                updatedads = []
+                first = True
+                updatetimestamp = updates["created"]
+                for ad in ads:
+                    ad = self.GetAdInfo(ad['id'])
+                    adtimestamp = self.getTimeStamp(ad["created"])
+                    print(f"   {adtimestamp}> {updatetimestamp}====>",adtimestamp>updatetimestamp)
+                    if adtimestamp>updatetimestamp:
+                        if first:
+                            self.createNewUpdate(ad)
+                            first=False
+                        updatedads.append(ad)
+                        adcount+=1
+                    else:
+                        print(f"{adcount} new ads scraped ")
+                        updated = True
+                        break
+                self.save(updatedads)
+                page+=1
+        else:
+            print("there is no update available l")
+    def save(self,adslist):
+        self.producer.PushDataList(kafkaTopicName,adslist)
+    def Crawlparam(self,param,allPage = True,first=False,save=True):
         print(param)
         # input()
         response = self.fetch(searchurl, method = "post", json=param, proxies=proxy)
@@ -190,6 +263,8 @@ class SelogerScraper:
         print(f"total page {totalpage}")
         # input()
         print(len(ads),"_total ads+++++++++++++")
+        if first:
+            ads = ads[:1]
         adlist = self.splitListInNpairs(ads,self.asyncsize)
         fetchedads = []
         for ads in adlist:
@@ -204,18 +279,27 @@ class SelogerScraper:
                 # adlist.append(adInfo)
             # with open("sampleout4.json",'a') as file:
             #     file.write(json.dumps(adInfo)+"\n")
-        self.producer.PushDataList(kafkaTopicName,fetchedads)
+        if first:
+            return fetchedads[0]
+        if save:self.save(fetchedads)
         if allPage:
             totalpage = 200 if totalpage>200 else totalpage
             for i in range(2,totalpage+1):
                 param["pageIndex"] = i
                 self.Crawlparam(param,allPage=False)
+        else:
+            return fetchedads
     def CrawlSeloger(self):
+        self.createNewUpdate(latestad=None)
         filterlist= self.genFilter()
         # for Filter in filterlist:
         #     self.Crawlparam(Filter)
-def main_scraper(payload):
+def main_scraper(payload,update=False):
     data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
-    ob = SelogerScraper(data,asyncsize=50)
-    data  = ob.CrawlSeloger()
-    # print(data)
+    ob = SelogerScraper(data,asyncsize=1)
+    if update:
+        print("updateing latedst ads")
+        ob.updateLatestAd()
+    else:
+        ob.CrawlSeloger()
+
