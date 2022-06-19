@@ -1,4 +1,4 @@
-from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
 import imp
 import requests
 import json
@@ -187,17 +187,20 @@ class SelogerScraper:
         print("total page",pagecount)
         print(len(ads),"_total ads+++++++++++++")
         adlist = self.splitListInNpairs(ads,self.asyncsize)
+        fetchedads = []
         for ads in adlist:
             # time.sleep(2)
-            with ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
                 adsidlist = [ad["id"] for ad in ads]
-                excuter.map(self.GetAdInfo,adsidlist,[i for i in range(0,len(adsidlist))])
-                excuter.shutdown(wait=True)
+                futures = excuter.map(self.GetAdInfo,adsidlist,[i for i in range(0,len(adsidlist))])
+                for f in futures:
+                    fetchedads.append(f)
+                # excuter.shutdown(wait=True)
                 # adInfo = self.GetAdInfo(ad["id"])
                 # adlist.append(adInfo)
             # with open("sampleout4.json",'a') as file:
             #     file.write(json.dumps(adInfo)+"\n")
-        self.producer.PushDataList(kafkaTopicName,adlist)
+        self.producer.PushDataList(kafkaTopicName,fetchedads)
         if allPage:
             for i in range(2,totalpage+1):
                 param["pageIndex"] = i
