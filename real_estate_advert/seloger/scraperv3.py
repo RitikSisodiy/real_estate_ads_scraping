@@ -27,6 +27,8 @@ class SelogerScraper:
     def __exit__(self):
         self.logfile.close()
     def init_headers(self):
+        self.session.close()
+        self.session = requests.Session()
         try:
             headers = {
                 'user-agent': 'okhttp/4.6.0',
@@ -77,8 +79,6 @@ class SelogerScraper:
             print(url)
             print(method)
             print(kwargs)
-            self.session.close()
-            self.session = requests.Session()
             self.headers = self.init_headers()
             if retry<10:
                 retry+=1
