@@ -50,7 +50,7 @@ class SelogerScraper:
             print("excepition==============>",e)
             print(traceback.format_exc())
             return self.init_headers()
-    def fetch(self,url,method = "get",**kwargs):
+    def fetch(self,url,method = "get",retry=0,**kwargs):
         kwargs['headers'] = self.headers
         kwargs['proxies'] = proxy
         try:
@@ -64,7 +64,10 @@ class SelogerScraper:
             time.sleep(1)
             self.session.close()
             self.session = requests.Session()
-            return self.fetch(url,method=method,**kwargs)
+            if retry<10:
+                retry+=1
+                return self.fetch(url,method=method,retry=retry,**kwargs)
+            else:return None
         if r.status_code!=200:
             print(url)
             print(method)
@@ -72,12 +75,16 @@ class SelogerScraper:
             self.session.close()
             self.session = requests.Session()
             self.headers = self.init_headers()
-            return self.fetch(url,method=method,**kwargs)
+            if retry<10:
+                retry+=1
+                return self.fetch(url,method=method,retry=retry,**kwargs)
+            else:return None
         return r
     def GetAdInfo(self,addId:int):
         url = f"{ViewAddUrl}{addId}"
         response = self.fetch(url,verify=False,proxies=proxy)
-        return response.json()
+        try:return response.json()
+        except:{}
     def getTotalResult(self,param):
         print(param)
         param = [param['query']]
@@ -100,8 +107,11 @@ class SelogerScraper:
         # 6 - DECREASING SURFACE
         param["query"]["sortBy"] =2
         # print(param)
-        prize = self.fetch(searchurl,method="post",json=param).json()["items"][0]['price']
-        prize = str(prize)
+        try:
+            prize = self.fetch(searchurl,method="post",json=param).json()["items"][0]['price']
+            prize = str(prize)
+        except:
+            prize = "1000"
         maxprice = ''
         for c in prize:
             try:maxprice+=f"{int(c)}"
