@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import imp
 import requests
 import json
@@ -18,17 +19,19 @@ except:
 cpath =os.path.dirname(__file__)
 kafkaTopicName = "seloger_data_v1"
 class SelogerScraper:
-    def __init__(self,paremeter) -> None:
-        self.paremeter= paremeter
-        self.session = requests.Session()
-        self.headers = self.init_headers()
-        self.producer = AsyncKafkaTopicProducer()
+    def __init__(self,paremeter,asyncsize=20) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
+        self.paremeter= paremeter
+        self.asyncsize=asyncsize
+        self.headers = {}
+        self.session = {i:requests.Session() for i in range(0,asyncsize)}
+        self.headers = {i:self.init_headers(sid=i) for i in range(0,asyncsize)}
+        self.producer = AsyncKafkaTopicProducer()
     def __exit__(self):
         self.logfile.close()
-    def init_headers(self):
-        self.session.close()
-        self.session = requests.Session()
+    def init_headers(self,sid=0):
+        self.session[sid].close()
+        self.session[sid] = requests.Session()
         try:
             headers = {
                 'user-agent': 'okhttp/4.6.0',
@@ -38,63 +41,63 @@ class SelogerScraper:
             seloger_token_port = os.environ.get('HS_SELOGER_TOKEN_PORT', '8001')
 
             SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security"
-            time_token = self.session.get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=proxy).json()
+            time_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=proxy).json()
             challenge_url = f"http://{seloger_token_host}:{seloger_token_port}/seloger-auth?{urllib.parse.urlencode(time_token, doseq=False)}"
-            token = self.session.get(challenge_url).text
+            token = self.session[sid].get(challenge_url).text
             print(token,"self genrager troe")
-            final_token = self.session.get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=proxy).text[1:-1]
+            final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=proxy).text[1:-1]
 
-            headers = {
+            self.headers[sid] = {
                 'accept': 'application/json',
                 'user-agent': 'Mobile;Android;SeLoger;6.4.2',
                 'authorization': f'Bearer {final_token}',
                 'content-type': 'application/json; charset=utf-8'
             }
             print(final_token,"<==========final token")
-            return headers
+            return self.headers[sid]
         except Exception as e :
             print("excepition==============>",e)
             traceback.print_exc(file=self.logfile)
-            return self.init_headers()
-    def fetch(self,url,method = "get",retry=0,**kwargs):
-        kwargs['headers'] = self.headers
+            return self.init_headers(sid=sid)
+    def fetch(self,url,method = "get",sid=0,retry=0,**kwargs):
+        kwargs['headers'] = self.headers[sid]
         kwargs['proxies'] = proxy
         try:
             if method=="post":
-                r = self.session.post(url,**kwargs)
+                r = self.session[sid].post(url,**kwargs)
             else:
-                r = self.session.get(url,**kwargs)
+                r = self.session[sid].get(url,**kwargs)
             print(r)
         except Exception as e:
             traceback.print_exc(file=self.logfile)
             print(e)
             time.sleep(1)
-            self.session.close()
-            self.session = requests.Session()
+            self.session[sid].close()
+            self.session[sid] = requests.Session()
             if retry<10:
                 retry+=1
-                return self.fetch(url,method=method,retry=retry,**kwargs)
+                return self.fetch(url,method=method,sid=sid,retry=retry,**kwargs)
             else:return None
         if r.status_code!=200:
             print(url)
             print(method)
             print(kwargs)
-            self.headers = self.init_headers()
+            self.init_headers(sid=sid)
             if retry<10:
                 retry+=1
-                return self.fetch(url,method=method,retry=retry,**kwargs)
+                return self.fetch(url,method=method,sid=sid,retry=retry,**kwargs)
             else:return None
         return r
-    def GetAdInfo(self,addId:int):
+    def GetAdInfo(self,addId:int,sid=0):
         url = f"{ViewAddUrl}{addId}"
-        response = self.fetch(url,verify=False,proxies=proxy)
+        response = self.fetch(url,sid=sid,proxies=proxy)
         try:return response.json()
         except:{}
-    def getTotalResult(self,param):
+    def getTotalResult(self,param,sid=0):
         print(param)
         param = [param['query']]
         url = resultcounturl
-        r = self.fetch(url,method="post",json=param,proxies=proxy)
+        r = self.fetch(url,method="post",sid=sid,json=param,proxies=proxy)
         try:
             count = r.json()[0]
         except:
@@ -102,7 +105,7 @@ class SelogerScraper:
         if count == -1:return 0
         else: return count
     
-    def getMaxPrize(self,param):
+    def getMaxPrize(self,param,sid=0):
         # sorting values "sortBy"
         # 1 - prize INCREASING order
         # 2 - prize DECREASING order
@@ -113,7 +116,7 @@ class SelogerScraper:
         param["query"]["sortBy"] =2
         # print(param)
         try:
-            prize = self.fetch(searchurl,method="post",json=param).json()["items"][0]['price']
+            prize = self.fetch(searchurl,method="post",sid=sid,json=param).json()["items"][0]['price']
             prize = str(prize)
         except:
             prize = "1000"
@@ -122,7 +125,14 @@ class SelogerScraper:
             try:maxprice+=f"{int(c)}"
             except:pass
         if maxprice:return int(maxprice)+1
-
+    def splitListInNpairs(self,li,interval):
+        ran = len(li)/interval
+        ran = int(ran) if ran==int(ran) else int(ran)+1
+        flist = []
+        for  i in range(0,ran):
+            item = li[interval*i:interval*(i+1)]
+            flist.append(item)
+        return flist
     def genFilter(self):
         dic = self.paremeter
         totalresult =self.getTotalResult(dic)
@@ -165,7 +175,9 @@ class SelogerScraper:
         filterurllist = [json.loads(query) for query in filterurllist.split("/n/:")]
         return filterurllist
     def Crawlparam(self,param,allPage = True):
-        response = self.fetch(searchurl, method = "post", json=param,verify=False, proxies=proxy)
+        response = self.fetch(searchurl, method = "post", json=param, proxies=proxy)
+        if not response:
+            return 0
         print(response.status_code,"+++++++++")
         res = response.json()
         pagecount = res['totalCount']
@@ -174,11 +186,15 @@ class SelogerScraper:
         totalpage = int(totalpage) if int(totalpage)==totalpage else int(totalpage)+1
         print("total page",pagecount)
         print(len(ads),"_total ads+++++++++++++")
-        adlist = []
-        for ad in ads:
+        adlist = self.splitListInNpairs(ads,self.asyncsize)
+        for ads in adlist:
             # time.sleep(2)
-            adInfo = self.GetAdInfo(ad["id"])
-            adlist.append(adInfo)
+            with ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
+                adsidlist = [ad["id"] for ad in ads]
+                excuter.map(self.GetAdInfo,adsidlist,[i for i in range(0,len(adsidlist))])
+                excuter.shutdown(wait=True)
+                # adInfo = self.GetAdInfo(ad["id"])
+                # adlist.append(adInfo)
             # with open("sampleout4.json",'a') as file:
             #     file.write(json.dumps(adInfo)+"\n")
         self.producer.PushDataList(kafkaTopicName,adlist)
