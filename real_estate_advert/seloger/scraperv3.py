@@ -94,7 +94,7 @@ class SelogerScraper:
         try:return response.json()
         except:{}
     def getTotalResult(self,param,sid=0):
-        print(param)
+        # print(param)
         param = [param['query']]
         url = resultcounturl
         r = self.fetch(url,method="post",sid=sid,json=param,proxies=proxy)
@@ -139,7 +139,7 @@ class SelogerScraper:
         print(totalresult)
         acres = totalresult
         fetchedresult = 0
-        iniinterval = [0,1000]
+        iniinterval = [0, 400]
         filterurllist = ''
         finalresult = 0
         maxresult = 50*200
@@ -151,7 +151,7 @@ class SelogerScraper:
                 dic["query"]['minimumPrice'],dic["query"]['maximumPrice'] = iniinterval
                 totalresult = self.getTotalResult(dic)
                 if totalresult < maxresult and maxresult-totalresult<=3000:
-                    print("condition is stisfy going to next interval")
+                    print(f"condition is stisfy going to next interval {totalresult}")
                     last = 1
                     self.Crawlparam(dic)
                     # filterurllist += json.dumps(dic) + "/n/:"
@@ -171,20 +171,24 @@ class SelogerScraper:
             self.Crawlparam(dic)
             # filterurllist+=json.dumps(dic)
             finalresult +=totalresult
-        print(finalresult,acres)
-        filterurllist = [json.loads(query) for query in filterurllist.split("/n/:")]
-        return filterurllist
+        print(f"{finalresult},{acres}")
+        # filterurllist = [json.loads(query) for query in filterurllist.split("/n/:")]
+        # return filterurllist
     def Crawlparam(self,param,allPage = True):
+        print(param)
+        # input()
         response = self.fetch(searchurl, method = "post", json=param, proxies=proxy)
         if not response:
             return 0
         print(response.status_code,"+++++++++")
         res = response.json()
         pagecount = res['totalCount']
+        print(pagecount)
         ads = res['items']
         totalpage = pagecount/len(ads)
         totalpage = int(totalpage) if int(totalpage)==totalpage else int(totalpage)+1
-        print("total page",pagecount)
+        print(f"total page {totalpage}")
+        # input()
         print(len(ads),"_total ads+++++++++++++")
         adlist = self.splitListInNpairs(ads,self.asyncsize)
         fetchedads = []
@@ -202,6 +206,7 @@ class SelogerScraper:
             #     file.write(json.dumps(adInfo)+"\n")
         self.producer.PushDataList(kafkaTopicName,fetchedads)
         if allPage:
+            totalpage = 200 if totalpage>200 else totalpage
             for i in range(2,totalpage+1):
                 param["pageIndex"] = i
                 self.Crawlparam(param,allPage=False)
@@ -211,6 +216,6 @@ class SelogerScraper:
         #     self.Crawlparam(Filter)
 def main_scraper(payload):
     data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
-    ob = SelogerScraper(data)
+    ob = SelogerScraper(data,asyncsize=50)
     data  = ob.CrawlSeloger()
     # print(data)
