@@ -28,13 +28,16 @@ def real_estate_task(payload):
     # Scraping task obj start here
 
     print("Task End ================> ")
-
+import traceback
 @celery_app.task(name="bienci task")
 def scrap_bienci_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
     try:bienciScraper()
-    except Exception as e:print("Exception ================> ",e)
+    
+    except Exception as e:
+        print(traceback.format_exc())
+        print("Exception ================> ",e)
     # Scraping task obj start here
     print("Task End ================> ")
 
@@ -66,6 +69,12 @@ def update_paruvendu_ads():
 def update_pap_ads():
     print("Task start ================> ")
     try:UpdatePap()
+    except Exception as e:print("Exception ================> ",e)
+    print("Task End ================> ")
+@celery_app.task(name="real estate fetch seloger latest ad")
+def update_seloger_ads():
+    print("Task start ================> ")
+    try:selogerScraper({},update=True)
     except Exception as e:print("Exception ================> ",e)
     print("Task End ================> ")
 
@@ -117,3 +126,5 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(20*60, update_paruvendu_ads.s(), name='update paruvendu ads every 20 minuts')
     # Calls update_pap_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_pap_ads.s(), name='update pap ads every 20 minuts')
+    # Calls update_seloger_ads in every 20 minutes
+    sender.add_periodic_task(20*60, update_seloger_ads.s(), name='update seloger ads every 20 minuts')
