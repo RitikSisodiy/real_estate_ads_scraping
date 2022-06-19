@@ -27,21 +27,18 @@ async def fetch(url,session,Json=False,file=False,**kwargs):
                 if response.status_code == 200:
                     if Json:
                         return  response.json()
-                    print(url,response.status_code)
+                    # print(url,response.status_code)
                     html = response.html
                     return html
                 else:
-                    print(response.status_code,"in else fetch")
-                    print(url,"in else fetch")
-                    count +=1
                     await asyncio.sleep(1)
                     return await fetch(url,session,Json)
             except Exception as e:
-                print(response)
-                print(traceback.format_exc())
+                # print(response)
+                # print(traceback.format_exc())
                 print(e,"got some isssue1")
                 # print(e)
     except Exception as e:
-        print(e,"got some isssue2")
-        print(traceback.format_exc())
+        # print(e,"got some isssue2")
+        # print(traceback.format_exc())
         pass

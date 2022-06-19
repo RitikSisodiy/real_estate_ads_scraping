@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+
 import sys
 from urllib import response
 import requests
@@ -22,7 +23,9 @@ citys.sort()
 lastpin ,lastpage = None,1
 if lastpin:start = False
 else:start = True
-def getFilterUrl(Filter):
+def getFilterUrl(Filter,page=None):
+    if page:
+        Filter['from'] = Filter['size']*page +1
     Filter = json.dumps(Filter)
     url  = f"https://www.bienici.com/realEstateAds.json?filters={Filter}&extensionType=extendedIfNoResult"
     return url
@@ -46,9 +49,10 @@ def syncfetch(session,url,Json=False,**kwargs):
         else:return res
     else:
         print(res.status_code)
-        return fetch(session,url,Json=Json,**kwargs)
+        print(url)
+        return syncfetch(session,url,Json=Json,**kwargs)
 def getTotalResult(session,parameter):
-    parameter['sortBy'],parameter['sortOrder'],parameter["size"] = "price","desc",1
+    parameter['sortBy'],parameter['sortOrder'],parameter["size"],parameter["from"] = "price","desc",1,0
     url = getFilterUrl(parameter)
     res = syncfetch(session,url,Json=True)
     totalres = res.get("total")
@@ -94,6 +98,7 @@ def genFilter(parameter,typ):
             # print(iniinterval,">apending")
             filterurllist += json.dumps(iniinterval) + "/n/:"
             asyncio.run(FetchFilter(dic))
+            print("going to next")
             iniinterval[0] = iniinterval[1]+1
             iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
             finalresult +=totalresult
@@ -180,23 +185,24 @@ async def GetAllPages(baseurl,session,first=False,Filter=None,**kwargs):
     print(Filter)
     r= await fetch(baseurl,session,Json=True)
     if r:
-        print(baseurl,"-200")
-        await saveRealstateAds(r['realEstateAds'],**kwargs)
+        # print(baseurl,"-200")
+        print(f"from===========>{r['from']}")
+        # await saveRealstateAds(r['realEstateAds'],**kwargs)
         if first:
             totalpage = r['total']/Filter['size']
             totalpage = int(totalpage)+1 if totalpage>int(totalpage) else int(totalpage)
-            print(len(r["realEstateAds"]),r['total'],"tis is ")
+            # print(len(r["realEstateAds"]),r['total'],"tis is ")
             tasks =[]
             print(totalpage,r['total'],Filter['size'])
-            input("chekd the pages")
-            for i in range(2,totalpage):
-                Filter['from'] += Filter['size'] 
-                url = getFilterUrl(Filter)
+            # input("chekd the pages")
+            for i in range(1,totalpage):
+                Filter['from'] += Filter['size']
+                baseurl = getFilterUrl(Filter,page=i)
                 tasks.append(asyncio.ensure_future(GetAllPages(baseurl,session,first=False,Filter=Filter,**kwargs)))
             await asyncio.gather(*tasks)
 
 async def FetchFilter(filters):
-    filters['size'] = 500
+    filters['size'] = 400
     session = AsyncHTMLSession()
     baseurl = getFilterUrl(filters)
     producer = AsyncKafkaTopicProducer()
