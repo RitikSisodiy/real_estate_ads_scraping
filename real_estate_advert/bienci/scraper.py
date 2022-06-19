@@ -187,7 +187,7 @@ async def GetAllPages(baseurl,session,first=False,Filter=None,**kwargs):
     if r:
         # print(baseurl,"-200")
         print(f"from===========>{r['from']}")
-        # await saveRealstateAds(r['realEstateAds'],**kwargs)
+        await saveRealstateAds(r['realEstateAds'],**kwargs)
         if first:
             totalpage = r['total']/Filter['size']
             totalpage = int(totalpage)+1 if totalpage>int(totalpage) else int(totalpage)
