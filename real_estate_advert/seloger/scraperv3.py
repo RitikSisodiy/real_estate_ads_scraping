@@ -141,7 +141,7 @@ class SelogerScraper:
         print(totalresult)
         acres = totalresult
         fetchedresult = 0
-        iniinterval = [647,650]
+        iniinterval = [701,710]
         filterurllist = ''
         finalresult = 0
         maxresult = 50*200
@@ -155,6 +155,7 @@ class SelogerScraper:
                 if totalresult < maxresult and maxresult-totalresult<=3000:
                     print(f"condition is stisfy going to next interval {totalresult}")
                     last = 1
+                    dic.update({"pageIndex":1})
                     self.Crawlparam(dic)
                     # filterurllist += json.dumps(dic) + "/n/:"
                     iniinterval[0] = iniinterval[1]+1
