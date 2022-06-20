@@ -75,8 +75,7 @@ class SelogerScraper:
             traceback.print_exc(file=self.logfile)
             print(e)
             time.sleep(1)
-            self.session[sid].close()
-            self.session[sid] = requests.Session()
+            self.init_headers(sid=sid)
             if retry<10:
                 retry+=1
                 return self.fetch(url,method=method,sid=sid,retry=retry,**kwargs)
