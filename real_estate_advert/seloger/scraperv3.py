@@ -296,10 +296,11 @@ class SelogerScraper:
         #     self.Crawlparam(Filter)
 def main_scraper(payload,update=False):
     data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
-    ob = SelogerScraper(data,asyncsize=1)
     if update:
+        ob = SelogerScraper(data,asyncsize=1)
         print("updateing latedst ads")
         ob.updateLatestAd()
     else:
+        ob = SelogerScraper(data,asyncsize=50)
         ob.CrawlSeloger()
 
