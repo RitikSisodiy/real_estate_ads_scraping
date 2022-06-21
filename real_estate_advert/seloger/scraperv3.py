@@ -8,12 +8,13 @@ import json
 import urllib
 import os
 import traceback
+proxyurl = "http://lum-auth-token:FNFdSkHsdFarybrZ2h4CRjchkgeATYx9@122.175.196.102:22225"
 import time
 searchurl = 'https://api-seloger.svc.groupe-seloger.com/api/v1/listings/search'
 ViewAddUrl = "https://api-seloger.svc.groupe-seloger.com/api/v2/listings/"
 resultcounturl = "https://api-seloger.svc.groupe-seloger.com/api/v1/listings/count/"
 session = requests.session()
-proxy = {'https': 'http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225', 'http': 'http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225'}
+proxy = {'https': proxyurl, 'http': proxyurl}
 
 try:
     from uploader import AsyncKafkaTopicProducer
