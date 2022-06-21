@@ -141,7 +141,7 @@ class SelogerScraper:
         print(totalresult)
         acres = totalresult
         fetchedresult = 0
-        iniinterval = [701,710]
+        iniinterval = [1451,1500]
         filterurllist = ''
         finalresult = 0
         maxresult = 50*200
