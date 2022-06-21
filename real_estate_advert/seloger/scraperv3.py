@@ -8,7 +8,7 @@ import json
 import urllib
 import os
 import traceback
-proxyurl = "http://lum-customer-c_5afd76d0-zone-data_center:r33r92fcpqmz@zproxy.lum-superproxy.io:22225"
+proxyurl = "http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225"
 import time
 searchurl = 'https://api-seloger.svc.groupe-seloger.com/api/v1/listings/search'
 ViewAddUrl = "https://api-seloger.svc.groupe-seloger.com/api/v2/listings/"
