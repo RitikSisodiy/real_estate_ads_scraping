@@ -8,7 +8,7 @@ import json
 import urllib
 import os
 import traceback
-proxyurl = "http://lum-customer-c_5afd76d0-zone-data_center-route_err-block:r33r92fcpqmz@zproxy.lum-superproxy.io:22225"
+proxyurl = "http://lum-customer-c_5afd76d0-zone-data_center:r33r92fcpqmz@zproxy.lum-superproxy.io:22225"
 import time
 searchurl = 'https://api-seloger.svc.groupe-seloger.com/api/v1/listings/search'
 ViewAddUrl = "https://api-seloger.svc.groupe-seloger.com/api/v2/listings/"
@@ -297,7 +297,8 @@ class SelogerScraper:
         #     self.Crawlparam(Filter)
 def main_scraper(payload,update=False):
     data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
-    if update:
+    adtype = payload["real_state_type"]
+    if adtype == "Updated/Latest Ads":
         ob = SelogerScraper(data,asyncsize=1)
         print("updateing latedst ads")
         ob.updateLatestAd()
