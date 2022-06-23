@@ -3,10 +3,13 @@ from datetime import datetime
 import imp
 from fastapi import FastAPI
 from pytest import param
+import threading
 import requests
 import json
+import random
 import urllib
 import os
+from .scrapProxy import ProxyScraper
 import traceback
 proxyurl = "http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225"
 import time
@@ -25,17 +28,58 @@ kafkaTopicName = "seloger_data_v1"
 class SelogerScraper:
     def __init__(self,paremeter,asyncsize=20) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
+        self.proxyUpdateThread()
+        SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security/register"
+        headers = {
+                    'User-Agent': 'okhttp/4.6.0',
+                }
+        self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
         self.paremeter= paremeter
+        try:
+            self.proxies = self.readProxy()
+        except:
+            self.getProxyList()
         self.asyncsize=asyncsize
         self.headers = {}
+        self.proxy = {}
         self.session = {i:requests.Session() for i in range(0,asyncsize)}
-        self.headers = {i:self.init_headers(sid=i) for i in range(0,asyncsize)}
+        self.headers = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
+            futures = excuter.map(self.init_headers,[i for i in range(0,asyncsize)])
+            count = 0
+            for f in futures:
+                self.headers[count] = f
+                count+=1
         self.producer = AsyncKafkaTopicProducer()
+    def getProxyList(self):
+        self.prox.FetchNGetProxy()
+        self.prox.save(cpath)
+        self.proxies = self.readProxy()
+    def updateProxyList(self,interval=300):
+        if self.readProxy():time.sleep(interval)
+        while True:
+            self.getProxyList()
+            time.sleep(interval)
+    def proxyUpdateThread(self):
+        print("proxy thread is started")
+        self.proc = threading.Thread(target=self.updateProxyList, args=())
+        self.proc.start()
+    def __del__(self):
+        self.proc.terminate()
+        print("proxy thread is terminated")
+    def readProxy(self):
+        with open(f"{cpath}/working.txt","r") as file:
+            proxies = file.readlines()
+        return [json.loads(proxy) for proxy in proxies]
+    def getRandomProxy(self):
+        proxy = random.choice(self.proxies)
+        return proxy
     def __exit__(self):
         self.logfile.close()
     def init_headers(self,sid=0):
         self.session[sid].close()
         self.session[sid] = requests.Session()
+        self.proxy[sid] = self.getRandomProxy()
         try:
             headers = {
                 'user-agent': 'okhttp/4.6.0',
@@ -45,11 +89,11 @@ class SelogerScraper:
             seloger_token_port = os.environ.get('HS_SELOGER_TOKEN_PORT', '8001')
 
             SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security"
-            time_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=proxy).json()
+            time_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=self.proxy[sid]).json()
             challenge_url = f"http://{seloger_token_host}:{seloger_token_port}/seloger-auth?{urllib.parse.urlencode(time_token, doseq=False)}"
             token = self.session[sid].get(challenge_url).text
             print(token,"self genrager troe")
-            final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=proxy).text[1:-1]
+            final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid]).text[1:-1]
 
             self.headers[sid] = {
                 'accept': 'application/json',
@@ -65,13 +109,13 @@ class SelogerScraper:
             return self.init_headers(sid=sid)
     def fetch(self,url,method = "get",sid=0,retry=0,**kwargs):
         kwargs['headers'] = self.headers[sid]
-        kwargs['proxies'] = proxy
+        kwargs['proxies'] = self.proxy[sid]
         try:
             if method=="post":
                 r = self.session[sid].post(url,**kwargs)
             else:
                 r = self.session[sid].get(url,**kwargs)
-            print(r)
+            print(r,kwargs)
         except Exception as e:
             traceback.print_exc(file=self.logfile)
             print(e)
@@ -93,14 +137,14 @@ class SelogerScraper:
         return r
     def GetAdInfo(self,addId:int,sid=0):
         url = f"{ViewAddUrl}{addId}"
-        response = self.fetch(url,sid=sid,proxies=proxy)
+        response = self.fetch(url,sid=sid,proxies=self.proxy[sid])
         try:return response.json()
         except:{}
     def getTotalResult(self,param,sid=0):
         # print(param)
         param = [param['query']]
         url = resultcounturl
-        r = self.fetch(url,method="post",sid=sid,json=param,proxies=proxy)
+        r = self.fetch(url,method="post",sid=sid,json=param,proxies=self.proxy[sid])
         try:
             count = r.json()[0]
         except:
@@ -223,7 +267,7 @@ class SelogerScraper:
             adcount = 0
             while not updated and page<=201:
                 param.update({"pageIndex":page})
-                res = self.fetch(searchurl, method = "post", json=param, proxies=proxy)
+                res = self.fetch(searchurl, method = "post", json=param, proxies=self.proxy[sid])
                 ads = res.json()['items']
                 updatedads = []
                 first = True
@@ -251,7 +295,7 @@ class SelogerScraper:
     def Crawlparam(self,param,allPage = True,first=False,save=True):
         print(param)
         # input()
-        response = self.fetch(searchurl, method = "post", json=param, proxies=proxy)
+        response = self.fetch(searchurl, method = "post", json=param,)
         if not response:
             return 0
         print(response.status_code,"+++++++++")
@@ -303,6 +347,6 @@ def main_scraper(payload,update=False):
         print("updateing latedst ads")
         ob.updateLatestAd()
     else:
-        ob = SelogerScraper(data,asyncsize=50)
+        ob = SelogerScraper(data,asyncsize=10)
         ob.CrawlSeloger()
 

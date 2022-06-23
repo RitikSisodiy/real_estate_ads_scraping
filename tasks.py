@@ -33,7 +33,7 @@ import traceback
 def scrap_bienci_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
-    try:bienciScraper()
+    try:bienciScraper(payload)
     
     except Exception as e:
         print(traceback.format_exc())
@@ -45,7 +45,7 @@ def scrap_bienci_task(payload):
 def scrape_leboncoin_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
-    try:leboncoinAdScraper()
+    try:leboncoinAdScraper(payload)
     except Exception as e:print("Exception ================> ",e)
     # Scraping task obj start here
     print("Scraper 3 ")
