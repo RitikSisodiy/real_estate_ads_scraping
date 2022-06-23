@@ -1,5 +1,6 @@
 from ast import excepthandler
 from datetime import datetime
+from turtle import update
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -211,14 +212,13 @@ dic = getParams()
 def pap_scraper(payload):
     print(payload)
     typ = payload.get("real_state_type")
-    if typ:
-        if typ=="rental":typ="location"
-        else: typ = "vente"
-        ob= PapScraper(dic,proxy=False)
-        ob.Crawl(typ)
-        ob.close()
-    else:
-        print("ad type is not selected")
+    if typ == "Updated/Latest Ads":
+        UpdatePap()
+    if typ=="rental":typ="location"
+    else: typ = "vente"
+    ob= PapScraper(dic,proxy=False)
+    ob.Crawl(typ)
+    ob.close()
 def UpdatePap():
     types = ['location',"vente"]
     ob= PapScraper(dic,proxy=False)

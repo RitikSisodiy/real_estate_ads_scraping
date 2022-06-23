@@ -102,8 +102,12 @@ async def main(adsType = ""):
         producer = AsyncKafkaTopicProducer()
         await startCrawling(session,filterParamList,producer=producer)
         await producer.stopProducer()
-def main_scraper(paylaod):
-    asyncio.run(main(paylaod["real_state_type"]))
+def main_scraper(payload):
+    adtype = payload["real_state_type"]
+    if adtype == "Updated/Latest Ads":
+        UpdateParuvendu()
+    else:
+        asyncio.run(main(adtype))
 def getLastUpdates():
     try:
         with open(f'{cpath}/lastUpdate.json','r') as file:
@@ -154,7 +158,7 @@ async def CreatelastupdateLog(session,typ):
     except Exception as e:
         traceback.print_exc()
         print("execption ======>" , e)
-        input()
+
     # lastupdate = json.load(open(f'{cpath}/lastUpdate.json','r'))
     print(updates)
     with open(f'{cpath}/lastUpdate.json','w') as file:

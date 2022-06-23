@@ -1,8 +1,10 @@
 import asyncio
+from datetime import datetime
 import json
 import os
 
 import sys
+import traceback
 from urllib import response
 import requests
 from requests_html import AsyncHTMLSession
@@ -181,13 +183,16 @@ async def saveRealstateAds(ads,**kwargs):
     # with open("output/output.json",'a') as file:
     #     file.write(allads)
 
-async def GetAllPages(baseurl,session,first=False,Filter=None,**kwargs):
+async def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
     print(Filter)
     r= await fetch(baseurl,session,Json=True)
     if r:
         # print(baseurl,"-200")
         print(f"from===========>{r['from']}")
-        await saveRealstateAds(r['realEstateAds'],**kwargs)
+        if save:
+            await saveRealstateAds(r['realEstateAds'],**kwargs)
+        else:
+            return r["realEstateAds"]
         if first:
             totalpage = r['total']/Filter['size']
             totalpage = int(totalpage)+1 if totalpage>int(totalpage) else int(totalpage)
@@ -210,9 +215,102 @@ async def FetchFilter(filters):
     await GetAllPages(baseurl,session,first=True,Filter=filters,producer=producer)
     await producer.stopProducer()
 
+def getLastUpdates():
+    try:
+        with open(f'{cpath}/lastUpdate.json','r') as file:
+            updates = json.load(file)
+    except:
+        return {}
+    return updates
+def getTimeStamp(self,strtime):
+    formate = '%Y-%m-%dT%H:%M:%S.%fZ'
+    #1970-01-01T00:00:00.000Z
+    t = datetime.strptime(strtime,formate)
+    return t.timestamp()
+def GetAdUpdate(ad):
+    nowtime  = datetime.now()
+    update = {
+            "timestamp": nowtime,
+            "lastupdate": getTimeStamp(ad['modificationDate']),
+            "lastadId": ad["id"],
+        }
+    return update
+async def CreatelastupdateLog(session,typ):
+    updates = getLastUpdates()
+    if typ == "sale":
+        typ = "buy"
+    else:
+        typ = "rent"
+    param  = {
+    "size":500,
+    "from":0,
+    "showAllModels":False,
+    "propertyType":["house","flat"],
+    "newProperty":False,
+    "page":1,
+    "sortBy":"modificationDate",
+    "sortOrder":"desc",
+    "onTheMarket":[True],
+    }
+    url = getFilterUrl(param)
+    d = await fetch(session,url,Json=True)
 
-def main_scraper():
+    try:
+        ad = d["realEstateAds"][0]
+        latupdate = await GetAdUpdate(ad)
+        # print(latupdate)
+        updates.update({typ:latupdate})
+    except Exception as e:
+        traceback.print_exc()
+        print("execption ======>" , e)
+    # lastupdate = json.load(open(f'{cpath}/lastUpdate.json','r'))
+    print(updates)
+    with open(f'{cpath}/lastUpdate.json','w') as file:
+        file.write(json.dumps(updates))
+async def asyncUpdateParuvendu():
+    session = AsyncHTMLSession()
+    producer = AsyncKafkaTopicProducer()
+    await producer.statProducer()
+    param  = {
+    "size":500,
+    "from":0,
+    "showAllModels":False,
+    "propertyType":["house","flat"],
+    "newProperty":False,
+    "page":1,
+    "sortBy":"modificationDate",
+    "sortOrder":"desc",
+    "onTheMarket":[True],
+    }
+    updates = getLastUpdates()
+    if updates:
+        for key,val in updates:
+            param.update({"filterType":key})
+            url = getFilterUrl(param)
+            updated = False
+            while not updated:
+                r = await fetch(url,session,Json=True)
+                ads = r['realEstateAds']
+                adslist = []
+                for ad in ads:
+                    if val['lastupdate']<ad["modificationDate"]:
+                        adslist.append(ad)
+                    else:
+                        print(f"{len(adslist)} new ads scraped")
+                        break
+                await producer.TriggerPushDataList(kafkaTopicName,adslist)
+        await producer.stopProducer()
+        
+    else:
+        await CreatelastupdateLog(session,'rent')
+        await CreatelastupdateLog(session,'buy')
+
+
+def main_scraper(payload):
     # asyncio.run(main())
+    if payload.get("real_state_type") == "Updated/Latest Ads":
+        asyncio.run(asyncUpdateParuvendu())
+        return 0
     param  = {
     "size":500,
     "from":0,
@@ -220,7 +318,7 @@ def main_scraper():
     "filterType":"buy",
     "propertyType":["house","flat"],
     "newProperty":False,
-    "page":3,
+    "page":1,
     "sortBy":"relevance",
     "sortOrder":"desc",
     "onTheMarket":[True],
@@ -236,7 +334,7 @@ if __name__ == "__main__":
     "filterType":"buy",
     "propertyType":["house","flat"],
     "newProperty":False,
-    "page":3,
+    "page":1,
     "sortBy":"relevance",
     "sortOrder":"desc",
     "onTheMarket":[True],

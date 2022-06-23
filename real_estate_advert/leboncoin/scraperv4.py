@@ -206,10 +206,14 @@ def updateLebonCoin():
     ob = LeboncoinScraper(data,"newout1")
     # ob.IntCrawling()
     ob.UpdataAds()
-def leboncoinAdScraper():
-    data = json.load(open(f'{cpath}/filter.json','r'))
-    ob = LeboncoinScraper(data,"newout1")
-    ob.IntCrawling()
+def leboncoinAdScraper(payload):
+    typ = payload.get("real_state_type")
+    if typ == "Updated/Latest Ads":
+        updateLebonCoin()
+    else:
+        data = json.load(open(f'{cpath}/filter.json','r'))
+        ob = LeboncoinScraper(data,"newout1")
+        ob.IntCrawling()
 if __name__=="__main__":
     data = json.load(open(f'{cpath}/filter.json','r'))
     ob = LeboncoinScraper(data,"newout1")
