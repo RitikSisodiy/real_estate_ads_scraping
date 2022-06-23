@@ -295,6 +295,7 @@ class SelogerScraper:
         self.producer.PushDataList(kafkaTopicName,adslist)
     def Crawlparam(self,param,allPage = True,first=False,save=True):
         print(param)
+        if allPage:param['pageIndex'] = 1
         # input()
         response = self.fetch(searchurl, method = "post", json=param,)
         if not response:
