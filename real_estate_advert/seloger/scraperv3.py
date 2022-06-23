@@ -28,6 +28,7 @@ kafkaTopicName = "seloger_data_v1"
 class SelogerScraper:
     def __init__(self,paremeter,asyncsize=20) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
+        self.timeout = 5
         self.proxyUpdateThread()
         SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security/register"
         headers = {
@@ -89,11 +90,11 @@ class SelogerScraper:
             seloger_token_port = os.environ.get('HS_SELOGER_TOKEN_PORT', '8001')
 
             SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security"
-            time_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=self.proxy[sid]).json()
+            time_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=self.proxy[sid],timeout=self.timeout).json()
             challenge_url = f"http://{seloger_token_host}:{seloger_token_port}/seloger-auth?{urllib.parse.urlencode(time_token, doseq=False)}"
             token = self.session[sid].get(challenge_url).text
             print(token,"self genrager troe")
-            final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid]).text[1:-1]
+            final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid],timeout=self.timeout).text[1:-1]
 
             self.headers[sid] = {
                 'accept': 'application/json',
@@ -112,9 +113,9 @@ class SelogerScraper:
         kwargs['proxies'] = self.proxy[sid]
         try:
             if method=="post":
-                r = self.session[sid].post(url,**kwargs)
+                r = self.session[sid].post(url,timeout=self.timeout,**kwargs)
             else:
-                r = self.session[sid].get(url,**kwargs)
+                r = self.session[sid].get(url,timeout=self.timeout,**kwargs)
             print(r,kwargs)
         except Exception as e:
             traceback.print_exc(file=self.logfile)
