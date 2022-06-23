@@ -116,7 +116,7 @@ class SelogerScraper:
                 r = self.session[sid].post(url,timeout=self.timeout,**kwargs)
             else:
                 r = self.session[sid].get(url,timeout=self.timeout,**kwargs)
-            print(r,kwargs)
+            print(f"{r.status_code} : response status")
         except Exception as e:
             traceback.print_exc(file=self.logfile)
             print(e)
