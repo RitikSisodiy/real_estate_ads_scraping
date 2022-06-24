@@ -66,7 +66,7 @@ class LeboncoinScraper:
     def updateCookies(self):
         self.headers['Cookie'] = ";".join([(f"{key}={val}") for key,val in self.cookies.items()])
         with open("cookies.txt",'w') as file:
-            file.write(self.headers['cookie'])
+            file.write(self.headers['Cookie'])
     def CrawlLeboncoin(self):
         parameter= self.parameter
         # headers = {
