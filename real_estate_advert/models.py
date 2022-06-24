@@ -19,6 +19,7 @@ class VendorType(str, Enum):
 class RealStateType(str, Enum):
     sale = "sale"
     rental = "rental"
+    latest = "Updated/Latest Ads"
 
 
 class PropertyType(str, Enum):
