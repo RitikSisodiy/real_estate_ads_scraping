@@ -268,7 +268,7 @@ class SelogerScraper:
             adcount = 0
             while not updated and page<=201:
                 param.update({"pageIndex":page})
-                res = self.fetch(searchurl, method = "post", json=param, proxies=self.proxy[sid])
+                res = self.fetch(searchurl, method = "post", json=param)
                 ads = res.json()['items']
                 updatedads = []
                 first = True
