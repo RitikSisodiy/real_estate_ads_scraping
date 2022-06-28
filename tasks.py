@@ -7,6 +7,7 @@ from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
 from real_estate_advert.pap.scraperf import pap_scraper as PapScraper
 from real_estate_advert.pap.scraperf import UpdatePap
 from real_estate_advert.bienci.scraper import main_scraper as bienciScraper
+from real_estate_advert.bienci.scraper import UpdateBienci
 from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
 
 from celery import Celery
@@ -71,6 +72,12 @@ def update_pap_ads():
     try:UpdatePap()
     except Exception as e:print("Exception ================> ",e)
     print("Task End ================> ")
+@celery_app.task(name="real estate fetch Bienci latest ad")
+def update_Bienci_ads():
+    print("Task start ================> ")
+    try:UpdateBienci()
+    except Exception as e:print("Exception ================> ",e)
+    print("Task End ================> ")
 @celery_app.task(name="real estate fetch seloger latest ad")
 def update_seloger_ads():
     print("Task start ================> ")
@@ -128,3 +135,5 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(20*60, update_pap_ads.s(), name='update pap ads every 20 minuts')
     # Calls update_seloger_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_seloger_ads.s(), name='update seloger ads every 20 minuts')
+    # Calls update_seloger_ads in every 20 minutes
+    sender.add_periodic_task(20*60, update_Bienci_ads.s(), name='update Bienci ads every 20 minuts')

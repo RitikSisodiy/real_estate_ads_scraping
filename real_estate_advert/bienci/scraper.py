@@ -267,7 +267,7 @@ async def CreatelastupdateLog(session,typ):
     print(updates)
     with open(f'{cpath}/lastUpdate.json','w') as file:
         file.write(json.dumps(updates))
-async def asyncUpdateParuvendu():
+async def asyncUpdateBienci():
     session = AsyncHTMLSession()
     producer = AsyncKafkaTopicProducer()
     await producer.statProducer()
@@ -304,12 +304,13 @@ async def asyncUpdateParuvendu():
     else:
         await CreatelastupdateLog(session,'rent')
         await CreatelastupdateLog(session,'buy')
-
+def UpdateBienci():
+    asyncio.run(asyncUpdateBienci())
 
 def main_scraper(payload):
     # asyncio.run(main())
     if payload.get("real_state_type") == "Updated/Latest Ads":
-        asyncio.run(asyncUpdateParuvendu())
+        UpdateBienci()
         return 0
     param  = {
     "size":500,
