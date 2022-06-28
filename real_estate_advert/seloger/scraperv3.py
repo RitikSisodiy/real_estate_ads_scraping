@@ -343,8 +343,8 @@ class SelogerScraper:
         #     self.Crawlparam(Filter)
 def main_scraper(payload,update=False):
     data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
-    adtype = payload["real_state_type"]
-    if adtype == "Updated/Latest Ads":
+    adtype = payload.get("real_state_type")
+    if adtype == "Updated/Latest Ads" or update:
         ob = SelogerScraper(data,asyncsize=1)
         print("updateing latedst ads")
         ob.updateLatestAd()
