@@ -264,6 +264,7 @@ class SelogerScraper:
             param = self.paremeter
             param["query"]["sortBy"]= 10
             updated = False
+            first = True
             page =1
             adcount = 0
             while not updated and page<=201:
@@ -271,7 +272,6 @@ class SelogerScraper:
                 res = self.fetch(searchurl, method = "post", json=param)
                 ads = res.json()['items']
                 updatedads = []
-                first = True
                 updatetimestamp = updates["created"]
                 for ad in ads:
                     ad = self.GetAdInfo(ad['id'])
