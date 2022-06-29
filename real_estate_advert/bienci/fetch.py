@@ -10,6 +10,7 @@ ua = fake_useragent.UserAgent(fallback='Your favorite Browser')
 def getUserAgent():
     return ua.random
 async def fetch(url,session,Json=False,file=False,**kwargs):
+    print(url)
     if not kwargs.get('headers'):
         kwargs["headers"] = {
                 "user-agent":getUserAgent(),

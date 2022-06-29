@@ -2,10 +2,9 @@ import asyncio
 from datetime import datetime
 import json
 import os
-
+import urllib
 import sys
 import traceback
-from urllib import response
 import requests
 from requests_html import AsyncHTMLSession
 import random
@@ -29,7 +28,10 @@ def getFilterUrl(Filter,page=None):
     if page:
         Filter['from'] = Filter['size']*page +1
     Filter = json.dumps(Filter)
-    url  = f"https://www.bienici.com/realEstateAds.json?filters={Filter}&extensionType=extendedIfNoResult"
+    
+    Filter =  {"filters":Filter}
+    Filter = urllib.parse.urlencode(Filter)
+    url  = f"https://www.bienici.com/realEstateAds.json?{Filter}&extensionType=extendedIfNoResult"
     return url
 def GetLast(val):
     try:
@@ -151,7 +153,6 @@ async def main():
     "filterType":"buy",
     "propertyType":["house","flat"],
     "newProperty":False,
-    "page":3,
     "sortBy":"relevance",
     "sortOrder":"desc",
     "onTheMarket":[True],
@@ -222,7 +223,7 @@ def getLastUpdates():
     except:
         return {}
     return updates
-def getTimeStamp(self,strtime):
+def getTimeStamp(strtime):
     formate = '%Y-%m-%dT%H:%M:%S.%fZ'
     #1970-01-01T00:00:00.000Z
     t = datetime.strptime(strtime,formate)
@@ -230,14 +231,14 @@ def getTimeStamp(self,strtime):
 def GetAdUpdate(ad):
     nowtime  = datetime.now()
     update = {
-            "timestamp": nowtime,
+            "timestamp": nowtime.timestamp(),
             "lastupdate": getTimeStamp(ad['modificationDate']),
             "lastadId": ad["id"],
         }
     return update
 async def CreatelastupdateLog(session,typ):
     updates = getLastUpdates()
-    if typ == "sale":
+    if typ == "sale" or typ=="buy":
         typ = "buy"
     else:
         typ = "rent"
@@ -246,6 +247,7 @@ async def CreatelastupdateLog(session,typ):
     "from":0,
     "showAllModels":False,
     "propertyType":["house","flat"],
+    "filterType":typ,
     "newProperty":False,
     "page":1,
     "sortBy":"modificationDate",
@@ -253,11 +255,12 @@ async def CreatelastupdateLog(session,typ):
     "onTheMarket":[True],
     }
     url = getFilterUrl(param)
-    d = await fetch(session,url,Json=True)
+    print("fetching url :", url)
+    d = await fetch(url,session,Json=True)
 
     try:
         ad = d["realEstateAds"][0]
-        latupdate = await GetAdUpdate(ad)
+        latupdate = GetAdUpdate(ad)
         # print(latupdate)
         updates.update({typ:latupdate})
     except Exception as e:
@@ -283,8 +286,11 @@ async def asyncUpdateBienci():
     "onTheMarket":[True],
     }
     updates = getLastUpdates()
+    print(updates)
     if updates:
-        for key,val in updates:
+        await CreatelastupdateLog(session,'rent')
+        await CreatelastupdateLog(session,'buy')
+        for key,val in updates.items():
             param.update({"filterType":key})
             url = getFilterUrl(param)
             updated = False
@@ -293,10 +299,11 @@ async def asyncUpdateBienci():
                 ads = r['realEstateAds']
                 adslist = []
                 for ad in ads:
-                    if val['lastupdate']<ad["modificationDate"]:
+                    if val['lastupdate']<getTimeStamp(ad["modificationDate"]):
                         adslist.append(ad)
                     else:
                         print(f"{len(adslist)} new ads scraped")
+                        updated = True
                         break
                 await producer.TriggerPushDataList(kafkaTopicName,adslist)
         await producer.stopProducer()
