@@ -136,4 +136,4 @@ def setup_periodic_tasks(sender, **kwargs):
     # Calls update_seloger_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_seloger_ads.s(), name='update seloger ads every 20 minuts')
     # Calls update_seloger_ads in every 20 minutes
-    sender.add_periodic_task(20*60, update_Bienci_ads.s(), name='update Bienci ads every 20 minuts')
+    # sender.add_periodic_task(20*60, update_Bienci_ads.s(), name='update Bienci ads every 20 minuts')
