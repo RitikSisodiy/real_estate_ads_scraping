@@ -232,7 +232,7 @@ def GetAdUpdate(ad):
     nowtime  = datetime.now()
     update = {
             "timestamp": nowtime.timestamp(),
-            "lastupdate": getTimeStamp(ad['modificationDate']),
+            "lastupdate": getTimeStamp(ad['publicationDate']),
             "lastadId": ad["id"],
         }
     return update
@@ -250,7 +250,7 @@ async def CreatelastupdateLog(session,typ):
     "filterType":typ,
     "newProperty":False,
     "page":1,
-    "sortBy":"modificationDate",
+    "sortBy":"publicationDate",
     "sortOrder":"desc",
     "onTheMarket":[True],
     }
@@ -281,12 +281,13 @@ async def asyncUpdateBienci():
     "propertyType":["house","flat"],
     "newProperty":False,
     "page":1,
-    "sortBy":"modificationDate",
+    "sortBy":"publicationDate",
     "sortOrder":"desc",
     "onTheMarket":[True],
     }
     updates = getLastUpdates()
     print(updates)
+    res = ""
     if updates:
         await CreatelastupdateLog(session,'rent')
         await CreatelastupdateLog(session,'buy')
@@ -299,10 +300,14 @@ async def asyncUpdateBienci():
                 ads = r['realEstateAds']
                 adslist = []
                 for ad in ads:
-                    if val['lastupdate']<getTimeStamp(ad["modificationDate"]):
+                    adtime = getTimeStamp(ad["publicationDate"])
+                    print(f"{val['lastupdate']}<{adtime} = ",val['lastupdate']<getTimeStamp(ad["publicationDate"]))
+                    if val['lastupdate']<getTimeStamp(ad["publicationDate"]):
                         adslist.append(ad)
                     else:
-                        print(f"{len(adslist)} new ads scraped")
+                        msg = f"{len(adslist)} {key} new ads scraped"
+                        res += " "+ msg
+                        print(msg)
                         updated = True
                         break
                 await producer.TriggerPushDataList(kafkaTopicName,adslist)
@@ -311,14 +316,15 @@ async def asyncUpdateBienci():
     else:
         await CreatelastupdateLog(session,'rent')
         await CreatelastupdateLog(session,'buy')
+    return res
 def UpdateBienci():
-    asyncio.run(asyncUpdateBienci())
+    return asyncio.run(asyncUpdateBienci())
 
 def main_scraper(payload):
     # asyncio.run(main())
     if payload.get("real_state_type") == "Updated/Latest Ads":
-        UpdateBienci()
-        return 0
+        res = UpdateBienci()
+        return res
     param  = {
     "size":500,
     "from":0,

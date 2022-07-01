@@ -34,14 +34,16 @@ import traceback
 def scrap_bienci_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
-    try:bienciScraper(payload)
+    try:
+        data = bienciScraper(payload)
     
     except Exception as e:
         print(traceback.format_exc())
         print("Exception ================> ",e)
+        data= "exception"
     # Scraping task obj start here
     print("Task End ================> ")
-
+    return data
 @celery_app.task(name="real estate leboncoin")
 def scrape_leboncoin_task(payload):
     print("Task start ================> ")
@@ -75,9 +77,14 @@ def update_pap_ads():
 @celery_app.task(name="real estate fetch Bienci latest ad")
 def update_Bienci_ads():
     print("Task start ================> ")
-    try:UpdateBienci()
-    except Exception as e:print("Exception ================> ",e)
+    try:
+        data = UpdateBienci()
+    except Exception as e:
+        print("Exception ================> ",e)
+        data = "exeption"
     print("Task End ================> ")
+    print(data)
+    return data
 @celery_app.task(name="real estate fetch seloger latest ad")
 def update_seloger_ads():
     print("Task start ================> ")
