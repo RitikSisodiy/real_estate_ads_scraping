@@ -345,10 +345,10 @@ def main_scraper(payload,update=False):
     data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
     adtype = payload.get("real_state_type")
     if adtype == "Updated/Latest Ads" or update:
-        ob = SelogerScraper(data,asyncsize=1)
+        ob = SelogerScraper(data,asyncsize=5)
         print("updateing latedst ads")
         ob.updateLatestAd()
     else:
         ob = SelogerScraper(data,asyncsize=10)
         ob.CrawlSeloger()
-
+    ob.__del__()
