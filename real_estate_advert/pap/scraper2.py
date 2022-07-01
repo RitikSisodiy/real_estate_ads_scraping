@@ -97,7 +97,6 @@ class PapScraper:
             qury = urlencode(params)
             url = f"{url}?{qury}"
         self.driver.get(url)
-        self.driver.save_screenshot("image.png")
         try:
             content = self.driver.page_source
             content = self.driver.find_element_by_tag_name('pre').text
