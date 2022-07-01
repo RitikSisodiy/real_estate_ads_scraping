@@ -59,14 +59,17 @@ class SelogerScraper:
     def updateProxyList(self,interval=300):
         if self.readProxy():time.sleep(interval)
         while True:
+            if not self.startThread:
+                break
             self.getProxyList()
             time.sleep(interval)
     def proxyUpdateThread(self):
         print("proxy thread is started")
+        self.startThread = True
         self.proc = threading.Thread(target=self.updateProxyList, args=())
         self.proc.start()
     def __del__(self):
-        self.proc.terminate()
+        self.startThread = False
         print("proxy thread is terminated")
     def readProxy(self):
         with open(f"{cpath}/working.txt","r") as file:
@@ -351,4 +354,4 @@ def main_scraper(payload,update=False):
     else:
         ob = SelogerScraper(data,asyncsize=10)
         ob.CrawlSeloger()
-    del ob
+    ob.__del__()
