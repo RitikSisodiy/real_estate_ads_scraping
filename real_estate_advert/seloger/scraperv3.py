@@ -272,12 +272,12 @@ class SelogerScraper:
             adcount = 0
             while not updated and page<=201:
                 param.update({"pageIndex":page})
-                res = self.fetch(searchurl, method = "post", json=param)
-                ads = res.json()['items']
+                # res = self.fetch(searchurl, method = "post", json=param)
+                ads = self.Crawlparam(param,False,False,False)
                 updatedads = []
                 updatetimestamp = updates["created"]
                 for ad in ads:
-                    ad = self.GetAdInfo(ad['id'])
+                    # ad = self.GetAdInfo(ad['id'])
                     adtimestamp = self.getTimeStamp(ad["created"])
                     print(f"   {adtimestamp}> {updatetimestamp}====>",adtimestamp>updatetimestamp)
                     if adtimestamp>updatetimestamp:
