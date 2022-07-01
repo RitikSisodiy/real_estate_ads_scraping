@@ -4,8 +4,8 @@ from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
 from real_estate_advert.leboncoin.scraperv4 import updateLebonCoin,leboncoinAdScraper
 from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
 from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
-from real_estate_advert.pap.scraperf import pap_scraper as PapScraper
-from real_estate_advert.pap.scraperf import UpdatePap
+from real_estate_advert.pap.scraper2 import pap_scraper as PapScraper
+from real_estate_advert.pap.scraper2 import UpdatePap
 from real_estate_advert.bienci.scraper import main_scraper as bienciScraper
 from real_estate_advert.bienci.scraper import UpdateBienci
 from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
