@@ -234,21 +234,7 @@ def UpdatePap():
     for typ in types:
         ob.CrawlLatest(typ)
     ob.close()
-def pap_scraper():
-    typ ="rental"
-    dic = {
-        "type":"recherche",
-        "produit":"vente",
-        "geo[ids][]":"25",
-        "typesbien[]":"immeuble",
-        "prix[min]":"10432",
-        "prix[max]":"254579774",
-    }
-    if typ=="rental":typ="location"
-    else: typ = "vente"
-    ob= PapScraper(dic,proxy=False)
-    ob.Crawl(typ)
-    ob.close()
+
 if __name__== "__main__":
     typ ="rental"
     dic = {
