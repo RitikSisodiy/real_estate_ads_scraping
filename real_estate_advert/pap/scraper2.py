@@ -8,7 +8,8 @@ from urllib.parse import urlencode
 import json,os,time
 from datetime import datetime
 
-from scrapProxy import ProxyScraper
+try:from scrapProxy import ProxyScraper
+except:from .scrapProxy import ProxyScraper
 try:from uploader import AsyncKafkaTopicProducer
 except:from .uploader import AsyncKafkaTopicProducer
 producer = AsyncKafkaTopicProducer()
