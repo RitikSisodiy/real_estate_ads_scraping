@@ -66,7 +66,10 @@ class SelogerScraper:
         self.proc = threading.Thread(target=self.updateProxyList, args=())
         self.proc.start()
     def __del__(self):
-        self.proc.terminate()
+        try:
+            self.proc.terminate()
+        except:
+            self.proc.deamon()
         print("proxy thread is terminated")
     def readProxy(self):
         with open(f"{cpath}/working.txt","r") as file:
