@@ -12,7 +12,8 @@ try:from scrapProxy import ProxyScraper
 except:from .scrapProxy import ProxyScraper
 try:from uploader import AsyncKafkaTopicProducer
 except:from .uploader import AsyncKafkaTopicProducer
-producer = AsyncKafkaTopicProducer()
+from kafka_publisher import KafkaTopicProducer
+producer = KafkaTopicProducer()
 kafkaTopicName = "pap_data_v1"
 cpath =os.path.dirname(__file__)
 chrome = ChromeDriverManager().install()
@@ -33,6 +34,7 @@ class PapScraper:
             self.getProxyList()
         self.driver = self.getDriver()
         self.driver.proxy = self.getRandomProxy()
+        self.driver.set_page_load_timeout(5)
         self.headers = {
             "Accept": "*/*",
             "X-App-Version": "4.0.10",
@@ -76,7 +78,7 @@ class PapScraper:
     def getDriver(self):
         options = webdriver.ChromeOptions()
         # options.add_argument('--proxy-server=%s' % "socks4://127.0.0.1:9050")
-        options.add_argument("--headless")
+        # options.add_argument("--headless")
         # proxy = "http://lum-customer-c_5afd76d0-zone-data_center:r33r92fcpqmz@zproxy.lum-superproxy.io:22225"
         driver = webdriver.Chrome(chrome, chrome_options=options)
         # time.sleep(10)
@@ -96,15 +98,15 @@ class PapScraper:
         if params:
             qury = urlencode(params)
             url = f"{url}?{qury}"
-        self.driver.get(url)
         try:
+            self.driver.get(url)
             content = self.driver.page_source
             content = self.driver.find_element_by_tag_name('pre').text
             parsed_json = json.loads(content)
         except Exception as e:
             print("exeptin", e)
             self.driver.proxy = self.getRandomProxy()
-            return self.fetchJson(url,params)
+            return self.fetchJson(url)
         return parsed_json
     def save(self,data,getdata=False):
         ads = data["annonces"]
@@ -166,7 +168,8 @@ class PapScraper:
         print(f"{len(finalads)} new ads scraped")
         self.saveAdList(finalads)
     def saveAdList(self,adsdata):
-            producer.PushDataList(kafkaTopicName,adsdata)
+            for data in adsdata:
+                producer.kafka_producer_sync(kafkaTopicName,data)
             final = ""
             # for da in adsdata:
             #     final+=json.dumps(da)+"\n"
@@ -213,9 +216,6 @@ dic = {
         "type":"recherche",
         "produit":"vente",
         "geo[ids][]":"25",
-        "typesbien[]":"immeuble",
-        "prix[min]":"10432",
-        "prix[max]":"254579774",
     }
 def pap_scraper(payload):
     print(payload)
@@ -236,14 +236,6 @@ def UpdatePap():
 
 if __name__== "__main__":
     typ ="rental"
-    dic = {
-        "type":"recherche",
-        "produit":"vente",
-        "geo[ids][]":"25",
-        "typesbien[]":"immeuble",
-        "prix[min]":"10432",
-        "prix[max]":"254579774",
-    }
     if typ=="rental":typ="location"
     else: typ = "vente"
     ob= PapScraper(dic,proxy=False)
