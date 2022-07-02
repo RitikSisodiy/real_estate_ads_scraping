@@ -13,7 +13,8 @@ except:from .scrapProxy import ProxyScraper
 try:from uploader import AsyncKafkaTopicProducer
 except:from .uploader import AsyncKafkaTopicProducer
 from kafka_publisher import KafkaTopicProducer
-producer = KafkaTopicProducer()
+# producer = KafkaTopicProducer()
+producer = AsyncKafkaTopicProducer()
 kafkaTopicName = "pap_data_v1"
 cpath =os.path.dirname(__file__)
 chrome = ChromeDriverManager().install()
@@ -168,8 +169,9 @@ class PapScraper:
         print(f"{len(finalads)} new ads scraped")
         self.saveAdList(finalads)
     def saveAdList(self,adsdata):
-            for data in adsdata:
-                producer.kafka_producer_sync(kafkaTopicName,data)
+            # for data in adsdata:
+            #     producer.kafka_producer_sync(kafkaTopicName,data)
+            producer.PushDataList(kafkaTopicName,adsdata)
             final = ""
             # for da in adsdata:
             #     final+=json.dumps(da)+"\n"
