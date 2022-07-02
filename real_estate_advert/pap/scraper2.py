@@ -176,7 +176,11 @@ class PapScraper:
     def saveAdList(self,adsdata):
             # for data in adsdata:
             #     producer.kafka_producer_sync(kafkaTopicName,data)
-            producer.PushDataList(kafkaTopicName,adsdata)
+            adlist = []
+            for ad in adsdata:
+                ad = ad.get("annonce")
+                if ad:adlist.append(ad)
+            producer.PushDataList(kafkaTopicName,adlist)
             final = ""
             # for da in adsdata:
             #     final+=json.dumps(da)+"\n"
