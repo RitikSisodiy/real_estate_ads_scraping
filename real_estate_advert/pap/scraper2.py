@@ -168,6 +168,11 @@ class PapScraper:
         self.createNewUpdate(typ,latad)
         print(f"{len(finalads)} new ads scraped")
         self.saveAdList(finalads)
+    def CrawlLatestV2(self,typ):
+        param = self.parameter
+        param.update({"produit":typ})
+        response = self.fetchJson(self.apiurl, params=param)
+        self.save(response)
     def saveAdList(self,adsdata):
             # for data in adsdata:
             #     producer.kafka_producer_sync(kafkaTopicName,data)
@@ -233,7 +238,7 @@ def UpdatePap():
     types = ['location',"vente"]
     ob= PapScraper(dic,proxy=False)
     for typ in types:
-        ob.CrawlLatest(typ)
+        ob.CrawlLatestV2(typ)
     ob.close()
 
 if __name__== "__main__":
