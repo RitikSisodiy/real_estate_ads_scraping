@@ -78,7 +78,7 @@ class PapScraper:
     def getDriver(self):
         options = webdriver.ChromeOptions()
         # options.add_argument('--proxy-server=%s' % "socks4://127.0.0.1:9050")
-        # options.add_argument("--headless")
+        options.add_argument("--headless")
         # proxy = "http://lum-customer-c_5afd76d0-zone-data_center:r33r92fcpqmz@zproxy.lum-superproxy.io:22225"
         driver = webdriver.Chrome(chrome, chrome_options=options)
         # time.sleep(10)
