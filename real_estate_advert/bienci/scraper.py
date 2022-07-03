@@ -293,9 +293,10 @@ async def asyncUpdateBienci():
         await CreatelastupdateLog(session,'buy')
         for key,val in updates.items():
             param.update({"filterType":key})
-            url = getFilterUrl(param)
             updated = False
-            while not updated:
+            page= 1
+            while not updated and page*param['size']<2400:
+                url = getFilterUrl(param,page=page)
                 r = await fetch(url,session,Json=True)
                 ads = r['realEstateAds']
                 adslist = []
@@ -311,6 +312,7 @@ async def asyncUpdateBienci():
                         updated = True
                         break
                 await producer.TriggerPushDataList(kafkaTopicName,adslist)
+                page +=1
         await producer.stopProducer()
         
     else:
