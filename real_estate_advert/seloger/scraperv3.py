@@ -184,13 +184,15 @@ class SelogerScraper:
             item = li[interval*i:interval*(i+1)]
             flist.append(item)
         return flist
-    def genFilter(self):
+    def genFilter(self,adtype):
         dic = self.paremeter
+        if adtype=="sale":dic["transactionType"]=2
+        else:dic["transactionType"] = 1
         totalresult =self.getTotalResult(dic)
         print(totalresult)
         acres = totalresult
         fetchedresult = 0
-        iniinterval = [2415,424796]
+        iniinterval = [0,500]
         filterurllist = ''
         finalresult = 0
         maxresult = 50*200
@@ -233,8 +235,10 @@ class SelogerScraper:
             return data
         except:
             return {}
-    def getlatestAd(self):
+    def getlatestAd(self,adtype):
         param = self.paremeter
+        if adtype=="sale":param["transactionType"]=2
+        else:param["transactionType"] = 1 
         param["query"]["sortBy"] =10
         data = self.Crawlparam(param,allPage=False,first=True)
         return data
@@ -250,10 +254,11 @@ class SelogerScraper:
                 "source": ad.get('permalink')
             }
         return upd
-    def createNewUpdate(self,latestad=None):
+    def createNewUpdate(self,adtype,latestad=None):
+        lastupd = self.getLastUpdate()
         if not latestad:
-            latestad = self.getlatestAd()
-        lastupd=self.getUpdateDicFromAd(latestad)
+            latestad = self.getlatestAd(adtype)
+        lastupd[adtype]=self.getUpdateDicFromAd(latestad)
         with open(f"{cpath}/lastUpdate.json",'w') as file:
             file.write(json.dumps(lastupd))
     def getTimeStamp(self,strtime):
@@ -261,10 +266,12 @@ class SelogerScraper:
         # 2022-06-19T05:26:55
         t = datetime.strptime(strtime,formate)
         return t.timestamp()
-    def updateLatestAd(self):
-        updates = self.getLastUpdate()
+    def updateLatestAd(self,adtype):
+        updates = self.getLastUpdate().get(adtype)
         if updates:
             param = self.paremeter
+            if adtype=="sale":param["transactionType"]=2
+            else:param["transactionType"] = 1
             param["query"]["sortBy"]= 10
             updated = False
             first = True
@@ -282,7 +289,7 @@ class SelogerScraper:
                     print(f"   {adtimestamp}> {updatetimestamp}====>",adtimestamp>updatetimestamp)
                     if adtimestamp>updatetimestamp:
                         if first:
-                            self.createNewUpdate(ad)
+                            self.createNewUpdate(adtype,ad)
                             first=False
                         updatedads.append(ad)
                         adcount+=1
@@ -339,9 +346,9 @@ class SelogerScraper:
                 self.Crawlparam(param,allPage=False)
         else:
             return fetchedads
-    def CrawlSeloger(self):
-        self.createNewUpdate(latestad=None)
-        filterlist= self.genFilter()
+    def CrawlSeloger(self,adtype):
+        self.createNewUpdate(adtype,latestad=None)
+        filterlist= self.genFilter(adtype)
         # for Filter in filterlist:
         #     self.Crawlparam(Filter)
 def main_scraper(payload,update=False):
@@ -350,8 +357,9 @@ def main_scraper(payload,update=False):
     if adtype == "Updated/Latest Ads" or update:
         ob = SelogerScraper(data,asyncsize=5)
         print("updateing latedst ads")
-        ob.updateLatestAd()
+        ob.updateLatestAd("rental")
+        ob.updateLatestAd("sale")
     else:
         ob = SelogerScraper(data,asyncsize=10)
-        ob.CrawlSeloger()
+        ob.CrawlSeloger(adtype)
     ob.__del__()
