@@ -7,7 +7,7 @@ from getChrome import getChromePath
 from urllib.parse import urlencode
 import json,os,time
 from datetime import datetime
-from .formater import formater
+# from .formater import formater
 try:from scrapProxy import ProxyScraper
 except:from .scrapProxy import ProxyScraper
 try:from uploader import AsyncKafkaTopicProducer
@@ -179,7 +179,7 @@ class PapScraper:
             adlist = []
             for ad in adsdata:
                 ad = ad.get("annonce")
-                if ad:adlist.append(formater(ad))
+                # if ad:adlist.append(formater(ad))
             producer.PushDataList("testpapupload",adlist)
             final = ""
             # for da in adsdata:
