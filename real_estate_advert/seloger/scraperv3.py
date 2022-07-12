@@ -186,8 +186,8 @@ class SelogerScraper:
         return flist
     def genFilter(self,adtype):
         dic = self.paremeter
-        if adtype=="sale":dic["transactionType"]=2
-        else:dic["transactionType"] = 1
+        if adtype=="sale":dic["query"]["transactionType"]=2
+        else:dic["query"]["transactionType"] = 1
         totalresult =self.getTotalResult(dic)
         print(totalresult)
         acres = totalresult
@@ -237,8 +237,8 @@ class SelogerScraper:
             return {}
     def getlatestAd(self,adtype):
         param = self.paremeter
-        if adtype=="sale":param["transactionType"]=2
-        else:param["transactionType"] = 1 
+        if adtype=="sale":param["query"]["transactionType"]=2
+        else:param["query"]["transactionType"] = 1 
         param["query"]["sortBy"] =10
         data = self.Crawlparam(param,allPage=False,first=True)
         return data
@@ -270,8 +270,8 @@ class SelogerScraper:
         updates = self.getLastUpdate().get(adtype)
         if updates:
             param = self.paremeter
-            if adtype=="sale":param["transactionType"]=2
-            else:param["transactionType"] = 1
+            if adtype=="sale":param["query"]["transactionType"]=2
+            else:param["query"]["transactionType"] = 1
             param["query"]["sortBy"]= 10
             updated = False
             first = True
