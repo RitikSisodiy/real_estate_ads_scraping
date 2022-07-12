@@ -1,5 +1,5 @@
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
+from getChrome import getChromePath
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -32,7 +32,7 @@ class Ad:
             chrome_options.add_argument('--ignore-certificate-errors')
             chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36")
             # chrome_options.binary_location = "C:/Program Files/Google/Chrome/Application/chrome.exe"
-            self.driver = uc.Chrome(ChromeDriverManager().install(), options=chrome_options, enable_cdp_events=True)
+            self.driver = uc.Chrome(getChromePath(), options=chrome_options, enable_cdp_events=True)
             self.driver.add_cdp_listener('Network.requestWillBeSent', event_details)
             self.driver.add_cdp_listener('Network.dataReceived', event_details)
         except Exception as e:

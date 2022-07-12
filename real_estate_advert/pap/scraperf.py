@@ -1,12 +1,12 @@
 from ast import excepthandler
 from datetime import datetime
 from turtle import update
-from webdriver_manager.chrome import ChromeDriverManager
+from getChrome import getChromePath
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import json
 from urllib.parse import urlencode
-chrome = ChromeDriverManager().install()
+chrome = getChromePath()
 import os
 import zipfile
 from selenium.webdriver.common.proxy import Proxy, ProxyType

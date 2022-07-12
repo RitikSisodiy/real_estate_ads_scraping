@@ -3,7 +3,7 @@ try:
     import sys
     import pickle
     import os
-    from webdriver_manager.chrome import ChromeDriverManager
+    from getChrome import getChromePath
     from fp.fp import FreeProxy
     from fake_useragent import UserAgent
     from bs4 import BeautifulSoup
@@ -87,7 +87,7 @@ class WebDriver(DriverOptions):
 
         path = os.path.join(os.getcwd(), 'chromedriver')
 
-        driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.options)
+        driver = webdriver.Chrome(getChromePath(), options=self.options)
 
         return driver
 

@@ -3,11 +3,11 @@ from tabnanny import check
 import threading
 from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
+from getChrome import getChromePath
 from urllib.parse import urlencode
 import json,os,time
 from datetime import datetime
-
+from .formater import formater
 try:from scrapProxy import ProxyScraper
 except:from .scrapProxy import ProxyScraper
 try:from uploader import AsyncKafkaTopicProducer
@@ -17,7 +17,7 @@ from kafka_publisher import KafkaTopicProducer
 producer = AsyncKafkaTopicProducer()
 kafkaTopicName = "pap_data_v1"
 cpath =os.path.dirname(__file__)
-chrome = ChromeDriverManager().install()
+chrome = getChromePath
 class PapScraper:
     def __init__(self,parameter,proxy=None) -> None:
         self.parameter = parameter
@@ -179,8 +179,8 @@ class PapScraper:
             adlist = []
             for ad in adsdata:
                 ad = ad.get("annonce")
-                if ad:adlist.append(ad)
-            producer.PushDataList(kafkaTopicName,adlist)
+                if ad:adlist.append(formater(ad))
+            producer.PushDataList("testpapupload",adlist)
             final = ""
             # for da in adsdata:
             #     final+=json.dumps(da)+"\n"
