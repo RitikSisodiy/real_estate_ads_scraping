@@ -58,9 +58,7 @@ class PapScraper:
         self.proc.start()
     def updateProxyList(self,interval=300):
         if self.readProxy():time.sleep(interval)
-        while True:
-            if not self.startThread:
-                break
+        while self.startThread:
             self.getProxyList()
             time.sleep(interval)     
     def getProxyList(self):
