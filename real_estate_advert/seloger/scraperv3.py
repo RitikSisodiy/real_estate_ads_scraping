@@ -219,7 +219,9 @@ class SelogerScraper:
         maxresult = 50*200
         maxprice = self.getMaxPrize(dic)
         minprice = self.getMinPrize(dic)
-        if minprice:iniinterval[0]=minprice
+        if minprice:
+            iniinterval[0]=minprice
+            iniinterval[1]=minprice+1
         print(maxprice)
         print(totalresult>=maxresult)
         if totalresult>=maxresult:
