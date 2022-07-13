@@ -176,6 +176,27 @@ class SelogerScraper:
             try:maxprice+=f"{int(c)}"
             except:pass
         if maxprice:return int(maxprice)+1
+    def getMinPrize(self,param,sid=0):
+        # sorting values "sortBy"
+        # 1 - prize INCREASING order
+        # 2 - prize DECREASING order
+        # 10 - DATE NEWEST FIRST
+        # 9 - ate OLDEST FIRST
+        # 5 - GROWING SURFACE
+        # 6 - DECREASING SURFACE
+        param["query"]["sortBy"] =1
+        # print(param)
+        try:
+            prize = self.fetch(searchurl,method="post",sid=sid,json=param).json()["items"][0]['price']
+            prize = str(prize)
+        except:
+            prize = "1000"
+        maxprice = ''
+        for c in prize:
+            try:maxprice+=f"{int(c)}"
+            except:pass
+        if maxprice:return int(maxprice)
+        else: return 0
     def splitListInNpairs(self,li,interval):
         ran = len(li)/interval
         ran = int(ran) if ran==int(ran) else int(ran)+1
@@ -197,6 +218,8 @@ class SelogerScraper:
         finalresult = 0
         maxresult = 50*200
         maxprice = self.getMaxPrize(dic)
+        minprice = self.getMinPrize(dic)
+        if minprice:iniinterval[0]=minprice
         print(maxprice)
         print(totalresult>=maxresult)
         if totalresult>=maxresult:
