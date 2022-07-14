@@ -83,7 +83,10 @@ class SelogerScraper:
     def init_headers(self,sid=0):
         self.session[sid].close()
         self.session[sid] = requests.Session()
-        self.proxy[sid] = self.getRandomProxy()
+        try:self.proxy[sid] = self.getRandomProxy()
+        except:
+            self.getProxyList()
+            self.init_headers()
         try:
             headers = {
                 'user-agent': 'okhttp/4.6.0',
