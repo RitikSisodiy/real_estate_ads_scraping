@@ -218,6 +218,8 @@ class PapScraper:
                         iniinterval[1] = iniinterval[0]+10
             print(f"total {finalresult} ads fetched")
     def close(self):
+        self.__del__()
+    def __del__(self):
         self.startThread = False
         self.driver.close()
         print("proxy thread is terminated")
