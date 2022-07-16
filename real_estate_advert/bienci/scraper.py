@@ -14,7 +14,7 @@ try:
 except:
     from .fetch import fetch,getUserAgent
     from .uploader import AsyncKafkaTopicProducer
-
+pageSize = 499
 kafkaTopicName = "bienici_data_v1"
 # define your filter here
 cpath =os.path.dirname(__file__) 
@@ -108,7 +108,7 @@ def genFilter(parameter,typ):
             finalresult +=totalresult
             retrydic = {iniinterval[0]:0}
             nooffilter +=1
-        elif maxresult-totalresult> 500:
+        elif maxresult-totalresult> pageSize:
             # print("elif 1")
             last = 10
             iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
@@ -147,7 +147,7 @@ async def main():
     # session.proxies.update({"http": "socks5://218.1.142.41:57114", "https": "socks5://218.1.142.41:57114"})
     print(lastpin, "this ", start)
     Filter = {
-    "size":500,
+    "size":pageSize,
     "from":0,
     "showAllModels":False,
     "filterType":"buy",
@@ -243,7 +243,7 @@ async def CreatelastupdateLog(session,typ):
     else:
         typ = "rent"
     param  = {
-    "size":500,
+    "size":pageSize,
     "from":0,
     "showAllModels":False,
     "propertyType":["house","flat"],
@@ -275,7 +275,7 @@ async def asyncUpdateBienci():
     producer = AsyncKafkaTopicProducer()
     await producer.statProducer()
     param  = {
-    "size":500,
+    "size":pageSize,
     "from":0,
     "showAllModels":False,
     "propertyType":["house","flat"],
@@ -328,7 +328,7 @@ def main_scraper(payload):
         res = UpdateBienci()
         return res
     param  = {
-    "size":500,
+    "size":pageSize,
     "from":0,
     "showAllModels":False,
     "filterType":"buy",
@@ -344,7 +344,7 @@ def main_scraper(payload):
 if __name__ == "__main__":
     # asyncio.run(main())
     param  = {
-    "size":500,
+    "size":pageSize,
     "from":0,
     "showAllModels":False,
     "filterType":"buy",
