@@ -57,7 +57,7 @@ class LeboncoinScraper:
         }
         if not self.cookies:
             self.cookies = {
-                "datadome":"..hyg-9PVuNALzOpFSUxCPaox7ar9MMLwEnG6Vn4A37QT8rL4GEljTgmZjQQjkXs8lzx2TZkA8jwd-~PLyAktL8qp89y0-QxApANpYLXDM916M2d7lqU7KeORP7op71U"
+                "datadome":".4AnnsHwd3_dptAmwe~eVbXnWLOY.FhsX1uxtXuc6GRl_~kB3ylSBQmMclERR.8dL-Wr9a0a._hz0X6mKOne8~Jx7JHr3wOw9Zc.9Na6edrexbfjTDgbGN5.Wi4gbwPs"
             }
         self.session = requests.session()
         self.parameter = parameter
