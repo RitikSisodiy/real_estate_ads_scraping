@@ -105,8 +105,8 @@ class LeboncoinScraper:
                     try:
                         key,val = cookie.split("=")
                         self.cookies[key] = val
-                        self.updateCookies()
                     except:pass
+                self.updateCookies()
             # data = response.read()
             data = gzip.decompress(response.read())
             # encoding = response.info().get_content_charset()
