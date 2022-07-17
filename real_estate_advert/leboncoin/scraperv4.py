@@ -37,7 +37,7 @@ class LeboncoinScraper:
             self.cookies  = {}
             with open("cookies.txt",'r') as file:
                 cookie = file.read()
-                rescookies = rescookies.split(";")
+                rescookies = cookie.split(";")
                 for cookie in rescookies:
                     try:
                         key,val = cookie.split("=")
