@@ -37,14 +37,14 @@ class LeboncoinScraper:
             self.cookies  = {}
             with open("cookies.txt",'r') as file:
                 cookie = file.read()
+                rescookies = cookie.split(";")
+                for cookie in rescookies:
+                    try:
+                        key,val = cookie.split("=")
+                        self.cookies[key] = val
+                    except:pass
         except:
-            cookie = '''__Secure-InstanceId=29ded759-24da-4a95-bd60-db96dbe34f46; ry_ry-l3b0nco_realytics=eyJpZCI6InJ5X0M2QzFEQjIzLTExOEQtNDU1Qi1BRTgyLTExMkMwMjFGQUJERSIsImNpZCI6bnVsbCwiZXhwIjoxNjgyOTM2ODMyMTAxLCJjcyI6bnVsbH0=; didomi_token=eyJ1c2VyX2lkIjoiMTgwN2YyOGUtZmIzMS02MWI1LWFjYmEtZTgzYjdhMGU2NjViIiwiY3JlYXRlZCI6IjIwMjItMDUtMDFUMTA6Mjc6MTMuNzI0WiIsInVwZGF0ZWQiOiIyMDIyLTA1LTAxVDEwOjI3OjEzLjcyNFoiLCJ2ZW5kb3JzIjp7ImVuYWJsZWQiOlsiZ29vZ2xlIiwiYzpsYmNmcmFuY2UiLCJjOnJldmxpZnRlci1jUnBNbnA1eCIsImM6ZGlkb21pIl19LCJwdXJwb3NlcyI6eyJlbmFibGVkIjpbInBlcnNvbm5hbGlzYXRpb25tYXJrZXRpbmciLCJwcml4IiwibWVzdXJlYXVkaWVuY2UiLCJleHBlcmllbmNldXRpbGlzYXRldXIiXX0sInZlbmRvcnNfbGkiOnsiZW5hYmxlZCI6WyJnb29nbGUiXX0sInZlcnNpb24iOjIsImFjIjoiRExXQThBRUlBSXdBV1FCLWdHRkFQeUFra0JKWUVBd0lrZ1NrQXR5QnhBRHB3SFZnUlVBam5CSk9DV3NGQ0lLTFFWemdzRkJiZUM0d0Z5d01CZ1lSQXhOQmxxQUEuRExXQTZBRUlBSXdBX1FEQ2dINUFTU0Frc0NBWUVTUUpTQVc1QTRnQjA0RHF3SXFBUnpna25CTFdDaEVGRm9LNXdXQ2d0dkJjWUM1WUdBd01JZ1ltZ3kxQSJ9; euconsent-v2=CPYSgcAPYSgcAAHABBENCMCgAPLAAHLAAAAAIAtB_G_dTyPi-f59YvtwYQ1P4VQnoyACjgaNgwwJiRLBMI0EgmAIKAHqAAACIBAEICJAAQBlCAHAAAAA4IEAASMMAAAAIBAIIgCAAEAAAmJICABZC5AAAQAQgkwAABQAgAICABMgSDAAAAAAFAAAAAgAAAAAAAAAAAAAQAAAAAAAAggCACYalxAA2JY4EkgaRAgARhAEAUAIAKKAIWCCAgJEAAgjAAUQAgAAAoAAAAAACAgBgAAAAEACEAAAADggEABAAgAAAAgAAgAAAAAQAAAYAAAAAABAAAAAAEABAAABQCAAAIAEABIEAAQAAAEAAAAAAAAAEAgAAAAAAAAAAAAAAACAGKAAwABBFgYABgACCLBAADAAEEWA.flgADlgAAAAA; _gcl_au=1.1.1982167932.1651400834; __gads=ID=cefe456db3055e6e:T=1651420637:S=ALNI_MZ9oNOM3vxXCvXKfYnk-jzhxS3pwQ; trc_cookie_storage=taboola%20global%3Auser-id=009a58ff-6ae9-489e-b24e-7dc7ab1a6b4e-tuct967d856; _hjSessionUser_2783207=eyJpZCI6IjNiNTFhYzgzLWQ3NmUtNTk3Ny05YTJhLTRiOWUxNGY3MmUyMiIsImNyZWF0ZWQiOjE2NTE0MDA4MzA1NDAsImV4aXN0aW5nIjp0cnVlfQ==; cto_bundle=OaOwNF9BNzNETWppNW1NczFmREs1eGNxNWZmOVRQQ1AxYUExbG5vS0tMbHBlWGxTenUlMkZHZm0wTWRJRUMyNVZvZkdlZUFVUlk3TWJvQVVTcEFZUSUyRjJqTjBMNlh2MFdkREw3JTJCQXhFcDlZNjlEM0R6ZExsWUV5QVZnakxVTWtqUmE3MjNpY2V4TkxSQlo2d2lqbHZRb21iWDhraUElM0QlM0Q; _pin_unauth=dWlkPVpERXhNbU00T0dFdFltTTFNQzAwWmpjd0xUZ3pPRFF0TmpBeFltTmtPVFF6TVRNdw; __gsas=ID=c6ae0d9301969e37:T=1652240022:S=ALNI_MaklqGvkMlDZE_oXmrs6DYUOtMcng; atidvisitor={"name":"atidvisitor","val":{"an":"NaN","ac":"","vrn":"-562498-"},"options":{"path":"/","session":34128000,"end":34128000}}; atauthority={"name":"atauthority","val":{"authority_name":"default","visitor_mode":"optin"},"options":{"end":"2023-07-11T06:54:20.418Z","path":"/"}}; utag_main=v_id:01807f28edc90021aae8dc69350c05073003d06b00978$_sn:20$_ss:0$_st:1654932260438$_pn:2;exp-session$ses_id:1654930458990;exp-session; __gpi=UID=0000051de22954b6:T=1651420637:RT=1654930463:S=ALNI_Maw2SB_W3CqrcGi9ra6gFaqbRFsgg; datadome=ri2_UGmLPYxVo~ukd3Mh3iyMKOaWW_V3SAZWvptS2WGJR8D4gAIbnRwgZ3vGj_vO2y-Tlz4mwB-6lxXCJtTo6xI~PTYXm8-DNQRAmxBpnwn~N_CE.fSW3v.~4LMY87E; include_in_experiment=true; _pbjs_userid_consent_data=1562905373006922; dblockS=1; dblockV=14datadome=.4klEEX07G7EIZ.Jgqjrr5c.2D2qUO.0C9cQie9oJX-wpD1COJDSAOtVoH.oeGe56xev9qEA0zVWxCROM6nI9xkyp5GyTSRDq1wqYfx~MdU7DGlju9uahi11fxxWVsD-; Max-Age=31536000; Domain=.leboncoin.fr; Path=/; Secure; SameSite=Lax'''
-        rescookies = cookie.split(";")
-        for cookie in rescookies:
-            try:
-                key,val = cookie.split("=")
-                self.cookies[key] = val
-            except:pass
+            cookie = ""
         self.headers = {
             "X-LBC-CC": "7",
             "Accept": "application/json,application/hal+json",
@@ -55,6 +55,10 @@ class LeboncoinScraper:
             "Connection": "Keep-Alive",
             "Accept-Encoding":"gzip",
         }
+        if not self.cookies:
+            self.cookies = {
+                "datadome":"..hyg-9PVuNALzOpFSUxCPaox7ar9MMLwEnG6Vn4A37QT8rL4GEljTgmZjQQjkXs8lzx2TZkA8jwd-~PLyAktL8qp89y0-QxApANpYLXDM916M2d7lqU7KeORP7op71U"
+            }
         self.session = requests.session()
         self.parameter = parameter
         self.updateCookies()
