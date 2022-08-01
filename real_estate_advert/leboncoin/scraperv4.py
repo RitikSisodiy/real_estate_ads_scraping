@@ -37,7 +37,7 @@ class LeboncoinScraper:
             self.cookies  = {}
             with open("cookies.txt",'r') as file:
                 cookie = file.read()
-                rescookies = cookie.split(";")
+                rescookies = rescookies.split(";")
                 for cookie in rescookies:
                     try:
                         key,val = cookie.split("=")
@@ -57,7 +57,9 @@ class LeboncoinScraper:
         }
         if not self.cookies:
             self.cookies = {
-                "datadome":"..hyg-9PVuNALzOpFSUxCPaox7ar9MMLwEnG6Vn4A37QT8rL4GEljTgmZjQQjkXs8lzx2TZkA8jwd-~PLyAktL8qp89y0-QxApANpYLXDM916M2d7lqU7KeORP7op71U"
+                "didomi_token":"eyJ1c2VyX2lkIjoiYzI3M2I5ZmEtODMyYi00ZTg4LWJmZmItMDFkNzBlNjlkYWQ5IiwidmVuZG9ycyI6eyJlbmFibGVkIjpbImM6cm9ja3lvdSIsImM6cHVib2NlYW4tYjZCSk10c2UiLCJjOnJ0YXJnZXQtR2VmTVZ5aUMiLCJjOnNjaGlic3RlZC1NUVBYYXF5aCIsImM6Z3JlZW5ob3VzZS1RS2JHQmtzNCIsImM6cmVhbHplaXRnLWI2S0NreHlWIiwiYzpsZW1vbWVkaWEtemJZaHAyUWMiLCJjOnlvcm1lZGlhcy1xbkJXaFF5UyIsImM6bWF5dHJpY3NnLUFTMzVZYW05IiwiYzpzYW5vbWEiLCJjOnJhZHZlcnRpcy1TSnBhMjVIOCIsImM6cXdlcnRpemUtemRuZ0UyaHgiLCJjOmxiY2ZyYW5jZSIsImM6cmV2bGlmdGVyLWNScE1ucDV4IiwiYzpyZXNlYXJjaC1ub3ciLCJjOndoZW5ldmVybS04Vllod2IyUCIsImM6YWRtb3Rpb24iLCJjOnRoaXJkcHJlc2UtU3NLd21IVksiLCJjOmFmZmlsaW5ldCIsImM6aW50b3dvd2luLXFhenQ1dEdpIiwiYzpkaWRvbWkiLCJjOmpxdWVyeSIsImM6YWthbWFpIiwiYzphYi10YXN0eSIsImM6emFub3giLCJjOm1vYmlmeSIsImM6YXQtaW50ZXJuZXQiLCJjOnB1cnBvc2VsYS0zdzRaZktLRCIsImM6aW5mZWN0aW91cy1tZWRpYSIsImM6bWF4Y2RuLWlVTXROcWNMIiwiYzpjbG91ZGZsYXJlIiwiYzppbnRpbWF0ZS1tZXJnZXIiLCJjOmFkdmFuc2UtSDZxYmF4blEiLCJjOnJldGFyZ2V0ZXItYmVhY29uIiwiYzp0dXJibyIsImM6Y2FibGF0b2xpLW5SbVZhd3AyIiwiYzp2aWFudC00N3gyWWhmNyIsImM6dnVibGUtY01DSlZ4NGUiLCJjOmJyYW5jaC1WMmRFQlJ4SiIsImM6c2ZyLU1kcGk3a2ZOIiwiYzphcHBzZmx5ZXItWXJQZEdGNjMiLCJjOmhhc29mZmVyLThZeU1UdFhpIiwiYzpsa3FkLWNVOVFtQjZXIiwiYzpzd2F2ZW4tTFlCcmltQVoiLCJjOmZvcnR2aXNpb24taWU2YlhUdzkiLCJjOmFkaW1vLVBoVVZtNkZFIiwiYzpvc2Nhcm9jb20tRlJjaE5kbkgiLCJjOnJldGVuY3ktQ0xlclppR0wiLCJjOmlsbHVtYXRlYy1DaHRFQjRlayIsImM6YWRsaWdodG5pLXRXWkdyZWhUIiwiYzpyb2NrZXJib3gtZlRNOEVKOVAiXSwiZGlzYWJsZWQiOltdfSwicHVycG9zZXMiOnsiZW5hYmxlZCI6WyJjb29raWVzIiwic2VsZWN0X2Jhc2ljX2FkcyIsImNyZWF0ZV9hZHNfcHJvZmlsZSIsIm1lYXN1cmVfYWRfcGVyZm9ybWFuY2UiLCJtYXJrZXRfcmVzZWFyY2giLCJpbXByb3ZlX3Byb2R1Y3RzIiwic2VsZWN0X3BlcnNvbmFsaXplZF9hZHMiLCJnZW9sb2NhdGlvbl9kYXRhIiwicGVyc29ubmFsaXNhdGlvbm1hcmtldGluZyIsInByaXgiLCJtZXN1cmVhdWRpZW5jZSIsImV4cGVyaWVuY2V1dGlsaXNhdGV1ciJdLCJkaXNhYmxlZCI6W119fQ==",
+                "__Secure-InstanceId":"b4ad7045-7ac5-4fab-a719-b0e745767de5",
+                "datadome":"DUrPEWLGpFrS6.M82beJMDZ.-0x_ICHsE9bD3unWWxWWJnRo-xrJ6EDipD6W~OxBM1rNVh~q~g3APLdjT3u7trYtTmB_~Z0QKMqxT5uhksvC02n~o3LWZo~vOudUau7"
             }
         self.session = requests.session()
         self.parameter = parameter
@@ -86,8 +88,7 @@ class LeboncoinScraper:
         jsondata = json.dumps(parameter)
         jsondataasbytes = jsondata.encode()  
         print(self.headers)
-        req = urllib.request.Request("https://api.leboncoin.fr/api/adfinder/v1/search",headers=self.headers)
-        req.add_header('Content-Length', len(jsondataasbytes))
+        req = urllib.request.Request("api.leboncoin.fr/finder/search",headers=self.headers)
         response = urllib.request.urlopen(req, jsondataasbytes)
         # response = opener.open(req, jsondataasbytes)
         # response = requests.post(self.searchurl, headers=self.headers, verify=False,json=parameter)
@@ -105,8 +106,8 @@ class LeboncoinScraper:
                     try:
                         key,val = cookie.split("=")
                         self.cookies[key] = val
+                        self.updateCookies()
                     except:pass
-                self.updateCookies()
             # data = response.read()
             data = gzip.decompress(response.read())
             # encoding = response.info().get_content_charset()
