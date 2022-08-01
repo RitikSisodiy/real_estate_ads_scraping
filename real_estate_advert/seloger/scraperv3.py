@@ -10,6 +10,7 @@ import random
 import urllib
 import os
 from .scrapProxy import ProxyScraper
+from .parser import ParseSeloger
 import traceback
 proxyurl = "http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225"
 import time
@@ -25,6 +26,7 @@ except:
     from .uploader import AsyncKafkaTopicProducer
 cpath =os.path.dirname(__file__)
 kafkaTopicName = "seloger_data_v1"
+commonTopicName = "common-ads-data_v1"
 class SelogerScraper:
     def __init__(self,paremeter,asyncsize=20) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
@@ -58,9 +60,7 @@ class SelogerScraper:
         self.proxies = self.readProxy()
     def updateProxyList(self,interval=300):
         if self.readProxy():time.sleep(interval)
-        while True:
-            if not self.startThread:
-                break
+        while self.startThread:
             self.getProxyList()
             time.sleep(interval)
     def proxyUpdateThread(self):
@@ -331,6 +331,8 @@ class SelogerScraper:
             print("there is no update available l")
     def save(self,adslist):
         self.producer.PushDataList(kafkaTopicName,adslist)
+        parseAdList = [ParseSeloger(ad) for ad in adslist]
+        self.producer.PushDataList(commonTopicName,parseAdList)
     def Crawlparam(self,param,allPage = True,first=False,save=True):
         print(param)
         if allPage:param['pageIndex'] = 1
