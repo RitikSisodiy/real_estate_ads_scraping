@@ -60,14 +60,17 @@ class SelogerScraper:
         self.proxies = self.readProxy()
     def updateProxyList(self,interval=300):
         if self.readProxy():time.sleep(interval)
-        while self.startThread:
+        start = True
+        while start:
             self.getProxyList()
-            time.sleep(interval)
+            time.sleep(interval) 
+            start = self.startThread 
     def proxyUpdateThread(self):
         print("proxy thread is started")
         self.startThread = True
         self.proc = threading.Thread(target=self.updateProxyList, args=())
         self.proc.start()
+    
     def __del__(self):
         self.startThread = False
         print("proxy thread is terminated")

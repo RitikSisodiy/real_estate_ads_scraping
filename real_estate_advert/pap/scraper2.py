@@ -23,7 +23,6 @@ class PapScraper:
         self.parameter = parameter
         self.apiurl = "https://api.pap.fr/app/annonces"
         self.proxy = proxy
-        self.proxyUpdateThread()
         SELOGER_SECURITY_URL = "https://www.pap.fr"
         headers = {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
@@ -33,6 +32,7 @@ class PapScraper:
             self.proxies = self.readProxy()
         except:
             self.getProxyList()
+        self.proxyUpdateThread()
         self.driver = self.getDriver()
         self.driver.proxy = self.getRandomProxy()
         self.driver.set_page_load_timeout(5)
@@ -58,9 +58,11 @@ class PapScraper:
         self.proc.start()
     def updateProxyList(self,interval=300):
         if self.readProxy():time.sleep(interval)
-        while self.startThread:
+        start = True
+        while start:
             self.getProxyList()
-            time.sleep(interval)     
+            time.sleep(interval) 
+            start = self.startThread    
     def getProxyList(self):
         self.prox.FetchNGetProxy()
         self.prox.save(cpath)
@@ -217,6 +219,7 @@ class PapScraper:
                     if iniinterval[0]>iniinterval[1]:
                         iniinterval[1] = iniinterval[0]+10
             print(f"total {finalresult} ads fetched")
+            return True
     def close(self):
         self.__del__()
     def __del__(self):
@@ -237,13 +240,13 @@ def pap_scraper(payload):
     else: typ = "vente"
     ob= PapScraper(dic,proxy=False)
     ob.Crawl(typ)
-    ob.close()
+    ob.__del__()
 def UpdatePap():
     types = ['location',"vente"]
     ob= PapScraper(dic,proxy=False)
     for typ in types:
         ob.CrawlLatestV2(typ)
-    ob.close()
+    ob.__del__()
 
 if __name__== "__main__":
     typ ="rental"
@@ -251,4 +254,4 @@ if __name__== "__main__":
     else: typ = "vente"
     ob= PapScraper(dic,proxy=False)
     ob.Crawl(typ)
-    ob.close()
+    ob.__del__()
