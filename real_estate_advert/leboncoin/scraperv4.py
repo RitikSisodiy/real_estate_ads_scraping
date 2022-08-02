@@ -8,12 +8,15 @@ import time
 import os
 import gzip
 import requests
+from .parser import ParseLeboncoin
 try:
     from uploader import AsyncKafkaTopicProducer
 except:
     from .uploader import AsyncKafkaTopicProducer
 cpath =os.path.dirname(__file__)
 producer = AsyncKafkaTopicProducer()
+KafkaTopicName = 'leboncoin-data_v2'
+commonAdsTopic= "common-ads-data_v1"
 def now_time_int():
     dateobj = datetime.now()
     total = int(dateobj.strftime('%S'))
@@ -149,7 +152,9 @@ class LeboncoinScraper:
         ads = res.get('ads')
         if not ads:
             return 0
-        producer.PushDataList('leboncoin-data_v2',ads)
+        producer.PushDataList(KafkaTopicName,ads)
+        parseAds = [ParseLeboncoin(ad) for ad in ads]
+        producer.PushDataList(commonAdsTopic,parseAds)
         # totalads = ''
         # for ad in ads:
         #     totalads+= json.dumps(ad)+"\n"
