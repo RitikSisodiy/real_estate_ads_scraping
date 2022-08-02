@@ -91,7 +91,7 @@ class LeboncoinScraper:
         jsondata = json.dumps(parameter)
         jsondataasbytes = jsondata.encode()  
         print(self.headers)
-        req = urllib.request.Request("api.leboncoin.fr/finder/search",headers=self.headers)
+        req = urllib.request.Request("https://api.leboncoin.fr/finder/search",headers=self.headers)
         response = urllib.request.urlopen(req, jsondataasbytes)
         # response = opener.open(req, jsondataasbytes)
         # response = requests.post(self.searchurl, headers=self.headers, verify=False,json=parameter)
