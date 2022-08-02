@@ -54,7 +54,6 @@ class LeboncoinScraper:
             "Accept": "application/json,application/hal+json",
             "User-Agent":"LBC;Android;11;sdk_gphone_x86;phone;8b1263fac1529be6;wifi;5.70.2;570200;0",
             "Content-Type":"application/json; charset=UTF-8",
-            "Content-Length":"433",
             "Host": "api.leboncoin.fr",
             "Connection": "Keep-Alive",
             "Accept-Encoding":"gzip",
