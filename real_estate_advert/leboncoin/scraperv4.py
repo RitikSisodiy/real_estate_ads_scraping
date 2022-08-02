@@ -1,4 +1,5 @@
 from base64 import encode
+from random import random
 from urllib import response
 import urllib.request
 from datetime import datetime
@@ -95,7 +96,7 @@ class LeboncoinScraper:
         response = urllib.request.urlopen(req, jsondataasbytes)
         # response = opener.open(req, jsondataasbytes)
         # response = requests.post(self.searchurl, headers=self.headers, verify=False,json=parameter)
-        time.sleep(5)
+        time.sleep(random.randint(5, 20))
         # print(response.status_code)
         # if response.status_code==200:
         print(response.getcode())
