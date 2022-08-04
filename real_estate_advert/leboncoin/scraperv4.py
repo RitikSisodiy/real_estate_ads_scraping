@@ -1,6 +1,5 @@
 import asyncio
-from base64 import encode
-from random import random
+import random
 from urllib import response
 import urllib.request
 import aiohttp
