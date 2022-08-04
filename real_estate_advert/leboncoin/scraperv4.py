@@ -91,6 +91,7 @@ class LeboncoinScraper:
         #     'Connection': 'Keep-Alive',
         #     # 'Accept-Encoding': 'gzip',
         # }
+        time.sleep(random.randint(5, 20))
         return asyncio.run(fetch("https://api.leboncoin.fr/finder/search",headers=self.headers,json=parameter))
         jsondata = json.dumps(parameter)
         jsondataasbytes = jsondata.encode()  
