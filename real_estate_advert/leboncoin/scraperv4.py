@@ -1,7 +1,9 @@
+import asyncio
 from base64 import encode
 from random import random
 from urllib import response
 import urllib.request
+import aiohttp
 from datetime import datetime
 import json
 from datetime import datetime
@@ -16,7 +18,7 @@ except:
     from .uploader import AsyncKafkaTopicProducer
 cpath =os.path.dirname(__file__)
 producer = AsyncKafkaTopicProducer()
-KafkaTopicName = 'leboncoin-data_v2'
+KafkaTopicName = 'leboncoin-data_v1'
 commonAdsTopic= "common-ads-data_v1"
 def now_time_int():
     dateobj = datetime.now()
@@ -35,6 +37,12 @@ def saveAds(res):
     if totalads:
         with open('out12.json','a') as file:
             file.write(totalads)
+async def fetch(url,**kwargs):
+    async with aiohttp.ClientSession() as session:
+        r = await session.post(url,**kwargs)
+        print(r)
+        if r.status==200:
+            return await r.json()
 class LeboncoinScraper:
     def __init__(self,parameter,outputfilename) -> None:
         try:
@@ -83,10 +91,13 @@ class LeboncoinScraper:
         #     'Connection': 'Keep-Alive',
         #     # 'Accept-Encoding': 'gzip',
         # }
-        
+        return asyncio.run(fetch("https://api.leboncoin.fr/finder/search",headers=self.headers,json=parameter))
         jsondata = json.dumps(parameter)
         jsondataasbytes = jsondata.encode()  
         print(self.headers)
+        proxy_support = urllib.request.ProxyHandler({"https":"socks4://127.0.0.1:9050"})
+        opener = urllib.request.build_opener(proxy_support)
+        urllib.request.install_opener(opener)
         req = urllib.request.Request("https://api.leboncoin.fr/finder/search",headers=self.headers)
         response = urllib.request.urlopen(req, jsondataasbytes)
         # response = opener.open(req, jsondataasbytes)
