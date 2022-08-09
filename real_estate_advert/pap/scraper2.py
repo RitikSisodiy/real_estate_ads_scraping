@@ -19,7 +19,7 @@ producer = AsyncKafkaTopicProducer()
 kafkaTopicName = "pap_data_v1"
 commanPattern ="common-ads-data_v1"
 cpath =os.path.dirname(__file__)
-chrome = getChromePath
+chrome = getChromePath()
 class PapScraper:
     def __init__(self,parameter,proxy=None) -> None:
         self.parameter = parameter
