@@ -6,6 +6,7 @@ import urllib
 import sys
 import traceback
 import requests
+from . import ParseBienici
 from requests_html import AsyncHTMLSession
 import random
 try:
@@ -16,6 +17,7 @@ except:
     from .uploader import AsyncKafkaTopicProducer
 pageSize = 499
 kafkaTopicName = "bienici_data_v1"
+commanTopicName = "common-ads-data_v1"
 # define your filter here
 cpath =os.path.dirname(__file__) 
 citys = open(f"{cpath}/finalcitys.json",'r').readlines()
@@ -178,6 +180,7 @@ async def main():
 async def saveRealstateAds(ads,**kwargs):
     producer = kwargs.get("producer")
     await producer.TriggerPushDataList(kafkaTopicName,ads)
+    await producer.TriggerPushDataList(commanTopicName,[ParseBienici(ad) for ad in ads])
     # allads = ''
     # for ad in ads:
     #     allads+= json.dumps(ad)+"\n"

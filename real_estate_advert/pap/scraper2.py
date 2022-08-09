@@ -6,6 +6,7 @@ from selenium.webdriver.chrome.options import Options
 from getChrome import getChromePath
 from urllib.parse import urlencode
 import json,os,time
+from  . import ParsePap
 from datetime import datetime
 # from .formater import formater
 try:from scrapProxy import ProxyScraper
@@ -16,6 +17,7 @@ from kafka_publisher import KafkaTopicProducer
 # producer = KafkaTopicProducer()
 producer = AsyncKafkaTopicProducer()
 kafkaTopicName = "pap_data_v1"
+commanPattern ="common-ads-data_v1"
 cpath =os.path.dirname(__file__)
 chrome = getChromePath
 class PapScraper:
@@ -180,7 +182,8 @@ class PapScraper:
             for ad in adsdata:
                 ad = ad.get("annonce")
                 # if ad:adlist.append(formater(ad))
-            producer.PushDataList("testpapupload",adlist)
+            producer.PushDataList(kafkaTopicName,adlist)
+            producer.PushDataList(commanPattern,[ParsePap(ad) for ad in adlist])
             final = ""
             # for da in adsdata:
             #     final+=json.dumps(da)+"\n"
