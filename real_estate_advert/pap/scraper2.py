@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.options import Options
 from getChrome import getChromePath
 from urllib.parse import urlencode
 import json,os,time
-from  . import ParsePap
+from  .parser import ParsePap
 from datetime import datetime
 # from .formater import formater
 try:from scrapProxy import ProxyScraper

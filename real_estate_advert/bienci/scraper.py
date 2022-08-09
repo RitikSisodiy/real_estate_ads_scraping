@@ -6,7 +6,7 @@ import urllib
 import sys
 import traceback
 import requests
-from . import ParseBienici
+from .parser import ParseBienici
 from requests_html import AsyncHTMLSession
 import random
 try:
