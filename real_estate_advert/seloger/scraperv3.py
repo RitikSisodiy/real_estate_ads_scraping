@@ -31,7 +31,8 @@ class SelogerScraper:
     def __init__(self,paremeter,asyncsize=20) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
         self.timeout = 5
-        self.proxyUpdateThread()
+        
+        
         SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security/register"
         headers = {
                     'User-Agent': 'okhttp/4.6.0',
@@ -40,8 +41,11 @@ class SelogerScraper:
         self.paremeter= paremeter
         try:
             self.proxies = self.readProxy()
+            if not self.proxies:
+                self.getProxyList()
         except:
             self.getProxyList()
+        self.proxyUpdateThread()
         self.asyncsize=asyncsize
         self.headers = {}
         self.proxy = {}
