@@ -181,7 +181,7 @@ class PapScraper:
             adlist = []
             for ad in adsdata:
                 ad = ad.get("annonce")
-                # if ad:adlist.append(formater(ad))
+                if ad:adlist.append(ad)
             producer.PushDataList(kafkaTopicName,adlist)
             producer.PushDataList(commanPattern,[ParsePap(ad) for ad in adlist])
             final = ""
