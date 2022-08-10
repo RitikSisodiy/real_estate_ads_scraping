@@ -11,7 +11,6 @@ def ParseBienici(data):
     "programme":"maison"
   }
   try:
-    data = data.get("_source")
     sdata = {
           "id":data.get("id"),
           "ads_type": data.get("adType"),

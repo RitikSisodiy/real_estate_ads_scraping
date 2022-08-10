@@ -239,6 +239,7 @@ def pap_scraper(payload):
     typ = payload.get("real_state_type")
     if typ == "Updated/Latest Ads":
         UpdatePap()
+        return 0
     if typ=="rental":typ="location"
     else: typ = "vente"
     ob= PapScraper(dic,proxy=False)
