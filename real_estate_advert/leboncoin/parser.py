@@ -15,7 +15,7 @@ def ParseLeboncoin(data):
             for d in featuresli:
                 features[d.get("key")] = d.get("value")
                 featuresVals[d.get("key")] = d.get("values")
-                assetlist.append(f"{d.get('value_label')} {', '.join(d.get('values'))}")
+                assetlist.append(f"{d.get('key')} {', '.join(d.get('value_label'))}")
         price= data.get("price_cents")/100 if data.get("price_cents") else 0
         location = data.get("location")
         seller = data.get('owner')
