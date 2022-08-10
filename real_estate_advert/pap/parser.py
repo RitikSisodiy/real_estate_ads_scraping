@@ -13,7 +13,7 @@ def ParsePap(data):
     try:
       pin = re.search(r"(\()([0-9]+)(\))",data.get("titre")).group(2)
     except: pin=""
-    title = f'{data.get("typebien")} {data.get("typebien") } {caracteristiquesdic.get("mA2")} {data.get("titre")}'.replace("  "," ")
+    title = f'{data.get("typebien")} {data.get("typebien") } {caracteristiquesdic.get("mA2")} {data.get("titre")}'.replace("  "," ").replace("None","")
     for key in caracteristiquesstr:
       key = key.split(" ")
       if "Terrain" in key:
