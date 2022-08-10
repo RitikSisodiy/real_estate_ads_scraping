@@ -49,7 +49,9 @@ def scrape_leboncoin_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
     try:leboncoinAdScraper(payload)
-    except Exception as e:print("Exception ================> ",e)
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ================> ",e)
     # Scraping task obj start here
     print("Scraper 3 ")
 
@@ -59,20 +61,26 @@ def scrape_leboncoin_task(payload):
 def update_leboncoin_ads():
     print("Task start ================> ")
     try:updateLebonCoin()
-    except Exception as e:print("Exception ================> ",e)
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ================> ",e)
     print("Task End ================> ")
 @celery_app.task(name="real estate fetch paruvedu latest ad")
 def update_paruvendu_ads():
     print("Task start ================> ")
     try:UpdateParuvendu()
-    except Exception as e:print("Exception ================> ",e)
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ================> ",e)
     print("Task End ================> ")
 
 @celery_app.task(name="real estate fetch pap latest ad")
 def update_pap_ads():
     print("Task start ================> ")
     try:UpdatePap()
-    except Exception as e:print("Exception ================> ",e)
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ================> ",e)
     print("Task End ================> ")
 @celery_app.task(name="real estate fetch Bienci latest ad")
 def update_Bienci_ads():
@@ -80,6 +88,7 @@ def update_Bienci_ads():
     try:
         data = UpdateBienci()
     except Exception as e:
+        traceback.print_exc()
         print("Exception ================> ",e)
         data = "exeption"
     print("Task End ================> ")
@@ -89,7 +98,9 @@ def update_Bienci_ads():
 def update_seloger_ads():
     print("Task start ================> ")
     try:selogerScraper({},update=True)
-    except Exception as e:print("Exception ================> ",e)
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ================> ",e)
     print("Task End ================> ")
 
 
@@ -121,6 +132,7 @@ def scrape_paruvendu_task(payload):
     try:
         ParuvenduScraper(payload)
     except Exception as e:
+        traceback.print_exc()
         print("Exception ==============>", e)
     # Scraping task obj start here
 
