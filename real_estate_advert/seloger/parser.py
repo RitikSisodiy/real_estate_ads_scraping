@@ -1,8 +1,7 @@
 from datetime import datetime
-import json
+import json,re
 import traceback
 from xml.dom import ValidationErr
-
 
 def ParseSeloger(data):
   now = datetime.now()
