@@ -217,19 +217,29 @@ class SelogerScraper:
         return flist
     def genFilter(self,adtype):
         dic = self.paremeter
+        page = 1
         if adtype=="sale":dic["query"]["transactionType"]=2
         else:dic["query"]["transactionType"] = 1
         totalresult =self.getTotalResult(dic)
         print(totalresult)
         acres = totalresult
         fetchedresult = 0
-        iniinterval = [0,500]
+        try:
+            with open(f"{cpath}prev{dic['query']['transactionType']}.json",'r') as file:
+                iniinterval = json.load(file)
+                page = iniinterval['page']
+                iniinterval = iniinterval['ini']
+                file = True
+        except Exception as e:
+            file = False
+            print("==========>",e)
+            iniinterval = [0,500]
         filterurllist = ''
         finalresult = 0
         maxresult = 50*200
         maxprice = self.getMaxPrize(dic)
-        minprice = self.getMinPrize(dic)
-        if minprice:
+        if not file:
+            minprice = self.getMinPrize(dic)
             iniinterval[0]=minprice
             iniinterval[1]=minprice+1
         print(maxprice)
@@ -242,7 +252,8 @@ class SelogerScraper:
                     print(f"condition is stisfy going to next interval {totalresult}")
                     last = 1
                     dic.update({"pageIndex":1})
-                    self.Crawlparam(dic)
+                    self.Crawlparam(dic,page=page)
+                    page=1
                     # filterurllist += json.dumps(dic) + "/n/:"
                     iniinterval[0] = iniinterval[1]+1
                     iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
@@ -340,9 +351,9 @@ class SelogerScraper:
         self.producer.PushDataList(kafkaTopicName,adslist)
         parseAdList = [ParseSeloger(ad) for ad in adslist]
         self.producer.PushDataList(commonTopicName,parseAdList)
-    def Crawlparam(self,param,allPage = True,first=False,save=True):
+    def Crawlparam(self,param,allPage = True,first=False,save=True,page=1):
         print(param)
-        if allPage:param['pageIndex'] = 1
+        if allPage:param['pageIndex'] = page
         # input()
         response = self.fetch(searchurl, method = "post", json=param,)
         if not response:
@@ -359,6 +370,16 @@ class SelogerScraper:
         print(len(ads),"_total ads+++++++++++++")
         if first:
             ads = ads[:1]
+        try:
+            data = {
+                    "ini":[param["query"]['minimumPrice'],param["query"]['maximumPrice']],
+                    "page": param["pageIndex"]
+                    }
+            with open(f'{cpath}prev{param["query"]["transactionType"]}.json','w') as file:
+                    file.write(json.dumps(data))
+        except Exception as e:
+            print("exception=========>",e) 
+            pass
         adlist = self.splitListInNpairs(ads,self.asyncsize)
         fetchedads = []
         for ads in adlist:
@@ -378,7 +399,7 @@ class SelogerScraper:
         if save:self.save(fetchedads)
         if allPage:
             totalpage = 200 if totalpage>200 else totalpage
-            for i in range(2,totalpage+1):
+            for i in range(int(param["pageIndex"])+1,totalpage+1):
                 param["pageIndex"] = i
                 self.Crawlparam(param,allPage=False)
         else:
@@ -393,10 +414,10 @@ def main_scraper(payload,update=False):
     adtype = payload.get("real_state_type")
     if adtype == "Updated/Latest Ads" or update:
         ob = SelogerScraper(data,asyncsize=5)
-        print("updateing latedst ads")
+        print(" latedst ads")
         ob.updateLatestAd("rental")
         ob.updateLatestAd("sale")
     else:
-        ob = SelogerScraper(data,asyncsize=10)
+        ob = SelogerScraper(data,asyncsize=1)
         ob.CrawlSeloger(adtype)
     ob.__del__()
