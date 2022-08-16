@@ -418,6 +418,6 @@ def main_scraper(payload,update=False):
         ob.updateLatestAd("rental")
         ob.updateLatestAd("sale")
     else:
-        ob = SelogerScraper(data,asyncsize=1)
+        ob = SelogerScraper(data,asyncsize=10)
         ob.CrawlSeloger(adtype)
     ob.__del__()
