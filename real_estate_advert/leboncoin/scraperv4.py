@@ -80,7 +80,7 @@ class LeboncoinScraper:
         self.asyncSession = aiohttp.ClientSession(connector=connector)
         self.asyncSession = aiohttp.ClientSession()
         self.parameter = parameter
-        self.updateCookies()
+        # self.updateCookies()
         self.autoSave = True
         self.outputfile = outputfilename
         self.searchurl = "https://api.leboncoin.fr/api/adfinder/v1/search"
