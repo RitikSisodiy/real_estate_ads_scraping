@@ -130,7 +130,7 @@ class LeboncoinScraper:
                     return await self.fetch(self,url,**kwargs)
         except Exception as e:
             print(e , "<============= exception")
-            await asyncio.wait(5)
+            await asyncio.sleep(5)
             return await self.fetch(self,url,**kwargs)
     async def changeSessionProxy(self):
         connector = ProxyConnector.from_url(self.getRandomProxy()["http"])
