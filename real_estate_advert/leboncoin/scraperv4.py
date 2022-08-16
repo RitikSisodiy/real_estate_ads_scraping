@@ -135,7 +135,7 @@ class LeboncoinScraper:
             return await self.fetch(url,**kwargs)
     async def changeSessionProxy(self):
         connector = ProxyConnector.from_url(self.getRandomProxy()["http"])
-        await self.session.close()
+        await self.asyncSession.close()
         self.asyncSession = aiohttp.ClientSession(connector=connector)
     def updateCookies(self):
         self.headers['Cookie'] = ";".join([(f"{key}={val}") for key,val in self.cookies.items()])
