@@ -251,7 +251,7 @@ class SelogerScraper:
                 if totalresult < maxresult and maxresult-totalresult<=3000:
                     print(f"condition is stisfy going to next interval {totalresult}")
                     last = 1
-                    dic.update({"pageIndex":1})
+                    dic.update({"pageIndex":page})
                     self.Crawlparam(dic,page=page)
                     page=1
                     # filterurllist += json.dumps(dic) + "/n/:"
