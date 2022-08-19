@@ -14,7 +14,8 @@ import requests
 
 from .scrapProxy import ProxyScraper
 from .parser import ParseLeboncoin
-from aiohttp_socks import ProxyType, ProxyConnector, ChainProxyConnector
+# from aiohttp_socks import ProxyType, ProxyConnector, ChainProxyConnector
+from aiosocksy.connector import ProxyConnector, ProxyClientRequest
 try:
     from uploader import AsyncKafkaTopicProducer
 except:
@@ -74,13 +75,13 @@ class LeboncoinScraper:
                 await self.waitgetProxyList()
         except:
             await self.waitgetProxyList()
+        self.proxy = await self.getRandomProxy()
         self.proxyUpdateThread()
         self.session = requests.session()
-        connector = ProxyConnector.from_url(self.getRandomProxy()["http"])
-        self.asyncSession = aiohttp.ClientSession(connector=connector)
+        # connector = ProxyConnector.from_url("http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225")
         self.asyncSession = aiohttp.ClientSession()
         self.parameter = parameter
-        # self.updateCookies()
+        self.updateCookies()
         self.autoSave = True
         self.outputfile = outputfilename
         self.searchurl = "https://api.leboncoin.fr/api/adfinder/v1/search"
@@ -100,9 +101,14 @@ class LeboncoinScraper:
         with open(f"{cpath}/working.txt","r") as file:
             proxies = file.readlines()
         return [json.loads(proxy) for proxy in proxies]
-    def getRandomProxy(self):
-        proxy = random.choice(self.proxies)
-        return proxy
+    async def getRandomProxy(self):
+        try:
+            proxy = random.choice(self.proxies)
+            return proxy
+        except:
+            await asyncio.sleep(30)
+            await self.waitgetProxyList() 
+            return await self.getRandomProxy()
     def __del__(self):
         self.startThread = False
         print("proxy thread is terminated")
@@ -121,22 +127,27 @@ class LeboncoinScraper:
         self.proc.start()
     async def fetch(self,url,**kwargs):
         try:
-            async with self.asyncSession.post(url,**kwargs) as r:
+            print(self.proxy)
+            async with self.asyncSession.post(url,proxy=self.proxy["http"],timeout=4,**kwargs) as r:
                 print(r)
                 if r.status==200:
                     return await r.json()
                 else:
-                    self.changeSessionProxy()
+                    await self.changeSessionProxy()
                     await asyncio.sleep(1)
                     return await self.fetch(url,**kwargs)
         except Exception as e:
             print(e , "<============= exception")
             await asyncio.sleep(5)
+            await self.changeSessionProxy()
             return await self.fetch(url,**kwargs)
     async def changeSessionProxy(self):
-        connector = ProxyConnector.from_url(self.getRandomProxy()["http"])
+        # connector = ProxyConnector.from_url("http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225")
+        # self.asyncSession.delete()
         await self.asyncSession.close()
-        self.asyncSession = aiohttp.ClientSession(connector=connector)
+        self.proxy = await self.getRandomProxy()
+        connector = ProxyConnector()
+        self.asyncSession = aiohttp.ClientSession(connector=connector, request_class=ProxyClientRequest)
     def updateCookies(self):
         self.headers['Cookie'] = ";".join([(f"{key}={val}") for key,val in self.cookies.items()])
         with open("cookies.txt",'w') as file:

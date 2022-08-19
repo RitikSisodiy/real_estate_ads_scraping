@@ -1,10 +1,11 @@
 from asyncio import protocols
 from dataclasses import dataclass
 import json
-import asyncio
+import asyncio,aiohttp
 from requests_html import AsyncHTMLSession
 import time
 import fake_useragent
+from aiosocksy.connector import ProxyConnector, ProxyClientRequest
 restext = []
 ua = fake_useragent.UserAgent(fallback='Your favorite Browser')
 def getUserAgent():
@@ -21,12 +22,20 @@ class ProxyScraper:
         for protocol in self.protocols: self.urls.append([f"https://api.proxyscrape.com/v2/?request=getproxies&protocol={protocol}&timeout=10000&country=all&ssl=all&anonymity=all",protocol])
         pass
     async def fetch(self,url,**kwargs):
-        session = AsyncHTMLSession()
-        headers = kwargs.get("headers")
-        if not headers:kwargs['headers']=self.headers
-        print(url)
-        res = await session.get(url,**kwargs)
-        return res
+        # session = AsyncHTMLSession()
+        connector = ProxyConnector()
+        async with aiohttp.ClientSession(connector=connector, request_class=ProxyClientRequest) as session: 
+            headers = kwargs.get("headers")
+            if not headers:kwargs['headers']=self.headers
+            print(url)
+            res = await session.get(url,ssl=False,**kwargs)
+            d =  res.status
+            print(d)
+            if kwargs.get("proxy"):
+                pass
+            else:
+                d = await res.read()
+            return d
 
     async def main(self):
         # self.session = AsyncHTMLSession()
@@ -38,8 +47,8 @@ class ProxyScraper:
         return self.proxylist
     async def getProxy(self,url,protocol):
         global restext
-        r = await self.fetch(url)
-        content = r.content
+        content = await self.fetch(url)
+        # content = await r.read()
         with open(f"{protocol}.txt",'wb') as file:
             file.write(content)
         data = content.decode("utf-8")
@@ -75,7 +84,7 @@ class ProxyScraper:
                 for d in data:
                     if d:
                         r, proxy = d
-                        if r.status_code == 200:
+                        if r == 200:
                             working += json.dumps(proxy)+"\n"
                             # restext.append(proxy)
                             self.proxylist.append(proxy)
@@ -95,7 +104,7 @@ class ProxyScraper:
             # async with session.get(,) as r:
             #     return r
             print(proxies)
-            r= await self.fetch(url, proxies=proxies, timeout=2)
+            r= await self.fetch(url, proxy=proxies["http"], timeout=2)
             print(r)
             return r,proxies
         except:
@@ -108,11 +117,14 @@ def getProxyasstring():
     return restext
 if __name__ == '__main__':
     stat = time.time()
-    SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security/register"
+    # SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security/register"
+    LEBONCOIN_CHECK_URL = "https://api.leboncoin.fr/finder/classified/2130999715"
     headers = {
-                'User-Agent': 'okhttp/4.6.0',
+            'Accept-Language': "en-US,en;q=0.8,fr;q=0.6",
+            'Accept-Encoding': "*",
+            'User-Agent': "LBC;Android;11;sdk_gphone_x86;phone;8b1263fac1529be6;wifi;5.70.2;570200;0"
             }
-    ob = ProxyScraper(SELOGER_SECURITY_URL,headers)
+    ob = ProxyScraper(LEBONCOIN_CHECK_URL,headers)
     ob.FetchNGetProxy()
     ob.save()
     # asyncio.run(ob.main())
