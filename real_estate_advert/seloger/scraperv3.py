@@ -252,6 +252,8 @@ class SelogerScraper:
                     print(f"condition is stisfy going to next interval {totalresult}")
                     last = 1
                     dic.update({"pageIndex":page})
+                    print(page,dic)
+                    input()
                     self.Crawlparam(dic,page=page)
                     page=1
                     # filterurllist += json.dumps(dic) + "/n/:"
@@ -269,6 +271,8 @@ class SelogerScraper:
                 print(totalresult,"-",maxresult)
                 print(iniinterval)
             self.Crawlparam(dic)
+            if os.path.isfile(f'{cpath}prev{dic["query"]["transactionType"]}.json','w'):
+                os.remove(f'{cpath}prev{dic["query"]["transactionType"]}.json','w')
             # filterurllist+=json.dumps(dic)
             finalresult +=totalresult
         print(f"{finalresult},{acres}")
