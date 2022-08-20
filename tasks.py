@@ -60,7 +60,9 @@ def scrape_leboncoin_task(payload):
 @celery_app.task(name="real estate fetch leboncoin latest ad")
 def update_leboncoin_ads():
     print("Task start ================> ")
-    try:updateLebonCoin()
+    try:leboncoinAdScraper({
+        "real_state_type":"Updated/Latest Ads"
+    })
     except Exception as e:
         traceback.print_exc()
         print("Exception ================> ",e)
