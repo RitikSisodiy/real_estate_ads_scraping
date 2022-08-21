@@ -244,13 +244,13 @@ def pap_scraper(payload):
     else: typ = "vente"
     ob= PapScraper(dic,proxy=False)
     ob.Crawl(typ)
-    ob.__del__()
+    del ob
 def UpdatePap():
     types = ['location',"vente"]
     ob= PapScraper(dic,proxy=False)
     for typ in types:
         ob.CrawlLatestV2(typ)
-    ob.__del__()
+    del ob
 
 if __name__== "__main__":
     typ ="rental"
@@ -258,4 +258,4 @@ if __name__== "__main__":
     else: typ = "vente"
     ob= PapScraper(dic,proxy=False)
     ob.Crawl(typ)
-    ob.__del__()
+    del ob

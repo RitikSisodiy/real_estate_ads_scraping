@@ -10,6 +10,14 @@ class RealStateParameter(BaseModel):
     city: Optional[str] = ''
     rooms: Optional[int] = 0
 
+class RealStateAdId(BaseModel):
+    id: Optional[str]=""
+class RealPortals(str,Enum):
+    Seloger = "Seloger"
+    Leboncoin = "Leboncoin"
+    Bienci = "Bienci"
+    Paruvendu = "Paruvendu"
+    Pap = "Pap"
 
 class VendorType(str, Enum):
     individuals = "individuals"

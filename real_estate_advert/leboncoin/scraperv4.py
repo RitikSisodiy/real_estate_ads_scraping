@@ -43,7 +43,9 @@ def saveAds(res):
             file.write(totalads)
 
 class LeboncoinScraper:
-    async def init(self,parameter,outputfilename) -> None:
+    def __init__(self) -> None:
+        pass
+    async def init(self,parameter=None,outputfilename=None) -> None:
         try:
             self.cookies  = {}
             with open("cookies.txt",'r') as file:
@@ -85,6 +87,7 @@ class LeboncoinScraper:
         self.autoSave = True
         self.outputfile = outputfilename
         self.searchurl = "https://api.leboncoin.fr/api/adfinder/v1/search"
+        self.singleUrl = "https://api.leboncoin.fr/finder/classified"
     def updateProxyList(self,interval=300):
         if self.readProxy():time.sleep(interval)
         start = True
@@ -125,22 +128,29 @@ class LeboncoinScraper:
         self.startThread = True
         self.proc = threading.Thread(target=self.updateProxyList, args=())
         self.proc.start()
-    async def fetch(self,url,**kwargs):
+    async def fetch(self,url,method = "POST",**kwargs):
         try:
             print(self.proxy)
-            async with self.asyncSession.post(url,proxy=self.proxy["http"],timeout=4,**kwargs) as r:
+            if method == "GET":
+                async with self.asyncSession.get(url,proxy=self.proxy["http"],timeout=5,**kwargs) as r:
+                    if r.status==200:
+                        return True
+                    if r.status == 410 or r.status ==404:
+                        return False
+                    return await self.fetch(url,method=method,**kwargs)
+            async with self.asyncSession.post(url,proxy=self.proxy["http"],timeout=5,**kwargs) as r:
                 print(r)
                 if r.status==200:
                     return await r.json()
                 else:
                     await self.changeSessionProxy()
                     await asyncio.sleep(1)
-                    return await self.fetch(url,**kwargs)
+                    return await self.fetch(url,method=method,**kwargs)
         except Exception as e:
             print(e , "<============= exception")
             await asyncio.sleep(5)
             await self.changeSessionProxy()
-            return await self.fetch(url,**kwargs)
+            return await self.fetch(url,method=method,**kwargs)
     async def changeSessionProxy(self):
         # connector = ProxyConnector.from_url("http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225")
         # self.asyncSession.delete()
@@ -152,6 +162,9 @@ class LeboncoinScraper:
         self.headers['Cookie'] = ";".join([(f"{key}={val}") for key,val in self.cookies.items()])
         with open("cookies.txt",'w') as file:
             file.write(self.headers['Cookie'])
+    async def CheckIfAdIdLive(self,id):
+        res = await self.fetch(f"{self.singleUrl}/{id}",headers= self.headers,method = "GET")
+        return res
     async def CrawlLeboncoin(self):
         parameter= self.parameter
         # headers = {
@@ -301,13 +314,24 @@ async def updateLebonCoin():
     await ob.init(data,"newout1")
     # ob.IntCrawling()
     await ob.UpdataAds()
+    del ob
+async def CheckId(id):
+    ob = LeboncoinScraper()
+    await ob.init()
+    status = await ob.CheckIfAdIdLive(id)
+    del ob
+    return status
 async def ScrapLebonCoin():
     data = json.load(open(f'{cpath}/filter.json','r'))
     ob = LeboncoinScraper()
     await ob.init(data,"newout1")
     await ob.IntCrawling()
+    del ob
 def leboncoinAdScraper(payload):
     typ = payload.get("real_state_type")
+    if not typ:
+        id = payload.get("id")
+        return asyncio.run(CheckId(id))
     if typ == "Updated/Latest Ads":
         asyncio.run(updateLebonCoin())
     else:
