@@ -62,19 +62,29 @@ class SelogerScraper:
         self.prox.FetchNGetProxy()
         self.prox.save(cpath)
         self.proxies = self.readProxy()
-    def updateProxyList(self,interval=300):
-        if self.readProxy():time.sleep(interval)
-        start = True
-        while start:
-            self.getProxyList()
-            time.sleep(interval) 
-            start = self.startThread 
     def proxyUpdateThread(self):
         print("proxy thread is started")
         self.startThread = True
         self.proc = threading.Thread(target=self.updateProxyList, args=())
+        self.proc.daemon = True
         self.proc.start()
     
+    def threadsleep(self,t):
+        while(t>0):
+            if not self.startThread:
+                return True
+            time.sleep(1)
+            t-=1
+        return False
+    def updateProxyList(self,interval=300):
+        if self.readProxy():time.sleep(interval)
+        while self.startThread:
+            self.getProxyList()
+            b = self.threadsleep(10)
+            if b:
+                break
+        print("thread is stopped")
+
     def __del__(self):
         self.startThread = False
         print("proxy thread is terminated")
@@ -424,4 +434,4 @@ def main_scraper(payload,update=False):
     else:
         ob = SelogerScraper(data,asyncsize=10)
         ob.CrawlSeloger(adtype)
-    del ob
+    ob.__del__()

@@ -57,14 +57,23 @@ class PapScraper:
         print("proxy thread is started")
         self.startThread = True
         self.proc = threading.Thread(target=self.updateProxyList, args=())
+        self.proc.daemon = True
         self.proc.start()
+    def threadsleep(self,t):
+        while(t>0):
+            if not self.startThread:
+                return True
+            time.sleep(1)
+            t-=1
+        return False
     def updateProxyList(self,interval=300):
         if self.readProxy():time.sleep(interval)
-        start = True
-        while start:
+        while self.startThread:
             self.getProxyList()
-            time.sleep(interval) 
-            start = self.startThread    
+            b = self.threadsleep(10)
+            if b:
+                break
+        print("thread is stopped")
     def getProxyList(self):
         self.prox.FetchNGetProxy()
         self.prox.save(cpath)
@@ -244,13 +253,13 @@ def pap_scraper(payload):
     else: typ = "vente"
     ob= PapScraper(dic,proxy=False)
     ob.Crawl(typ)
-    del ob
+    ob.__del__()
 def UpdatePap():
     types = ['location',"vente"]
     ob= PapScraper(dic,proxy=False)
     for typ in types:
         ob.CrawlLatestV2(typ)
-    del ob
+    ob.__del__()
 
 if __name__== "__main__":
     typ ="rental"
@@ -258,4 +267,4 @@ if __name__== "__main__":
     else: typ = "vente"
     ob= PapScraper(dic,proxy=False)
     ob.Crawl(typ)
-    del ob
+    ob.__del__()

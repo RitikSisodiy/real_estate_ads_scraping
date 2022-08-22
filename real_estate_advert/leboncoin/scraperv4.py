@@ -88,17 +88,26 @@ class LeboncoinScraper:
         self.outputfile = outputfilename
         self.searchurl = "https://api.leboncoin.fr/api/adfinder/v1/search"
         self.singleUrl = "https://api.leboncoin.fr/finder/classified"
+    def threadsleep(self,t):
+        while(t>0):
+            if not self.startThread:
+                return True
+            time.sleep(1)
+            t-=1
+        return False
     def updateProxyList(self,interval=300):
         if self.readProxy():time.sleep(interval)
-        start = True
-        while start:
+        while self.startThread:
             self.getProxyList()
-            time.sleep(interval) 
-            start = self.startThread 
+            b = self.threadsleep(10)
+            if b:
+                break
+        print("thread is stopped")
     def proxyUpdateThread(self):
         print("proxy thread is started")
         self.startThread = True
         self.proc = threading.Thread(target=self.updateProxyList, args=())
+        self.proc.daemon = True
         self.proc.start()
     def readProxy(self):
         with open(f"{cpath}/working.txt","r") as file:
@@ -127,6 +136,7 @@ class LeboncoinScraper:
         print("proxy thread is started")
         self.startThread = True
         self.proc = threading.Thread(target=self.updateProxyList, args=())
+        self.proc.daemon = True
         self.proc.start()
     async def fetch(self,url,method = "POST",**kwargs):
         try:
@@ -314,19 +324,19 @@ async def updateLebonCoin():
     await ob.init(data,"newout1")
     # ob.IntCrawling()
     await ob.UpdataAds()
-    del ob
+    ob.__del__()
 async def CheckId(id):
     ob = LeboncoinScraper()
     await ob.init()
     status = await ob.CheckIfAdIdLive(id)
-    del ob
+    ob.__del__()
     return status
 async def ScrapLebonCoin():
     data = json.load(open(f'{cpath}/filter.json','r'))
     ob = LeboncoinScraper()
     await ob.init(data,"newout1")
     await ob.IntCrawling()
-    del ob
+    ob.__del__()
 def leboncoinAdScraper(payload):
     typ = payload.get("real_state_type")
     if not typ:
