@@ -26,7 +26,7 @@ def ParseParuvendu(data):
       "ads_type": adtyp,
       "price": float(data.get("price").replace(" ",'')),
       "original_price": float(data.get("price").replace(" ",'')),
-      "area": data.get("title")[data.get("title").rfind("- ")+2:],
+      "area": data.get("title")[data.get("title").rfind("- ")+2:].replace("m²","").strip(),
       "city": data.get("subtitle")[:data.get("subtitle").find(" (")],     # "Poitiers (86000)"
       "declared_habitable_surface": detailV.get("SUR"),
       "declared_land_surface": detailT.get("9999999_125"),
