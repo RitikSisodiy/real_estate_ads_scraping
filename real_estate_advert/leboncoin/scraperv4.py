@@ -1,6 +1,7 @@
 import asyncio
 import random
 import threading
+import traceback
 from urllib import response
 import urllib.request
 import aiohttp
@@ -45,7 +46,7 @@ def saveAds(res):
 class LeboncoinScraper:
     def __init__(self) -> None:
         pass
-    async def init(self,parameter=None,outputfilename=None) -> None:
+    async def init(self,parameter=None,outputfilename=None,proxyThread=True) -> None:
         try:
             self.cookies  = {}
             with open("cookies.txt",'r') as file:
@@ -78,7 +79,7 @@ class LeboncoinScraper:
         except:
             await self.waitgetProxyList()
         self.proxy = await self.getRandomProxy()
-        self.proxyUpdateThread()
+        if proxyThread:self.proxyUpdateThread()
         self.session = requests.session()
         # connector = ProxyConnector.from_url("http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225")
         self.asyncSession = aiohttp.ClientSession()
@@ -142,13 +143,13 @@ class LeboncoinScraper:
         try:
             print(self.proxy)
             if method == "GET":
-                async with self.asyncSession.get(url,proxy=self.proxy["http"],timeout=5,**kwargs) as r:
+                async with self.asyncSession.get(url,proxy=self.proxy["http"],timeout=15,**kwargs) as r:
                     if r.status==200:
                         return True
                     if r.status == 410 or r.status ==404:
                         return False
                     return await self.fetch(url,method=method,**kwargs)
-            async with self.asyncSession.post(url,proxy=self.proxy["http"],timeout=5,**kwargs) as r:
+            async with self.asyncSession.post(url,proxy=self.proxy["http"],timeout=15,**kwargs) as r:
                 print(r)
                 if r.status==200:
                     return await r.json()
@@ -157,6 +158,7 @@ class LeboncoinScraper:
                     await asyncio.sleep(1)
                     return await self.fetch(url,method=method,**kwargs)
         except Exception as e:
+            traceback.print_exc()
             print(e , "<============= exception")
             await asyncio.sleep(5)
             await self.changeSessionProxy()
@@ -327,7 +329,7 @@ async def updateLebonCoin():
     ob.__del__()
 async def CheckId(id):
     ob = LeboncoinScraper()
-    await ob.init()
+    await ob.init(proxyThread=False)
     status = await ob.CheckIfAdIdLive(id)
     ob.__del__()
     return status

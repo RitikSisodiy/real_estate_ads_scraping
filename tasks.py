@@ -9,6 +9,7 @@ from real_estate_advert.pap.scraper2 import UpdatePap
 from real_estate_advert.bienci.scraper import main_scraper as bienciScraper
 from real_estate_advert.bienci.scraper import UpdateBienci
 from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
+from real_estate_advert.logicImmo.logicImmo import main_scraper as LogicImmoScraper
 
 from celery import Celery
 from celery.schedules import crontab
@@ -44,6 +45,21 @@ def scrap_bienci_task(payload):
     # Scraping task obj start here
     print("Task End ================> ")
     return data
+@celery_app.task(name="real estate logic-immo")
+def scrap_logicimmo_task(payload):
+    print("Task start ================> ")
+    print("payload : ", payload)
+    try:
+        data = LogicImmoScraper(payload)
+    
+    except Exception as e:
+        print(traceback.format_exc())
+        print("Exception ================> ",e)
+        data= "exception"
+    # Scraping task obj start here
+    print("Task End ================> ")
+    return data
+
 @celery_app.task(name="real estate leboncoin")
 def scrape_leboncoin_task(payload):
     print("Task start ================> ")
@@ -156,5 +172,5 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(20*60, update_pap_ads.s(), name='update pap ads every 20 minuts')
     # Calls update_seloger_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_seloger_ads.s(), name='update seloger ads every 20 minuts')
-    # Calls update_seloger_ads in every 20 minutes
+    # Calls update_Bienci_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_Bienci_ads.s(), name='update Bienci ads every 20 minuts')
