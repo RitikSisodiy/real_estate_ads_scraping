@@ -100,7 +100,7 @@ class LeboncoinScraper:
         if self.readProxy():time.sleep(interval)
         while self.startThread:
             self.getProxyList()
-            b = self.threadsleep(10)
+            b = self.threadsleep(interval)
             if b:
                 break
         print("thread is stopped")
@@ -124,7 +124,7 @@ class LeboncoinScraper:
             return await self.getRandomProxy()
     def __del__(self):
         self.startThread = False
-        print("proxy thread is terminated")
+        # print("proxy thread is terminated")
     def getProxyList(self):
         self.prox.FetchNGetProxy()
         self.prox.save(cpath)
