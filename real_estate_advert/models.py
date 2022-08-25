@@ -18,6 +18,7 @@ class RealPortals(str,Enum):
     Bienci = "Bienci"
     Paruvendu = "Paruvendu"
     Pap = "Pap"
+    Logicimmo = "Logicimmo"
 
 class VendorType(str, Enum):
     individuals = "individuals"
