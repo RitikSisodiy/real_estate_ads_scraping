@@ -71,7 +71,7 @@ def ParseLeboncoin(data):
             "is_new": bool(features.get("immo_sell_type")),
             "website": "leboncoin.com",
             "property_type": features.get("real_estate_type"),
-            "published_at": data.get("first_publication_date"),
+            "published_at": getTimeStamp(data.get("first_publication_date")),
             "created_at": getTimeStamp(data.get("index_date")),
             "others": {
             "assets":assetlist,
