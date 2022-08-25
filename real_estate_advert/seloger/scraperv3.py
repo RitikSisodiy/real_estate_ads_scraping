@@ -80,7 +80,7 @@ class SelogerScraper:
         if self.readProxy():time.sleep(interval)
         while self.startThread:
             self.getProxyList()
-            b = self.threadsleep(10)
+            b = self.threadsleep(interval)
             if b:
                 break
         print("thread is stopped")
