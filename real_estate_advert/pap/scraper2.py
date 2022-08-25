@@ -117,6 +117,7 @@ class PapScraper:
             parsed_json = json.loads(content)
         except Exception as e:
             print("exeptin", e)
+            self.driver.delete_all_cookies()
             self.driver.proxy = self.getRandomProxy()
             return self.fetchJson(url)
         return parsed_json
