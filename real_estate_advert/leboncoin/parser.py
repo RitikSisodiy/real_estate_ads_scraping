@@ -2,7 +2,10 @@ import json
 import traceback
 from xml.dom import ValidationErr
 from datetime import datetime
-
+def getTimeStamp(strtime):
+    formate = '%Y-%m-%d %H:%M:%S'
+    t = datetime.strptime(strtime,formate)
+    return t.timestamp()
 def ParseLeboncoin(data):
     now = datetime.now()
     # pinRegx = r'(\d{5}\-?\d{0,4})'
@@ -69,7 +72,7 @@ def ParseLeboncoin(data):
             "website": "leboncoin.com",
             "property_type": features.get("real_estate_type"),
             "published_at": data.get("first_publication_date"),
-            "created_at": data.get("index_date"),
+            "created_at": getTimeStamp(data.get("index_date")),
             "others": {
             "assets":assetlist,
             "ges":features.get("ges"),        
