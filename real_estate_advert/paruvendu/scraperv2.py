@@ -81,6 +81,20 @@ async def parstItems(session,param,page=None,**kwargs):
     # data = json.load(res)
     return data
     await savedata(data,**kwargs)
+async def CheckId(id):
+    headers = {
+        "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36"
+    }
+    async with aiohttp.ClientSession() as session:
+        furl  = f"https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list?paId={id}&showdetail=1&mobId=dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd&key=lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh"
+        # print(furl)
+        r = await fetch(session,furl,headers=headers)
+        # print(r)
+        data = r
+        print(len(data["feed"]["row"]))
+        if data and len(data["feed"]["row"])==1:
+            return True
+        else:return False
 async def main(adsType = ""):
     # catid info
     # IVH00000 is for  Vente immobilier 
