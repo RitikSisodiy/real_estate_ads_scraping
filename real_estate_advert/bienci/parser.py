@@ -4,6 +4,11 @@ def getFieldLlstStartWith(start,datadic):
     if start in key:
       res[key] = val
   return res
+def getTimeStamp(strtime):
+    formate = '%Y-%m-%dT%H:%M:%S.%fZ'
+    #1970-01-01T00:00:00.000Z
+    t = datetime.strptime(strtime,formate)
+    return t.timestamp()
 def ParseBienici(data):
   propername = {
     "flat":"appartement",
@@ -51,7 +56,7 @@ def ParseBienici(data):
           "website": "bienici.com",
           "property_type": propername.get(data.get("propertyType")),
           "published_at": data.get("publicationDate"),
-          "created_at": data.get("modificationDate"),
+          "created_at": getTimeStamp(data.get("modificationDate")),
           "others":{
             "assets":[],
             **getFieldLlstStartWith("has",data),
