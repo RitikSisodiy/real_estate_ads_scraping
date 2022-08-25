@@ -2,7 +2,11 @@ from datetime import datetime
 import json,re
 import traceback
 from xml.dom import ValidationErr
-
+def getTimeStamp(strtime):
+        formate = '%Y-%m-%dT%H:%M:%S'
+        # 2022-06-19T05:26:55
+        t = datetime.strptime(strtime,formate)
+        return t.timestamp()
 def ParseSeloger(data):
   now = datetime.now()
   assetlist = [d.get("label") for d in data.get("features")]
@@ -70,7 +74,7 @@ def ParseSeloger(data):
         "website": "seloger.com",
         "property_type": re.search(r"(annonces/[a-z-]*)/([a-z]*)",data.get("permalink")).group(2),
         "published_at": data.get("lastModified"),
-        "created_at": data.get("created"),
+        "created_at": getTimeStamp(data.get("created")),
         "others": {
           "assets":assetlist,
           "ges":data.get("energyBalance")["ges"].get("category"),        
