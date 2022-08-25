@@ -1,4 +1,5 @@
 from real_estate_advert.leboncoin.scraperv4 import CheckId as LebonCoinAdStatus
+from real_estate_advert.logicImmo.logicImmo import CheckId as LogicImmoAdStatus
 from real_estate_advert.models import RealStateParameter, VendorType, RealStateType, PropertyType,RealStateAdId,RealPortals
 from typing import Optional
 from fastapi import APIRouter
@@ -291,10 +292,12 @@ async def scrape_bienci(real_args: RealStateAdId, Portals:RealPortals):
                 "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "exception": "Please Select Ads Portal"}
     payload.update({"Portal": Portals})
+    id = payload.get("id")
     if payload['Portal']=="Leboncoin":
-        id = payload.get("id")
         AdStatus = await LebonCoinAdStatus(id) 
-        if AdStatus:return{"status":200,"found":True}
-        else:return {"status":410,"found":False}
+    if payload["Portal"] == "Logicimmo":
+        AdStatus = LogicImmoAdStatus(id) 
+    if AdStatus:return{"status":200,"found":True}
+    else:return {"status":410,"found":False}
     return {"message": "scraping request is successfully added to web scrapping server",
                     "status": status.HTTP_200_OK}

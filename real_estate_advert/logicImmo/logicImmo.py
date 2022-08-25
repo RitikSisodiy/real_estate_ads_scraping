@@ -27,8 +27,8 @@ except:
 cpath =os.path.dirname(__file__)
 kafkaTopicName = "logicImmo_data_v1"
 commonTopicName = "common-ads-data_v1"
-class SelogerScraper:
-    def __init__(self,paremeter,asyncsize=20) -> None:
+class LogicImmoScraper:
+    def __init__(self,paremeter,asyncsize=20,proxy = None) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
         self.timeout = 5
         
@@ -39,13 +39,15 @@ class SelogerScraper:
                 }
         self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
         self.paremeter= paremeter
-        try:
-            self.proxies = self.readProxy()
-            if not self.proxies:
+        if not proxy:
+            try:
+                self.proxies = self.readProxy()
+                if not self.proxies:
+                    self.getProxyList()
+            except:
                 self.getProxyList()
-        except:
-            self.getProxyList()
-        self.proxyUpdateThread()
+            self.proxyUpdateThread()
+        else:self.proxies = [proxy]
         self.asyncsize=asyncsize
         self.headers = {}
         self.proxy = {}
@@ -142,7 +144,7 @@ class SelogerScraper:
                 retry+=1
                 return self.fetch(url,method=method,sid=sid,retry=retry,**kwargs)
             else:return None
-        if r.status_code!=200:
+        if r.status_code not in [200,404]:
             print(url)
             print(method)
             print(kwargs)
@@ -309,6 +311,10 @@ class SelogerScraper:
             t = datetime.strptime(strtime,formate)
         except:return strtime
         return t.timestamp()
+    def getAdStatus(self,id):
+        r = self.fetch(f"{ViewAddUrl}{id}","get")
+        print(r)
+        return r.status_code
     def updateLatestAd(self,adtype):
         updates = self.getLastUpdate().get(adtype)
         if updates:
@@ -383,15 +389,22 @@ class SelogerScraper:
         # filterlist= self.genFilter(adtype)
         # for Filter in filterlist:
         #     self.Crawlparam(Filter)
+data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
+def CheckId(id):
+    ob = LogicImmoScraper(data,asyncsize=1,proxy={"https":"http://sp30786500:Legals786@eu.dc.smartproxy.com:20000/"})
+    r= ob.getAdStatus(id)
+    ob.__del__()
+    if r==200:found = True
+    else:found = False
+    return found
 def main_scraper(payload,update=False):
-    data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
     adtype = payload.get("real_state_type")
     if adtype == "Updated/Latest Ads" or update:
-        ob = SelogerScraper(data,asyncsize=5)
+        ob = LogicImmoScraper(data,asyncsize=5)
         print("updateing latedst ads")
         ob.updateLatestAd("rental")
         ob.updateLatestAd("sale")
     else:
-        ob = SelogerScraper(data,asyncsize=1)
+        ob = LogicImmoScraper(data,asyncsize=1)
         ob.CrawlSeloger(adtype)
     ob.__del__()
