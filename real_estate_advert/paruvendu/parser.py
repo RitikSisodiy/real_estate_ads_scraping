@@ -1,5 +1,10 @@
 import json,re
 from datetime import datetime
+def getTimeStamp(strtime,formate=None):
+  if not formate:
+    formate = '%Y-%m-%d %H:%M:%S'
+  t = datetime.strptime(strtime,formate)
+  return t.timestamp()
 def ParseParuvendu(data):
   now = datetime.now()
   try:
@@ -68,7 +73,7 @@ def ParseParuvendu(data):
       "website": "paruvendu.fr",
       "property_type": detailT.get("_R2").lower(),
       "published_at": data.get("datePublish"),
-      "created_at": data.get("datePublish"),
+      "created_at": getTimeStamp(data.get("datePublish"),"%d/%m/%Y"),
       "others":{
         "assets":assetlist
       },
