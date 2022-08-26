@@ -28,7 +28,7 @@ cpath =os.path.dirname(__file__)
 kafkaTopicName = "seloger_data_v1"
 commonTopicName = "common-ads-data_v1"
 class SelogerScraper:
-    def __init__(self,paremeter,asyncsize=20) -> None:
+    def __init__(self,paremeter,asyncsize=20,proxyThread=True,proxies = {}) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
         self.timeout = 5
         
@@ -39,13 +39,15 @@ class SelogerScraper:
                 }
         self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
         self.paremeter= paremeter
-        try:
-            self.proxies = self.readProxy()
-            if not self.proxies:
+        if not proxies:
+            try:
+                self.proxies = self.readProxy()
+                if not self.proxies:
+                    self.getProxyList()
+            except:
                 self.getProxyList()
-        except:
-            self.getProxyList()
-        self.proxyUpdateThread()
+        else:self.proxies=proxies
+        if proxyThread: self.proxyUpdateThread()
         self.asyncsize=asyncsize
         self.headers = {}
         self.proxy = {}
@@ -149,7 +151,7 @@ class SelogerScraper:
                 retry+=1
                 return self.fetch(url,method=method,sid=sid,retry=retry,**kwargs)
             else:return None
-        if r.status_code!=200:
+        if r.status_code not in [200,404,400]:
             print(url)
             print(method)
             print(kwargs)
@@ -423,6 +425,14 @@ class SelogerScraper:
         filterlist= self.genFilter(adtype)
         # for Filter in filterlist:
         #     self.Crawlparam(Filter)
+def CheckId(id):
+    ob = SelogerScraper({},asyncsize=1,proxyThread=False,proxies=[{"https":"http://sp30786500:Legals786@eu.dc.smartproxy.com:20000/"}])
+    r = ob.fetch(f"{ViewAddUrl}{id}")
+    if r.status_code ==404:
+        return False
+    if r.status_code == 200:
+        return True
+    return False
 def main_scraper(payload,update=False):
     data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
     adtype = payload.get("real_state_type")
