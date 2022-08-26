@@ -20,9 +20,12 @@ async def fetch(url,session,Json=False,file=False,**kwargs):
             try:
                 response = await session.get(url,**kwargs)
             except:
+                traceback.print_exc()
                 await asyncio.sleep(2)
                 return await fetch(url,session,Json,file,**kwargs)
             try:
+                if response.status_code==404:
+                    return {}
                 if response.status_code == 500:
                     return None
                 if response.status_code == 200:

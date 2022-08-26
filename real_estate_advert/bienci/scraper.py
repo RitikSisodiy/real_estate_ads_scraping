@@ -7,7 +7,7 @@ import sys
 import traceback
 import requests
 from .parser import ParseBienici
-from requests_html import AsyncHTMLSession
+from requests_html import AsyncHTMLSession,HTMLSession
 import random
 try:
     from fetch import fetch,getUserAgent
@@ -322,6 +322,11 @@ async def asyncUpdateBienci():
         await CreatelastupdateLog(session,'rent')
         await CreatelastupdateLog(session,'buy')
     return res
+async def CheckId(id):
+    session = AsyncHTMLSession()
+    url = f"https://www.bienici.com/realEstateAd.json?id={id}"
+    res = await fetch(url,session,Json=True)
+    return bool(res)
 def UpdateBienci():
     return asyncio.run(asyncUpdateBienci())
 
