@@ -14,10 +14,12 @@ def ParseLeboncoin(data):
         features = {}
         featuresVals ={}
         assetlist = []
+        featureslabels = {}
         if featuresli:
             for d in featuresli:
                 features[d.get("key")] = d.get("value")
                 featuresVals[d.get("key")] = d.get("values")
+                featureslabels[d.get("key")] = d.get("value_label")
                 assetlist.append(f"{d.get('key')} {d.get('value_label')}")
         price= data.get("price_cents")/100 if data.get("price_cents") else 0
         area = features.get("square")
@@ -73,7 +75,7 @@ def ParseLeboncoin(data):
             "images_url": images,
             "is_new": bool(features.get("immo_sell_type")),
             "website": "leboncoin.com",
-            "property_type": features.get("real_estate_type"),
+            "property_type": featureslabels.get("real_estate_type"),
             "published_at": getTimeStamp(data.get("first_publication_date")),
             "created_at": getTimeStamp(data.get("index_date")),
             "updated_at": getTimeStamp(data.get("index_date")),
