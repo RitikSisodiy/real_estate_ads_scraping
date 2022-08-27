@@ -308,6 +308,6 @@ async def scrape_bienci(real_args: RealStateAdId, Portals:RealPortals):
     if payload['Portal'] == "Bienci":
         AdStatus = await BienciAdStatus(id)
     if payload['Portal'] == "Pap":
-        AdStatus = await PapAdStatus(id)
+        AdStatus =  PapAdStatus(id)
     if AdStatus:return{"status":200,"found":True}
     else:return {"status":410,"found":False}
