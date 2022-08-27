@@ -26,7 +26,7 @@ def ParseSeloger(data):
   try:
     sdata = {
         "id":data.get("id"),
-        "ads_type": "buy" if data.get("transactionType")==2 else "rent",
+        "ads_type": "rent" if data.get("transactionType")==1 else "buy",
         "price": data.get("price"),
         "original_price": data.get("price"),
         "area": data.get("livingArea"),
