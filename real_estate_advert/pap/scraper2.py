@@ -29,7 +29,7 @@ class PapScraper:
         self.proxy = proxy
         SELOGER_SECURITY_URL = "https://www.pap.fr"
         
-        self.cookie = self.GenCookie()
+        self.cookie = ""
         headers = {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
                 }
@@ -127,7 +127,7 @@ class PapScraper:
             qury = urlencode(params)
             url = f"{url}?{qury}"
         try:
-            self.headers["cookie"] = self.cookie
+            if self.cookie:self.headers["cookie"] = self.cookie
             print(self.proxy)
             r= self.session.get(url,headers=self.headers,proxies=self.proxy,timeout=5)
             print(r)
