@@ -13,6 +13,7 @@ def getTimeStamp(strtime):
     t = datetime.strptime(strtime,formate)
     return t.timestamp()
 def ParseBienici(data):
+  now = datetime.now()
   propername = {
     "flat":"appartement",
     "house":"maison",
@@ -46,7 +47,7 @@ def ParseBienici(data):
           "available": True,
           "status": True,
           "furnished": any(word in data.get("description").lower() for word in ["furnished","meublée","meublé"]),      
-          "last_checked_at": data.get("@timestamp"),
+          "last_checked_at": now.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
           "elevator": data.get("hasElevator") or any(word in data.get("description").lower() for word in ["elevator","ascenseur"]),
           "pool": bool(data.get("hasPool")) or any(word in data.get("description").lower() for word in ["piscine","piscina"]),
           "floor": data.get("floorQuantity"),
