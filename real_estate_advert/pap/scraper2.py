@@ -273,6 +273,16 @@ dic = {
         "produit":"vente",
         "geo[ids][]":"25",
     }
+def CheckId(id):
+    proxy = {"https":"http://sp30786500:Legals786@eu.dc.smartproxy.com:20000/"}
+    headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
+                }
+    url = f"https://www.pap.fr/r{id}"
+    r = requests.get(url,headers=headers,proxies=proxy)
+    if str(id) in r.url:
+        return True
+    else:False
 def pap_scraper(payload):
     print(payload)
     typ = payload.get("real_state_type")
