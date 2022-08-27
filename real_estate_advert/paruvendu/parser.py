@@ -1,10 +1,12 @@
 import json,re
 from datetime import datetime
 def getTimeStamp(strtime,formate=None):
-  if not formate:
-    formate = '%Y-%m-%d %H:%M:%S'
-  t = datetime.strptime(strtime,formate)
-  return t.timestamp()
+  try:
+    if not formate:
+      formate = '%Y-%m-%d %H:%M:%S'
+    t = datetime.strptime(strtime,formate)
+    return t.timestamp()
+  except:return None
 def ParseParuvendu(data):
   now = datetime.now()
   try:
@@ -25,15 +27,19 @@ def ParseParuvendu(data):
     images = [img.get("img") for img in data.get("syndication")["pics"]["feed"]["row"]]
     if "Location" in adtyp:adtyp = "rent"
     else:adtyp="buy"
+    area = data.get("title")[data.get("title").rfind("- ")+2:].replace("m²","").strip()
+    try:area = float(area)
+    except: area = int(detailV.get("SUR")) if detailV.get("SUR") else 0
+
     pinRegx = r'(\d{5}\-?\d{0,4})'
     sdata = {
       "id": data.get("id"),
       "ads_type": adtyp,
       "price": float(data.get("price").replace(" ",'')),
       "original_price": float(data.get("price").replace(" ",'')),
-      "area": data.get("title")[data.get("title").rfind("- ")+2:].replace("m²","").strip(),
+      "area": area ,
       "city": data.get("subtitle")[:data.get("subtitle").find(" (")],     # "Poitiers (86000)"
-      "declared_habitable_surface": detailV.get("SUR"),
+      "declared_habitable_surface": int(detailV.get("SUR")) if detailV.get("SUR") else 0,
       "declared_land_surface": detailT.get("9999999_125"),
       "land_surface": detailT.get("9999999_125"),
       "declared_rooms": detailT.get("NBP"),
@@ -74,6 +80,7 @@ def ParseParuvendu(data):
       "property_type": detailT.get("_R2").lower(),
       "published_at": data.get("datePublish"),
       "created_at": getTimeStamp(data.get("datePublish"),"%d/%m/%Y"),
+      "updated_at": getTimeStamp(data.get("dateRefresh"),"%d/%m/%Y") or  getTimeStamp(data.get("datePublish"),"%d/%m/%Y"),
       "others":{
         "assets":assetlist
       },
