@@ -1,6 +1,8 @@
 import random
 from tabnanny import check
 import threading
+import requests
+from xml.dom import ValidationErr
 from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
 from getChrome import getChromePath
@@ -26,6 +28,8 @@ class PapScraper:
         self.apiurl = "https://api.pap.fr/app/annonces"
         self.proxy = proxy
         SELOGER_SECURITY_URL = "https://www.pap.fr"
+        
+        self.cookie = self.GenCookie()
         headers = {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
                 }
@@ -35,9 +39,11 @@ class PapScraper:
         except:
             self.getProxyList()
         self.proxyUpdateThread()
-        self.driver = self.getDriver()
-        self.driver.proxy = self.getRandomProxy()
-        self.driver.set_page_load_timeout(5)
+        # self.sesson  = self.getDriver()
+        self.session = requests.session()
+        self.proxy = self.getRandomProxy()
+        # self.driver.proxy = self.getRandomProxy()
+        # self.driver.set_page_load_timeout(5)
         self.headers = {
             "Accept": "*/*",
             "X-App-Version": "4.0.10",
@@ -48,8 +54,17 @@ class PapScraper:
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
             }
-        self.driver.request_interceptor = self.interceptor
+        # self.driver.request_interceptor = self.interceptor
         pass
+    def GenCookie(self,proxy=None):
+        import subprocess
+        if proxy:proc = subprocess.check_output(f'java -jar "{cpath}/scrap.jar" {proxy["http"]} 10' ,stderr=subprocess.STDOUT,shell=True)
+        else:proc = subprocess.check_output(f'java -jar "{cpath}/scrap.jar"' ,stderr=subprocess.STDOUT,shell=True)
+        d = proc.decode('UTF-8')
+        print(d)
+        if "error" not in d:
+            return d.strip()
+        else:return False
     def getRandomProxy(self):
         proxy = random.choice(self.proxies)
         return proxy
@@ -69,6 +84,7 @@ class PapScraper:
     def updateProxyList(self,interval=300):
         if self.readProxy():time.sleep(interval)
         while self.startThread:
+            self.cookie = self.GenCookie()
             self.getProxyList()
             b = self.threadsleep(interval)
             if b:
@@ -84,9 +100,9 @@ class PapScraper:
         return [json.loads(proxy) for proxy in proxies]
     def interceptor(self,request):
         for key,val in self.headers.items():
-            try:del request.headers[key] # Delete the header first
+            try:del requests.headers[key] # Delete the header first
             except:pass
-            request.headers[key] = val
+            requests.headers[key] = val
     def getDriver(self):
         options = webdriver.ChromeOptions()
         # options.add_argument('--proxy-server=%s' % "socks4://127.0.0.1:9050")
@@ -111,14 +127,27 @@ class PapScraper:
             qury = urlencode(params)
             url = f"{url}?{qury}"
         try:
-            self.driver.get(url)
-            content = self.driver.page_source
-            content = self.driver.find_element_by_tag_name('pre').text
-            parsed_json = json.loads(content)
+            self.headers["cookie"] = self.cookie
+            print(self.proxy)
+            r= self.session.get(url,headers=self.headers,proxies=self.proxy,timeout=5)
+            print(r)
+            # self.driver.get(url)
+            # content = self.driver.page_source
+            # content = self.driver.find_element_by_tag_name('pre').text
+            if r.status_code==200:
+                parsed_json = r.json()
+            elif r.status_code == 403:
+                cookie = self.GenCookie(self.proxy)
+                if not cookie: raise ValidationErr
+                else:self.cookie=cookie
+                return self.fetchJson(url,params)
+            else:
+                raise ValidationErr
         except Exception as e:
-            print("exeptin", e)
-            self.driver.delete_all_cookies()
-            self.driver.proxy = self.getRandomProxy()
+            print("exeptin", self.cookie)
+            self.proxy = self.getRandomProxy()
+            self.session.close()
+            self.session = requests.session()
             return self.fetchJson(url)
         return parsed_json
     def save(self,data,getdata=False):
@@ -237,7 +266,7 @@ class PapScraper:
         self.__del__()
     def __del__(self):
         self.startThread = False
-        self.driver.close()
+        # self.driver.close()
         print("proxy thread is terminated")
 dic = {
         "type":"recherche",
