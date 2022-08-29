@@ -1,7 +1,26 @@
 import re
 from datetime import datetime
 from unidecode import unidecode
+def GetTImeStamp(time):
+  d,m,y = time.split(" ")
+  dic2 = {'janvier': 'January', 'fevrier': 'February', 'mars': 'March', 'avril': 'April', 'mai': 'May', 'juin': 'June', 'juillet': 'July', 'aout': 'August', 'septembre': 'September', 'octobre': 'October', 'novembre': 'November', 'decembre': 'December'}
+  m = dic2[unidecode(m).lower()][:3].lower()
+  date = f"{d}/{m}/{y}"
+  formate = "%d/%m/%Y"
+  t = datetime.strptime(date,formate)
+  return t.timestamp()
+def GetTImeStamp(time):
+  d,m,y = time.split(" ")
+  dic2 = {'janvier': 'January', 'fevrier': 'February', 'mars': 'March', 'avril': 'April', 'mai': 'May', 'juin': 'June', 'juillet': 'July', 'aout': 'August', 'septembre': 'September', 'octobre': 'October', 'novembre': 'November', 'decembre': 'December'}
+  m = dic2[unidecode(m).lower()][:3].lower()
+  date = f"{d}/{m}/{y}"
+  formate = "%d/%b/%Y"
+  t = datetime.strptime(date,formate)
+  return t.timestamp()
+# with open("pap_data_v1_response.json",'r') as file:
+#     data = json.load(file)
 def ParsePap(data):
+  # data = data["_source"]
   now = datetime.now()
   try:
     adtype = data.get("produit")
@@ -20,11 +39,14 @@ def ParsePap(data):
         caracteristiquesdic[key[0]] = key[1]
       else:
         caracteristiquesdic[key[1]] = key[0]
+    try:price = re.search(r"[0-9.]+",unidecode(data.get("prix"))).group()
+    except:price = 0
+
     sdata = {
       "id":data.get("id"),
       "ads_type": adtype,
-      "price": re.search(r"[0-9.]+",unidecode(data.get("prix"))).group(),
-      "original_price": re.search(r"[0-9.]+",unidecode(data.get("prix"))).group(),
+      "price": price,
+      "original_price": price,
       "area":  caracteristiquesdic.get("mA2"),
       "city": re.search(cityRe,data.get("titre")).group(),
       "declared_habitable_surface":  caracteristiquesdic.get("mA2"),
@@ -46,7 +68,7 @@ def ParsePap(data):
       "available": True,
       "status": True,
       "furnished": any(word in data.get("texte").lower() for word in ["furnished","meublée","meublé"]),
-      "last_checked_at": data.get("@timestamp"),
+      "last_checked_at": now.timestamp(),
       "coloc_friendly": False,
       "elevator": any(word in data.get("texte").lower() for word in ["elevator","ascenseur"]),
       "pool": any(word in data.get("texte").lower() for word in ["piscine","piscina"]),
@@ -60,14 +82,12 @@ def ParsePap(data):
       "website": "pap.fr",
       "property_type": data.get("typebien"),
       "published_at": None,
-      "created_at": now.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+      "created_at": GetTImeStamp(data.get("date")),
       "visite_virtuelle": data.get("visite_virtuelle"),
       "url": data.get("url"),
       "dpe": data.get("classe_dpe").get("letter") if data.get("classe_dpe") else None,
       "ges": data.get("classe_ges").get("letter") if data.get("classe_ges") else None,
     }
-
-
     return sdata
-  except:
+  except: 
     return {}
