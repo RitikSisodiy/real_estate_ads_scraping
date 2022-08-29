@@ -13,12 +13,15 @@ def getTimeStamp(strtime):
     t = datetime.strptime(strtime,formate)
     return t.timestamp()
 def ParseBienici(data):
-  now = datetime.now()
+  data =data["_source"]
   propername = {
     "flat":"appartement",
     "house":"maison",
     "programme":"maison"
   }
+  # try:
+  dates = [getTimeStamp(data.get(date)) for date in ["publicationDate","thresholdDate","modificationDate"]]
+  dates.sort(reverse=True)
   try:
     sdata = {
           "id":data.get("id"),
@@ -47,7 +50,7 @@ def ParseBienici(data):
           "available": True,
           "status": True,
           "furnished": any(word in data.get("description").lower() for word in ["furnished","meublée","meublé"]),      
-          "last_checked_at": now.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+          "last_checked_at": data.get("@timestamp"),
           "elevator": data.get("hasElevator") or any(word in data.get("description").lower() for word in ["elevator","ascenseur"]),
           "pool": bool(data.get("hasPool")) or any(word in data.get("description").lower() for word in ["piscine","piscina"]),
           "floor": data.get("floorQuantity"),
@@ -60,7 +63,7 @@ def ParseBienici(data):
           "website": "bienici.com",
           "property_type": propername.get(data.get("propertyType")),
           "published_at": data.get("publicationDate"),
-          "created_at": getTimeStamp(data.get("modificationDate")),
+          "created_at": dates[0],
           "others":{
             "assets":[],
             **getFieldLlstStartWith("has",data),
