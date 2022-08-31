@@ -29,7 +29,7 @@ def ParseParuvendu(data):
     else:adtyp="buy"
     area = data.get("title")[data.get("title").rfind("- ")+2:].replace("m²","").strip()
     try:area = float(area)
-    except: area = int(detailV.get("SUR")) if detailV.get("SUR") else 0
+    except: area = float(detailV.get("SUR")) if detailV.get("SUR") else 0
 
     pinRegx = r'(\d{5}\-?\d{0,4})'
     sdata = {
@@ -39,7 +39,7 @@ def ParseParuvendu(data):
       "original_price": float(data.get("price").replace(" ",'')),
       "area": area ,
       "city": data.get("subtitle")[:data.get("subtitle").find(" (")],     # "Poitiers (86000)"
-      "declared_habitable_surface": int(detailV.get("SUR")) if detailV.get("SUR") else 0,
+      "declared_habitable_surface": float(detailV.get("SUR")) if detailV.get("SUR") else 0,
       "declared_land_surface": detailT.get("9999999_125"),
       "land_surface": detailT.get("9999999_125"),
       "declared_rooms": detailT.get("NBP"),
