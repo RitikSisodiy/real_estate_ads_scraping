@@ -1,6 +1,6 @@
 {
     "searchParameters": {
-        "limit": 80,
+        "limit": 10000,
         "offset": 0,
         "sortBy": 0
     },
