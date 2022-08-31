@@ -1,6 +1,7 @@
 import concurrent.futures
 from datetime import datetime
 import imp
+from socket import timeout
 from fastapi import FastAPI
 from pytest import param
 import threading
@@ -28,9 +29,9 @@ cpath =os.path.dirname(__file__)
 kafkaTopicName = "logicImmo_data_v1"
 commonTopicName = "common-ads-data_v1"
 class LogicImmoScraper:
-    def __init__(self,paremeter,asyncsize=20,proxy = None) -> None:
+    def __init__(self,paremeter,asyncsize=20,timeout = 5,proxy = None) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
-        self.timeout = 5
+        self.timeout = timeout
         
         
         SELOGER_SECURITY_URL = "https://api-logicimmo.svc.groupe-seloger.com/api/security/register"
@@ -120,20 +121,21 @@ class LogicImmoScraper:
         seloger_token_port = os.environ.get('HS_SELOGER_TOKEN_PORT', '8001')
 
         SELOGER_SECURITY_URL = "https://api-logicimmo.svc.groupe-seloger.com/api/security"
-        time_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=self.proxy[sid],timeout=self.timeout).json()
+        time_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=self.proxy[sid],timeout=5).json()
         challenge_url = f"http://{seloger_token_host}:{seloger_token_port}/seloger-auth?{urllib.parse.urlencode(time_token, doseq=False)}"
         token = self.session[sid].get(challenge_url).text
         print(token,"self genrager troe")
-        final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid],timeout=self.timeout).text[1:-1]
+        final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid],timeout=5).text[1:-1]
         return final_token
     def fetch(self,url,method = "get",sid=0,retry=0,**kwargs):
         kwargs['headers'] = self.headers[sid]
         kwargs['proxies'] = self.proxy[sid]
+        kwargs["timeout"] = kwargs.get("timeout") or self.timeout
         try:
             if method=="post":
-                r = self.session[sid].post(url,timeout=self.timeout,**kwargs)
+                r = self.session[sid].post(url,**kwargs)
             else:
-                r = self.session[sid].get(url,timeout=self.timeout,**kwargs)
+                r = self.session[sid].get(url,**kwargs)
             print(f"{r.status_code} : response status")
         except Exception as e:
             traceback.print_exc(file=self.logfile)
@@ -404,11 +406,11 @@ def main_scraper(payload,update=False):
     adtype = payload.get("real_state_type")
     if adtype == "Updated/Latest Ads" or update:
         data["searchParameters"]["limit"] = 500
-        ob = LogicImmoScraper(data,asyncsize=1)
+        ob = LogicImmoScraper(data,asyncsize=1,timeout=10)
         print("updateing latedst ads")
         ob.updateLatestAd("rental")
         ob.updateLatestAd("sale")
     else:
-        ob = LogicImmoScraper(data,asyncsize=1)
+        ob = LogicImmoScraper(data,asyncsize=1,timeout=30)
         ob.CrawlSeloger(adtype)
     ob.__del__()
