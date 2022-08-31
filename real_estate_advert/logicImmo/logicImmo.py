@@ -319,14 +319,17 @@ class LogicImmoScraper:
         updates = self.getLastUpdate().get(adtype)
         if updates:
             param = self.paremeter
-            if adtype=="sale":param["query"]["transactionType"]=[1]
-            else:param["query"]["transactionType"] = [2]
-            param["query"]["sortBy"]= 10
+            if adtype=="sale":param["listingSearchCriterias"]["transactionTypesIds"]=[1]
+            else:param["listingSearchCriterias"]["transactionTypesIds"] = [2] 
+            param["searchParameters"]["sortBy"] =1
             updated = False
             first = True
             page =1
             adcount = 0
-            while not updated and page<=201:
+            page = 0
+            pagesize = self.paremeter["searchParameters"]["limit"]
+            while not updated:
+                param["searchParameters"]["offset"] = (page*pagesize) or 1
                 param.update({"pageIndex":page})
                 # res = self.fetch(searchurl, method = "post", json=param)
                 ads = self.Crawlparam(param,False,False,False)
@@ -334,7 +337,7 @@ class LogicImmoScraper:
                 updatetimestamp = updates["created"]
                 for ad in ads:
                     # ad = self.GetAdInfo(ad['id'])
-                    adtimestamp = self.getTimeStamp(ad["created"])
+                    adtimestamp = ad["updateDate"]
                     print(f"   {adtimestamp}> {updatetimestamp}====>",adtimestamp>updatetimestamp)
                     if adtimestamp>updatetimestamp:
                         if first:
@@ -400,7 +403,7 @@ def CheckId(id):
 def main_scraper(payload,update=False):
     adtype = payload.get("real_state_type")
     if adtype == "Updated/Latest Ads" or update:
-        ob = LogicImmoScraper(data,asyncsize=5)
+        ob = LogicImmoScraper(data,asyncsize=1)
         print("updateing latedst ads")
         ob.updateLatestAd("rental")
         ob.updateLatestAd("sale")

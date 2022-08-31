@@ -10,6 +10,7 @@ __pycache__/
 *.dir
 real_estate_advert/leboncoin/lastUpdate.json
 real_estate_advert/paruvendu/lastUpdate.json
+real_estate_advert/logicImmo/lastUpdate.json
 # Distribution / packaging
 .Python
 env/
