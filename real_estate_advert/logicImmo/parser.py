@@ -9,7 +9,7 @@ def getFieldLlstStartWith(start,datadic):
       res[key] = val
   return res
 def ParseLogicImmo(data):
-  # data = data["_source"]
+  data = data["_source"]
   now = datetime.now()
   # pinRegx = r'(\d{5}\-?\d{0,4})'
   title = ""
@@ -22,7 +22,7 @@ def ParseLogicImmo(data):
     ges = energy.get("ges").get("category") or 0
     dpe = energy.get("dpe").get("category") or 0
   else:
-    ges,dpe = 0,0
+    ges,dep = 0,0
   try:
     sdata = {
         "id":data.get("id"),
@@ -44,7 +44,7 @@ def ParseLogicImmo(data):
         # "longitude": data['coordinates']['longitude'],
         # "latitude": data['coordinates']['latitude'],
         # "location": f"{data['coordinates']['latitude']}, {data['coordinates']['longitude']}",
-        "agency": data.get("agencyName") or False,
+        "agency": bool(data.get("agencyName")) or False,
         "agency_name": data.get("agencyName"),
         "agency_details": {
           "address": data.get("agencyAddress"),
@@ -58,7 +58,7 @@ def ParseLogicImmo(data):
         },
         "available": True,
         "status": True,
-        "last_checked_at": now.timestamp(),
+        "last_checked_at": data.get("@timestamp"),
         "coloc_friendly": False,
         "elevator": any(word in data.get("description").lower() for word in ["elevator","ascenseur"]),
         "pool": data.get("hasPool"),
@@ -89,4 +89,4 @@ def ParseLogicImmo(data):
       file.write(json.dumps(data))
     # raise ValidationErr      
   print("parsed")
-  return {}
+  return sdata
