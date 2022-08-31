@@ -329,7 +329,7 @@ class LogicImmoScraper:
             page = 0
             pagesize = self.paremeter["searchParameters"]["limit"]
             while not updated:
-                param["searchParameters"]["offset"] = (page*pagesize) or 1
+                param["searchParameters"]["offset"] = (page*pagesize) or 1  
                 param.update({"pageIndex":page})
                 # res = self.fetch(searchurl, method = "post", json=param)
                 ads = self.Crawlparam(param,False,False,False)
@@ -403,6 +403,7 @@ def CheckId(id):
 def main_scraper(payload,update=False):
     adtype = payload.get("real_state_type")
     if adtype == "Updated/Latest Ads" or update:
+        data["searchParameters"]["limit"] = 500
         ob = LogicImmoScraper(data,asyncsize=1)
         print("updateing latedst ads")
         ob.updateLatestAd("rental")
