@@ -11,7 +11,7 @@ import random
 import urllib
 import os
 from .scrapProxy import ProxyScraper
-from .parser import ParseSeloger
+from .parser import ParseLogicImmo
 import traceback
 proxyurl = "http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225"
 import time
@@ -357,8 +357,8 @@ class LogicImmoScraper:
             print("there is no update available l")
     def save(self,adslist):
         self.producer.PushDataList(kafkaTopicName,adslist)
-        # parseAdList = [ParseSeloger(ad) for ad in adslist]
-        # self.producer.PushDataList(commonTopicName,parseAdList)
+        parseAdList = [ParseLogicImmo(ad) for ad in adslist]
+        self.producer.PushDataList(commonTopicName,parseAdList)
     def Crawlparam(self,param,allPage = True,first=False,save=True):
         print(param)
         if allPage:param["searchParameters"]["offset"] = 1

@@ -2,88 +2,91 @@ from datetime import datetime
 import json,re
 import traceback
 from xml.dom import ValidationErr
-
-def ParseSeloger(data):
+def getFieldLlstStartWith(start,datadic):
+  res = {}
+  for key,val in datadic.items():
+    if start in key:
+      res[key] = val
+  return res
+def ParseLogicImmo(data):
+  # data = data["_source"]
   now = datetime.now()
-  assetlist = [d.get("label") for d in data.get("features")]
-  isdata = {
-    "Balcon": False,
-    "Parking": False,
-    "Terrasse": False,
-    "Ascenseur": False,
-    "Piscine": False,
-    "Rez-de-chaussée":False
-  }
-  for lab in assetlist:
-    for k,v in isdata.items():
-      if k in lab:isdata[k]=True
-  professionals = data.get("professionals")[0]
   # pinRegx = r'(\d{5}\-?\d{0,4})'
+  title = ""
+  if data.get("city"): title+=data.get("city")+" "
+  if data.get("propertyType"): title += data.get("propertyType")+" "
+  if data.get("area"): title += str(data.get("area"))+ "m²"
+  if data.get("rooms"): title += str(data.get("rooms"))+ "pièce"
+  energy = data.get("energyBalance")
+  if energy:
+    ges = energy.get("ges").get("category") or 0
+    dpe = energy.get("dpe").get("category") or 0
+  else:
+    ges,dpe = 0,0
   try:
     sdata = {
         "id":data.get("id"),
-        "ads_type": "buy" if data.get("transactionType")==2 else "sale",
+        "ads_type": "buy" if data.get("transactionTypeId")==1 else "rent",
         "price": data.get("price"),
         "original_price": data.get("price"),
-        "area": data.get("livingArea"),
+        "area": data.get("area"),
         "city": data.get("city"),
-        "declared_habitable_surface": data.get("livingArea"),
-        "declared_land_surface": data.get("livingArea"),
-        "land_surface": data.get("livingArea"),
+        "declared_habitable_surface": data.get("area"),
+        "declared_land_surface": data.get("area"),
+        "land_surface": data.get("area"),
         "declared_rooms": data.get("rooms"),
         "declared_bedrooms": data.get("bedrooms"),
         "rooms": data.get("rooms"),
         "bedrooms": data.get("bedrooms"),
-        "title": data.get("title"),
+        "title": title,
         "description": data.get("description"),
         "postal_code":  data.get("zipCode"),
-        "longitude": data['coordinates']['longitude'],
-        "latitude": data['coordinates']['latitude'],
-        "location": f"{data['coordinates']['latitude']}, {data['coordinates']['longitude']}",
-        "agency": True if professionals['type']==1 else False,
-        "agency_name": professionals['name'],
+        # "longitude": data['coordinates']['longitude'],
+        # "latitude": data['coordinates']['latitude'],
+        # "location": f"{data['coordinates']['latitude']}, {data['coordinates']['longitude']}",
+        "agency": data.get("agencyName") or False,
+        "agency_name": data.get("agencyName"),
         "agency_details": {
-          "address": professionals.get('address'),
-          "name": professionals.get("name"),
-          "rcs": professionals.get('rcs'),
-          "phone": professionals.get('phoneNumber').replace(" ",""),
-          "email": professionals.get('email'),
-          "website": professionals.get('website'),
-          "url_seloger": professionals.get('url'),
-          "logo": professionals.get("logoUrl"),
-          "city_name": professionals.get("logoUrl"),
-          "id": professionals.get('id')
+          "address": data.get("agencyAddress"),
+          "name":  data.get("agencyName"),
+          "rcs":  data.get("agencySiret"),
+          "phone":  data.get("agencyPhone"),
+          "email":  data.get("agencyMail"),
+          "logo": data.get("agencyLogo"),
+          "city_name": data.get("agencyCity"),
+          "zipcode":data.get("agencyZipCode")
         },
         "available": True,
         "status": True,
-        "last_checked_at": now.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        "last_checked_at": now.timestamp(),
         "coloc_friendly": False,
-        "elevator": isdata["Ascenseur"],
-        "pool": isdata["Piscine"],
-        "floor": isdata['Rez-de-chaussée'],
-        "balcony": isdata["Balcon"],
-        "terrace": isdata["Terrasse"],
+        "elevator": any(word in data.get("description").lower() for word in ["elevator","ascenseur"]),
+        "pool": data.get("hasPool"),
+        "floor": data.get("floors"),
+        "balcony": data.get("hasBalcony"),
+        "terrace": data.get("hasTerrace"),
         "insee_code": data.get("zipCode"),
-        "parking": isdata["Parking"],
+        "parking": data.get("parkings"),
         "images_url": data.get("photos"),
         "is_new": True if data.get("isNew") else False,
-        "website": "seloger.com",
-        "property_type": re.search(r"(annonces/[a-z-]*)/([a-z]*)",data.get("permalink")).group(2),
-        "published_at": data.get("lastModified"),
-        "created_at": data.get("created"),
+        "website": "logic-immo.com",
+        "property_type": data.get("propertyType"),
+        "published_at": data.get("firstOnlineDate"),
+        "created_at": data.get("updateDate"),
         "others": {
-          "assets":assetlist,
-          "ges":data.get("energyBalance")["ges"].get("category"),        
-          "dpe":data.get("energyBalance")["dpe"].get("category"),        
+          "assets":[],
+          **getFieldLlstStartWith("has",data),
+          "ges":ges,        
+          "dpe":dpe,        
         },
-        "url": data.get("permalink"),
-        "ges":data.get("energyBalance")["ges"].get("category"),
-        "dpe":data.get("energyBalance")["dpe"].get("category"),  
+        "url": data.get("url"),
+        "ges":ges,
+        "dpe":dpe 
       }
   except:
     traceback.print_exc()
     with open("error.json","w") as file:
       file.write(json.dumps(data))
-    raise ValidationErr      
+    # raise ValidationErr      
   print("parsed")
-  return sdata
+  return {}
