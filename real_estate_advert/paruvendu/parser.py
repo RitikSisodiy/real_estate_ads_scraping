@@ -57,6 +57,7 @@ def ParseParuvendu(data):
         "rcs":sellerdetail.get("rcs"),
         "phone":sellerdetail.get("sellerPhone"),
         "email":sellerdetail.get("email"),
+        "logo":sellerdetail.get("logo"),
         "website":sellerdetail.get("website"),
         "city_name":sellerdetail.get("city"),
         "state":sellerdetail.get("state"),
