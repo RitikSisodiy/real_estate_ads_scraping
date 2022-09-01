@@ -112,6 +112,18 @@ def update_Bienci_ads():
     print("Task End ================> ")
     print(data)
     return data
+@celery_app.task(name="real estate fetch logicImmo latest ad")
+def update_logicImmo_ads():
+    print("Task start ================> ")
+    try:
+        data = LogicImmoScraper({},update=True)
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ================> ",e)
+        data = "exeption"
+    print("Task End ================> ")
+    print(data)
+    return data
 @celery_app.task(name="real estate fetch seloger latest ad")
 def update_seloger_ads():
     print("Task start ================> ")
@@ -174,3 +186,5 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(20*60, update_seloger_ads.s(), name='update seloger ads every 20 minuts')
     # Calls update_Bienci_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_Bienci_ads.s(), name='update Bienci ads every 20 minuts')
+    # Calls update_logicImmo_ads in every 20 minutes
+    sender.add_periodic_task(20*60, update_logicImmo_ads.s(), name='update logicImmo ads every 20 minuts')
