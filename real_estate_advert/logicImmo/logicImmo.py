@@ -336,7 +336,7 @@ class LogicImmoScraper:
                 # res = self.fetch(searchurl, method = "post", json=param)
                 ads = self.Crawlparam(param,False,False,False)
                 updatedads = []
-                updatetimestamp = updates["created"]
+                updatetimestamp = updates["lastupdate"]
                 for ad in ads:
                     # ad = self.GetAdInfo(ad['id'])
                     adtimestamp = ad["updateDate"]
