@@ -9,7 +9,7 @@ def getFieldLlstStartWith(start,datadic):
       res[key] = val
   return res
 def ParseLogicImmo(data):
-  data = data["_source"]
+  # data = data["_source"]
   now = datetime.now()
   # pinRegx = r'(\d{5}\-?\d{0,4})'
   title = ""
