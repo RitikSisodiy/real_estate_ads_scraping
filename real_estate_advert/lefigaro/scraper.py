@@ -159,13 +159,15 @@ async def getFilter(session,params,producer):
     # print(filterurllist)
     # time.sleep(10)
     return 0
-async def parstItems(session,param,page=None,**kwargs):
-    param.update({"p":page})
+async def parstItems(session,param,page=None,save=True,**kwargs):
+    if page:
+        param.update({"currentPage":page})
     data = await fetch(session,url,param)
     # print(param['p'])
     # data = json.load(res)
-    # return data
-    await savedata(data,**kwargs)
+    if save:
+        await savedata(data,**kwargs)
+    return data
 async def CheckId(id):
     headers = {
         "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36"
@@ -184,7 +186,7 @@ async def main(adsType = ""):
     # catid info
     # vente is for  Vente immobilier 
     # location is for Location immobilier
-    if adsType == "sale":
+    if adsType == "rental":
         catid = "vente"
     else:
         catid = "location"
@@ -224,7 +226,7 @@ async def GetAdUpdate(ad):
 
 async def CreatelastupdateLog(session,typ):
     updates = getLastUpdates()
-    if typ == "sale":
+    if typ == "rental":
         catid = "vente"
     else:
         catid = "location"
@@ -259,7 +261,7 @@ async def asyncUpdateParuvendu():
         updates = getLastUpdates()
         for key,val in updates.items():
             await CreatelastupdateLog(session,key)
-            if key == "sale":
+            if key == "rental":
                 catid = "vente"
             else:
                 catid = "location"
@@ -274,10 +276,10 @@ async def asyncUpdateParuvendu():
             producer = AsyncKafkaTopicProducer()
             while not updated:
                 print(f"cheking page {p}")
-                adsres = await parstItems(session,params,page=p)
-                ads = adsres['feed']['row']
-                lastadurl = ads[len(ads)-1]['shortURL']
-                webupdates = await GetAdUpdate(session,lastadurl)
+                adsres = await parstItems(session,params,page=p,save=False,producer=producer)
+                ads = adsres["classifieds"]
+                lastad = ads[len(ads)-1]
+                webupdates = await GetAdUpdate(lastad)
                 await savedata(adsres,producer=producer)
                 res = val['lastupdate']>webupdates['lastupdate']
                 print(f"{val['lastupdate']}>{webupdates['lastupdate']} ={res} and type {key}")
