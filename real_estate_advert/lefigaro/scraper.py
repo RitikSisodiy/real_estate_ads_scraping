@@ -14,7 +14,7 @@ except:
 kafkaTopicName = "lefigaro-data_v1"
 commonTopicName = "common-ads-data_v1"
 s= HTMLSession()
-pagesize  = 100 # maxsize is 100
+pagesize  = 1000 # maxsize is 100
 cpath =os.path.dirname(__file__)
 url = "https://fi-classified-search-api.immo.fcms.io/apps/classifieds"
 params = {
