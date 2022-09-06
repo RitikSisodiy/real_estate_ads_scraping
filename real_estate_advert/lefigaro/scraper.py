@@ -6,7 +6,7 @@ import asyncio
 import os
 from requests_html import HTMLSession
 import json,re
-# from .parser import ParseParuvendu
+from .parser import ParseLefigaro
 try:
     from uploader import AsyncKafkaTopicProducer
 except:
@@ -58,7 +58,7 @@ async def savedata(resjson,**kwargs):
     ads = resjson["classifieds"]
     producer = kwargs["producer"]
     await producer.TriggerPushDataList(kafkaTopicName,ads)
-    # await producer.TriggerPushDataList('common-ads-data_v1',[ParseParuvendu(ad) for ad in ads])
+    await producer.TriggerPushDataList('common-ads-data_v1',[ParseLefigaro(ad) for ad in ads])
     # for ad in ads:
     #     resstr += json.dumps(ad)+"\n"
     # with open("output.json",'a') as file:
