@@ -86,8 +86,8 @@ async def startCrawling(session,param,**kwargs):
             filterlist.append((totalpage,param))
         start = 2
         for totalpage,param in filterlist:
-            print(param)
-            await asyncio.sleep(5)
+            # print(param)
+            # await asyncio.sleep(5)
             tasks = []
             for i in range(start,totalpage+1):
                 param['currentPage'] = i
