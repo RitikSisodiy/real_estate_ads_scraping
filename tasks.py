@@ -207,7 +207,7 @@ def scrape_paruvendu_task(payload):
 def setup_periodic_tasks(sender, **kwargs):
     print("rnnnint periodic tasks")
     # Calls update_leboncoin_ads in every 20 minutes
-    sender.add_periodic_task(20*60, update_leboncoin_ads.s(), name='update leboncoin ads in every 20 minuts')
+    # sender.add_periodic_task(20*60, update_leboncoin_ads.s(), name='update leboncoin ads in every 20 minuts')
     # Calls update_peruvendu_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_paruvendu_ads.s(), name='update paruvendu ads every 20 minuts')
     # Calls update_pap_ads in every 20 minutes
