@@ -141,7 +141,7 @@ async def getFilter(session,params,producer):
                 iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
             elif totalresult>maxresult:
                 print("elif 2")
-                last = -20
+                last = -30
                 iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
             print(totalresult,"-",maxresult)
         print(iniinterval,">apending")
