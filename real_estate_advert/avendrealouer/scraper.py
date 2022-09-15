@@ -79,13 +79,11 @@ async def startCrawling(session,param,**kwargs):
         filterlist = []
         if totalpage > 7:
             param.update({"sorts[0].Order":"desc"})
-            filterlist.append(7,param)
+            filterlist.append((7,param))
             param.update({"sorts[0].Order":"asc"})
-            filterlist.append((totalpage-7),param)
+            filterlist.append(((totalpage-7),param))
         else:
-            filterlist= [
-                totalpage,param
-            ]
+            filterlist.append((totalpage,param))
         start = 2
         for totalpage,param in filterlist:
             print(param)
