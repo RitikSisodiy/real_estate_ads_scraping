@@ -137,7 +137,7 @@ async def getFilter(session,params,producer):
                 finalresult +=totalresult
             elif maxresult-totalresult> 200:
                 print("elif 1")
-                last = 10
+                last = 40
                 iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
             elif totalresult>maxresult:
                 print("elif 2")
