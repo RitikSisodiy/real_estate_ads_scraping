@@ -71,7 +71,7 @@ async def startCrawling(session,param,**kwargs):
         data = await fetch(session,url,param)
         # data= json.load(res)
         await savedata(data,**kwargs)
-        totalres = int(data["count"])
+        totalres = int(data.get("count")) or 0
         totalpage = totalres/pagesize
         totalpage = int(totalpage) if totalpage==int(totalpage) else int(totalpage)+1
         print(totalres,param)
