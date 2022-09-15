@@ -124,7 +124,7 @@ async def getFilter(session,params,producer):
         while iniinterval[1]<=maxprice:
             dic['price.gte'],dic['price.lte'] = iniinterval
             totalresult = await getTotalResult(session,dic,baseurl)
-            if totalresult < maxresult and maxresult-totalresult<=200:
+            if totalresult <= 700 and totalresult>0:
                 print("condition is stisfy going to next interval")
                 print(iniinterval,">apending")
                 # filterurllist.append(iniinterval)
