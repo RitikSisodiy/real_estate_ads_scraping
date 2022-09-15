@@ -11,6 +11,7 @@ from real_estate_advert.bienci.scraper import UpdateBienci
 from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
 from real_estate_advert.logicImmo.logicImmo import main_scraper as LogicImmoScraper
 from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
+from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 
 from celery import Celery
 from celery.schedules import crontab
@@ -73,6 +74,21 @@ def scrap_lefigaro_task(payload):
     # Scraping task obj start here
     print("Task End ================> ")
     return data
+
+@celery_app.task(name="real estate avendrealouer")
+def scrap_avendrealouer_task(payload):
+    print("Task start ================> ")
+    print("payload : ", payload)
+    try:
+        data = avendrealouerScrapper(payload)
+    except Exception as e:
+        print(traceback.format_exc())
+        print("Exception ================> ",e)
+        data= "exception"
+    # Scraping task obj start here
+    print("Task End ================> ")
+    return data
+
 
 @celery_app.task(name="real estate leboncoin")
 def scrape_leboncoin_task(payload):
