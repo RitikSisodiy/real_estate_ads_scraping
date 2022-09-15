@@ -123,6 +123,7 @@ async def getFilter(session,params,producer):
     maxprice = await  getMaxPrize(session,params,baseurl)
     if totalresult>=maxresult:
         while iniinterval[1]<=maxprice:
+            print(iniinterval)
             dic['price.gte'],dic['price.lte'] = iniinterval
             totalresult = await getTotalResult(session,dic,baseurl)
             if totalresult <= 700 and totalresult>0:
