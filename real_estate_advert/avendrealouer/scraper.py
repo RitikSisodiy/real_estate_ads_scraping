@@ -1,5 +1,6 @@
 from datetime import datetime
 from email import header
+from socket import timeout
 import traceback
 import aiohttp
 import asyncio
@@ -39,7 +40,7 @@ async def fetch(session,url,params = None,method="get",**kwargs):
     #     query_string = urllib.parse.urlencode( params )
     #     url += "?"+query_string 
     try:
-        res = await session.get(url,headers = headers,params=params)
+        res = await session.get(url,headers = headers,params=params,timeout=10)
     except Exception as e:
         await asyncio.sleep(3)
         return await fetch(session,url,params,method,**kwargs)
