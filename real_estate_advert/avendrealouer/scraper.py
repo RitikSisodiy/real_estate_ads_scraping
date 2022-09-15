@@ -204,7 +204,10 @@ async def main(adsType = ""):
     async with aiohttp.ClientSession() as session:
         await CreatelastupdateLog(session,adsType)
         producer = AsyncKafkaTopicProducer()
-        filterParamList = await getFilter(session,params,producer)
+        flist = [2,3,6,7,19]
+        for f in flist:
+            params.update({"typeIds":f})
+            await getFilter(session,params,producer)
         # await startCrawling(session,filterParamList,producer=producer)
         await producer.stopProducer()
 def main_scraper(payload):
