@@ -75,14 +75,29 @@ async def startCrawling(session,param,**kwargs):
         totalpage = totalres/pagesize
         totalpage = int(totalpage) if totalpage==int(totalpage) else int(totalpage)+1
         print(totalres,param)
-        tasks = []
         print(totalpage,"this is total pages")
-        for i in range(2,totalpage+1):
-            param['currentPage'] = i
-            # print(param)
-            await parstItems(session,param,page=i,**kwargs)
-            # tasks.append(asyncio.ensure_future(parstItems(session,param,page=i,**kwargs)))
-        await asyncio.gather(*tasks)  
+        filterlist = []
+        if totalpage > 7:
+            param.update({"sorts[0].Order":"desc"})
+            filterlist.append(7,param)
+            param.update({"sorts[0].Order":"asc"})
+            filterlist.append((totalpage-7),param)
+        else:
+            filterlist= [
+                totalpage,param
+            ]
+        start = 2
+        for totalpage,param in filterlist:
+            print(param)
+            await asyncio.sleep(5)
+            tasks = []
+            for i in range(start,totalpage+1):
+                param['currentPage'] = i
+                # print(param)
+                await parstItems(session,param,page=i,**kwargs)
+                # tasks.append(asyncio.ensure_future(parstItems(session,param,page=i,**kwargs)))
+            await asyncio.gather(*tasks)
+            start=1  
         # totaldata = 0
         # for d in data:
         #     results = len(d['feed']["row"])
@@ -126,7 +141,7 @@ async def getFilter(session,params,producer):
             print(iniinterval)
             dic['price.gte'],dic['price.lte'] = iniinterval
             totalresult = await getTotalResult(session,dic,baseurl)
-            if totalresult <= 700 and totalresult>0:
+            if totalresult <= 1400 and totalresult>0:
                 print("condition is stisfy going to next interval")
                 print(iniinterval,">apending")
                 # filterurllist.append(iniinterval)
