@@ -17,8 +17,7 @@ s= HTMLSession()
 pagesize  = 100 # maxsize is 100
 cpath =os.path.dirname(__file__)
 url = "https://ws-web.avendrealouer.fr/realestate/properties/"
-params = {
-        "transactionIdsIds":"1,3", # 2 for location
+gparams = {
         "typeIds":"2,3,6,7,19",
         "size":25,
         "transactionIds":"vente",
@@ -118,6 +117,7 @@ async def getMaxPrize(session,params,url):
     prizefilter = {
         "sorts[0].Name":"price",
         "size":1,
+        "from":0,
         "sorts[0].Order":"desc"
     }
     params.update(prizefilter)
@@ -193,6 +193,7 @@ async def CheckId(id):
             return True
         except:return False
 async def main(adsType = ""):
+    params = gparams
     # catid info
     # vente is for  Vente immobilier 
     # location is for Location immobilier
@@ -206,6 +207,7 @@ async def main(adsType = ""):
         await CreatelastupdateLog(session,adsType)
         producer = AsyncKafkaTopicProducer()
         flist = [2,3,6,7,19]
+
         for f in flist:
             params.update({"typeIds":f})
             await getFilter(session,params,producer)
@@ -237,6 +239,7 @@ async def GetAdUpdate(ad):
     return updates
 
 async def CreatelastupdateLog(session,typ):
+    params = gparams
     updates = getLastUpdates()
     if typ == "rental":
         catid = "2"
@@ -264,6 +267,7 @@ async def CreatelastupdateLog(session,typ):
         file.write(json.dumps(updates))
 
 async def asyncUpdateParuvendu():
+    params= gparams
     updates = getLastUpdates()
     # print(updates)
     async with aiohttp.ClientSession() as session:
