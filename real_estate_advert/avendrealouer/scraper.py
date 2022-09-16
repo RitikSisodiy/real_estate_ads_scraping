@@ -117,7 +117,8 @@ async def getMaxPrize(session,params,url):
     # dic["ddlOrd"] = "desc"
     prizefilter = {
         "sorts[0].Name":"price",
-        "size":1
+        "size":1,
+        "sorts[0].Order":"desc"
     }
     params.update(prizefilter)
     r = await fetch(session,url,params=params)
