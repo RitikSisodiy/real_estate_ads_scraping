@@ -210,7 +210,7 @@ async def main(adsType = ""):
         flist = [3,6,7,19]
         paramlist = []
         for f in flist:
-            params.update({"typeIds":f})
+            params["typeIds"]= f
             paramlist.append(params)
         for f in paramlist:
             await getFilter(session,f,producer)
