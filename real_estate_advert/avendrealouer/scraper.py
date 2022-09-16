@@ -213,7 +213,6 @@ async def main(adsType = ""):
             params.update({"typeIds":f})
             paramlist.append(params)
         for f in paramlist:
-            params.update({"typeIds":f})
             await getFilter(session,f,producer)
         # await startCrawling(session,filterParamList,producer=producer)
         await producer.stopProducer()
