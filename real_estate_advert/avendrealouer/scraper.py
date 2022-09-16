@@ -213,7 +213,7 @@ async def main(adsType = ""):
     async with aiohttp.ClientSession() as session:
         await CreatelastupdateLog(session,adsType)
         producer = AsyncKafkaTopicProducer()
-        flist = [3,6,7,19]
+        flist = [2,3,6,7,19]
         for f in flist:
             params.update({"typeIds":f})
             await getFilter(session,params,producer)
