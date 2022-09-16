@@ -130,6 +130,10 @@ async def getFilter(session,params,producer):
     # url = getUrl(baseurl,dic)
     # url = baseurl
     maxresult = 700
+    try:
+        del dic['price.gte']
+        del dic['price.lte']
+    except:pass
     totalresult =await getTotalResult(session,dic,baseurl)
     acres = totalresult
     fetchedresult = 0
@@ -208,12 +212,9 @@ async def main(adsType = ""):
         await CreatelastupdateLog(session,adsType)
         producer = AsyncKafkaTopicProducer()
         flist = [3,6,7,19]
-        paramlist = []
         for f in flist:
-            params["typeIds"]= f
-            paramlist.append(params)
-        for f in paramlist:
-            await getFilter(session,f,producer)
+            params.update({"typeIds":f})
+            await getFilter(session,params,producer)
         # await startCrawling(session,filterParamList,producer=producer)
         await producer.stopProducer()
 def main_scraper(payload):
