@@ -123,7 +123,9 @@ async def getMaxPrize(session,params,url):
     params.update(prizefilter)
     r = await fetch(session,url,params=params)
     print(params)
-    prize = r["items"][0]["price"]
+    try:
+        prize = r["items"][0]["price"]
+    except:prize = 0
     return float(prize)
 async def getFilter(session,params,producer):
     dic,baseurl = params , "https://ws-web.avendrealouer.fr/realestate/properties/"
