@@ -70,7 +70,7 @@ async def startCrawling(session,param,**kwargs):
         data = await fetch(session,url,param)
         # data= json.load(res)
         await savedata(data,**kwargs)
-        totalres = int(data.get("count")) or 0
+        totalres = data.get("count") or 0
         totalpage = totalres/pagesize
         totalpage = int(totalpage) if totalpage==int(totalpage) else int(totalpage)+1
         print(totalres,param)
@@ -206,7 +206,7 @@ async def main(adsType = ""):
     async with aiohttp.ClientSession() as session:
         await CreatelastupdateLog(session,adsType)
         producer = AsyncKafkaTopicProducer()
-        flist = [2,3,6,7,19]
+        flist = [3,6,7,19]
 
         for f in flist:
             params.update({"typeIds":f})
