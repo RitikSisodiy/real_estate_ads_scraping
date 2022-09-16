@@ -208,10 +208,13 @@ async def main(adsType = ""):
         await CreatelastupdateLog(session,adsType)
         producer = AsyncKafkaTopicProducer()
         flist = [3,6,7,19]
-
+        paramlist = []
         for f in flist:
             params.update({"typeIds":f})
-            await getFilter(session,params,producer)
+            paramlist.append(params)
+        for f in paramlist:
+            params.update({"typeIds":f})
+            await getFilter(session,f,producer)
         # await startCrawling(session,filterParamList,producer=producer)
         await producer.stopProducer()
 def main_scraper(payload):

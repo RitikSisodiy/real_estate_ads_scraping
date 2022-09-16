@@ -16,7 +16,7 @@ async def send_one(topic,data,producer):
         # msg = str().encode('utf-8')
         msg = bytes(data, 'utf-8')
         await producer.send_and_wait(topic, msg)
-        print("uploaded")
+        # print("uploaded")
     except Exception as e:
         await send_one(topic,data,producer)
     finally:
@@ -82,6 +82,7 @@ class AsyncKafkaTopicProducer:
             da = json.dumps(da)
             tasks.append(asyncio.ensure_future(self.send_one(topic,da)))
         await asyncio.gather(*tasks)
+        print("uploaded")
         await self.stopProducer()
     def PushDataList(self,topic,data):
         asyncio.run(self.TriggerPushDataList(topic,data))
