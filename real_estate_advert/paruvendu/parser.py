@@ -57,7 +57,7 @@ def ParseParuvendu(data):
         "rcs":sellerdetail.get("rcs"),
         "phone":sellerdetail.get("sellerPhone"),
         "email":sellerdetail.get("email"),
-        "logo":sellerdetail.get("logo"),
+        "logo":"https://media.paruvendu.fr/media-logo/" + sellerdetail.get("logo").replace("https://media.paruvendu.fr/media-logo/","") if sellerdetail.get("logo") else "",
         "website":sellerdetail.get("website"),
         "city_name":sellerdetail.get("city"),
         "state":sellerdetail.get("state"),
