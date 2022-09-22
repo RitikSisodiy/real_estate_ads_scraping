@@ -36,7 +36,8 @@ class SelogerScraper:
         SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security/register"
         headers = {
                 "User-Agent": "SeLoger/6.8.1 Dalvik/2.1.0 (Linux; U; Android 8.1.0; Android SDK built for x86 Build/OSM1.180201.007)",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Content-Type":"application/json"
                 }
         self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
         self.paremeter= paremeter
@@ -110,7 +111,8 @@ class SelogerScraper:
         try:
             headers = {
             "User-Agent": "SeLoger/6.8.1 Dalvik/2.1.0 (Linux; U; Android 8.1.0; Android SDK built for x86 Build/OSM1.180201.007)",
-            "Accept": "application/json"
+            "Accept": "application/json",
+            "Content-Type":"application/json"
             }
             seloger_token_host = os.environ.get('HS_SELOGER_TOKEN_HOST', 'localhost')
             seloger_token_port = os.environ.get('HS_SELOGER_TOKEN_PORT', '8001')
@@ -126,6 +128,7 @@ class SelogerScraper:
                "User-Agent": "SeLoger/6.8.1 Dalvik/2.1.0 (Linux; U; Android 8.1.0; Android SDK built for x86 Build/OSM1.180201.007)",
                 "Accept": "application/json",
                 'authorization': f'Bearer {final_token}',
+                "Content-Type":"application/json"
             }
             print(final_token,"<==========final token")
             return self.headers[sid]
