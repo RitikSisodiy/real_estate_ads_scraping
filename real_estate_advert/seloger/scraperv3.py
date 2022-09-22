@@ -35,7 +35,8 @@ class SelogerScraper:
         
         SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security/register"
         headers = {
-                    'User-Agent': 'okhttp/4.6.0',
+                "User-Agent": "SeLoger/6.8.1 Dalvik/2.1.0 (Linux; U; Android 8.1.0; Android SDK built for x86 Build/OSM1.180201.007)",
+                "Accept": "application/json"
                 }
         self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
         self.paremeter= paremeter
