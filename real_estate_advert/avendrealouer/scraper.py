@@ -11,12 +11,14 @@ try:
     from uploader import AsyncKafkaTopicProducer
 except:
     from .uploader import AsyncKafkaTopicProducer
+from .parser import ParseAvendrealouer
 kafkaTopicName = "avendrealouer-data_v1"
 commonTopicName = "common-ads-data_v1"
 s= HTMLSession()
 pagesize  = 100 # maxsize is 100
 cpath =os.path.dirname(__file__)
 url = "https://ws-web.avendrealouer.fr/realestate/properties/"
+ajencyurl = "https://ws-web.avendrealouer.fr/common/accounts/?id="
 gparams = {
         "typeIds":"2,3,6,7,19",
         "size":25,
@@ -58,7 +60,7 @@ async def savedata(resjson,**kwargs):
     ads = resjson["items"]
     producer = kwargs["producer"]
     await producer.TriggerPushDataList(kafkaTopicName,ads)
-    # await producer.TriggerPushDataList(commonTopicName,[ParseLefigaro(ad) for ad in ads])
+    await producer.TriggerPushDataList(commonTopicName,[ParseAvendrealouer(ad) for ad in ads])
     # for ad in ads:
     #     resstr += json.dumps(ad)+"\n"
     # with open("output.json",'a') as file:
