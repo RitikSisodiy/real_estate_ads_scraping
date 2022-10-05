@@ -9,6 +9,7 @@ def getTimeStamp(strtime,formate=None):
     return t.timestamp()
   except:return None
 def ParseLefigaro(data):
+  now = datetime.now()
   try:
     data = data.get("_source")
     adtyp = "sale" if data.get("transactionType")=="vente" else "rent"
@@ -68,7 +69,7 @@ def ParseLefigaro(data):
       "available": True,
       "status": True,
       "furnished": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["furnished","meublée","meublé"]),
-      "last_checked_at": data.get("@timestamp"),
+      "last_checked": now.isoformat(),
       "coloc_friendly": False,
       "elevator": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["elevator","ascenseur"]),
       "pool": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["piscine","piscina"]),

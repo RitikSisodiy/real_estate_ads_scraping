@@ -13,7 +13,8 @@ def getTimeStamp(strtime):
     t = datetime.strptime(strtime,formate)
     return t.timestamp()
 def ParseBienici(data):
-  data =data["_source"]
+  now = datetime.now()
+  # data =data["_source"]
   propername = {
     "flat":"appartement",
     "house":"maison",
@@ -50,7 +51,7 @@ def ParseBienici(data):
           "available": True,
           "status": True,
           "furnished": any(word in data.get("description").lower() for word in ["furnished","meublée","meublé"]),      
-          "last_checked_at": data.get("@timestamp"),
+          "last_checked": now.isoformat(),
           "elevator": data.get("hasElevator") or any(word in data.get("description").lower() for word in ["elevator","ascenseur"]),
           "pool": bool(data.get("hasPool")) or any(word in data.get("description").lower() for word in ["piscine","piscina"]),
           "floor": data.get("floorQuantity"),
@@ -71,6 +72,11 @@ def ParseBienici(data):
           "url":f"https://www.bienici.com/annonce/{data.get('id')}",
           "ges":"NA",
           "dpe":"NA",
+          "variation": {
+                "price": 0,
+                "timestamp": ""
+            },
+            "priceDeviation": []
         }
     return sdata
   except:

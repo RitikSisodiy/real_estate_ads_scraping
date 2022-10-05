@@ -55,6 +55,7 @@ def getOrCreateDb(id,id2):
             raise ValidationErr
     return data
 def ParseAvendrealouer(data):
+    now = datetime.now()
     # pinRegx = r'(\d{5}\-?\d{0,4})'\
     try:
         data = data["_source"]
@@ -107,7 +108,7 @@ def ParseAvendrealouer(data):
             "available": True,
             "status": True,
             "furnished": any(word in data.get("description").lower() for word in ["furnished","meublée","meublé"]),
-            "last_checked_at": data.get("@timestamp"),
+            "last_checked": now.isoformat(),
             "coloc_friendly": False,
             "elevator": any(word in data.get("description").lower() for word in ["elevator","ascenseur"]) ,
             "pool":  any(word in data.get("description").lower() for word in ["piscine","piscina"]),
@@ -130,6 +131,11 @@ def ParseAvendrealouer(data):
             "url": url,
             "ges":data.get("diagnostics").get("gasSymbol"),
             "dpe":data.get("diagnostics").get("energySymbol"),  
+            "variation": {
+                "price": 0,
+                "timestamp": ""
+            },
+            "priceDeviation": []
         }
         return sdata
     except:

@@ -66,7 +66,7 @@ def ParseParuvendu(data):
       "available": True,
       "status": True,
       "furnished": any(word in spec.get("text").lower() for word in ["furnished","meublée","meublé"]),
-      "last_checked_at": now.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+      "last_checked": now.isoformat(),
       "coloc_friendly": False,
       "elevator": any(word in spec.get("text").lower() for word in ["elevator","ascenseur"]),
       "pool": any(word in spec.get("text").lower() for word in ["piscine","piscina"]),
@@ -88,6 +88,11 @@ def ParseParuvendu(data):
       "url": data.get("shortURL"),
       "dpe": detailT.get("GES"),
       "ges": detailT.get("DPE"),
+      "variation": {
+                "price": 0,
+                "timestamp": ""
+            },
+      "priceDeviation": []
       }
     return sdata
   except:
