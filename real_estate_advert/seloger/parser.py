@@ -60,7 +60,7 @@ def ParseSeloger(data):
         },
         "available": True,
         "status": True,
-        "last_checked": now.isoformat(),
+        "last_checked_at": now.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         "coloc_friendly": False,
         "elevator": isdata["Ascenseur"],
         "pool": isdata["Piscine"],
@@ -82,12 +82,13 @@ def ParseSeloger(data):
         },
         "url": data.get("permalink"),
         "ges":data.get("energyBalance")["ges"].get("category"),
-        "dpe":data.get("energyBalance")["dpe"].get("category"),  
+        "dpe":data.get("energyBalance")["dpe"].get("category"),
         "variation": {
-            "price": 0,
-            "timestamp": ""
-        },
-        "priceDeviation": []
+                "price": 0,
+                "timestamp": ""
+            },
+            "last_checked": now.isoformat(),
+            "priceDeviation": []  
       }
   except:
     traceback.print_exc()

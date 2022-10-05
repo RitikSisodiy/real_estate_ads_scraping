@@ -69,7 +69,7 @@ def ParseLefigaro(data):
       "available": True,
       "status": True,
       "furnished": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["furnished","meublée","meublé"]),
-      "last_checked": now.isoformat(),
+      "last_checked_at": data.get("@timestamp"),
       "coloc_friendly": False,
       "elevator": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["elevator","ascenseur"]),
       "pool": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["piscine","piscina"]),
@@ -91,6 +91,12 @@ def ParseLefigaro(data):
       "url": data.get("recordLink"),
       "dpe": data.get("dpe").get("energyconsumptioncategory") or "",
       "ges": data.get("dpe").get("gesemissioncategory") or "",
+      "variation": {
+                "price": 0,
+                "timestamp": ""
+            },
+            "last_checked": now.isoformat(),
+            "priceDeviation": []
       }
     
     return sdata

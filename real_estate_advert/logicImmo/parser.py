@@ -58,7 +58,7 @@ def ParseLogicImmo(data):
         },
         "available": True,
         "status": True,
-        "last_checked": now.isoformat(),
+        "last_checked_at": data.get("@timestamp"),
         "coloc_friendly": False,
         "elevator": any(word in data.get("description").lower() for word in ["elevator","ascenseur"]),
         "pool": data.get("hasPool"),
@@ -81,11 +81,12 @@ def ParseLogicImmo(data):
         },
         "url": data.get("url"),
         "ges":ges,
-        "dpe":dpe,
+        "dpe":dpe ,
         "variation": {
                 "price": 0,
                 "timestamp": ""
             },
+            "last_checked": now.isoformat(),
             "priceDeviation": []
       }
   except:

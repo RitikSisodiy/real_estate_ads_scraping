@@ -63,7 +63,7 @@ def ParseLeboncoin(data):
             "available": True,
             "status": True,
             "furnished": features.get("furnished") or any(word in data.get("body").lower() for word in ["furnished","meublée","meublé"]),
-            "last_checked": now.isoformat(),
+            "last_checked_at": now.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "coloc_friendly": False,
             "elevator": any(word in data.get("body").lower() for word in ["elevator","ascenseur"]) ,
             "pool":  any(word in data.get("body").lower() for word in ["piscine","piscina"]),
@@ -91,6 +91,7 @@ def ParseLeboncoin(data):
                 "price": 0,
                 "timestamp": ""
             },
+            "last_checked": now.isoformat(),
             "priceDeviation": []
         }
     except:

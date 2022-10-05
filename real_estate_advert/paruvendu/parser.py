@@ -66,7 +66,7 @@ def ParseParuvendu(data):
       "available": True,
       "status": True,
       "furnished": any(word in spec.get("text").lower() for word in ["furnished","meublée","meublé"]),
-      "last_checked": now.isoformat(),
+      "last_checked_at": now.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
       "coloc_friendly": False,
       "elevator": any(word in spec.get("text").lower() for word in ["elevator","ascenseur"]),
       "pool": any(word in spec.get("text").lower() for word in ["piscine","piscina"]),
@@ -92,7 +92,8 @@ def ParseParuvendu(data):
                 "price": 0,
                 "timestamp": ""
             },
-      "priceDeviation": []
+            "last_checked": now.isoformat(),
+            "priceDeviation": []
       }
     return sdata
   except:
