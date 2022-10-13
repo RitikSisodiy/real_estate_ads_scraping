@@ -58,7 +58,6 @@ def ParseAvendrealouer(data):
     now = datetime.now()
     # pinRegx = r'(\d{5}\-?\d{0,4})'\
     try:
-        data = data["_source"]
         location = data.get("viewData")
         cordinates = data.get("location")
         seller = getOrCreateDb(data.get("accountId"),data.get("id"))
