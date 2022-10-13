@@ -46,7 +46,6 @@ def getOrCreateDb(id,id2):
     data = db.get(id)
     if not data:
         data = getAjency(id,id2)
-        print(data)
         db.create(id,json.dumps(data))
     else:
         try:
