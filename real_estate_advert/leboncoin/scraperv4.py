@@ -60,15 +60,11 @@ class LeboncoinScraper:
         except:
             cookie = ""
         self.headers = {
-            "X-LBC-CC": "7",
-            "Accept": "application/json,application/hal+json",
-            "User-Agent": "LBC;Android;11;sdk_gphone_x86;phone;8b1263fac1529be6;wifi;5.70.2;570200;0",
-            "Content-Type": "application/json; charset=UTF-8",
-            "Host": "api.leboncoin.fr",
-            "Connection": "Keep-Alive",
-            "Accept-Encoding": "gzip",
+            'Accept-Language': "en-US,en;q=0.8,fr;q=0.6",
+            'Accept-Encoding': "*",
+            'User-Agent': "LBC;Android;11;sdk_gphone_x86;phone;8b1263fac1529be6;wifi;5.70.2;570200;0"
             }
-        if not self.cookies:    
+        if not self.cookies:
             self.cookies = {
                 "datadome":".B08HCAFRuFBU8GC7hocph0ac~EBB56RXmYV6QWkiBfDXZS--KajhR~7XibDdOz2QwA6A4UL.2P90icl_MZ8vjMRNbO~TB52m-Yve2TPtceRoyPxhZ9MHbP6NW4_4vx9",
                 "didomi_token":"eyJ1c2VyX2lkIjoiZGM5YWFkMTctM2UxMC00YjgwLThiNDYtYmFlZTk0NWFhYzU5IiwidmVuZG9ycyI6eyJlbmFibGVkIjpbImM6cm9ja3lvdSIsImM6cHVib2NlYW4tYjZCSk10c2UiLCJjOnJ0YXJnZXQtR2VmTVZ5aUMiLCJjOnNjaGlic3RlZC1NUVBYYXF5aCIsImM6Z3JlZW5ob3VzZS1RS2JHQmtzNCIsImM6cmVhbHplaXRnLWI2S0NreHlWIiwiYzpsZW1vbWVkaWEtemJZaHAyUWMiLCJjOnlvcm1lZGlhcy1xbkJXaFF5UyIsImM6bWF5dHJpY3NnLUFTMzVZYW05IiwiYzpzYW5vbWEiLCJjOnJhZHZlcnRpcy1TSnBhMjVIOCIsImM6cXdlcnRpemUtemRuZ0UyaHgiLCJjOmxiY2ZyYW5jZSIsImM6cmV2bGlmdGVyLWNScE1ucDV4IiwiYzpyZXNlYXJjaC1ub3ciLCJjOndoZW5ldmVybS04Vllod2IyUCIsImM6YWRtb3Rpb24iLCJjOnRoaXJkcHJlc2UtU3NLd21IVksiLCJjOmFmZmlsaW5ldCIsImM6aW50b3dvd2luLXFhenQ1dEdpIiwiYzpkaWRvbWkiLCJjOmpxdWVyeSIsImM6YWthbWFpIiwiYzphYi10YXN0eSIsImM6emFub3giLCJjOm1vYmlmeSIsImM6YXQtaW50ZXJuZXQiLCJjOnB1cnBvc2VsYS0zdzRaZktLRCIsImM6aW5mZWN0aW91cy1tZWRpYSIsImM6bWF4Y2RuLWlVTXROcWNMIiwiYzpjbG91ZGZsYXJlIiwiYzppbnRpbWF0ZS1tZXJnZXIiLCJjOmFkdmFuc2UtSDZxYmF4blEiLCJjOnNuYXBpbmMteWhZbkpaZlQiLCJjOnJldGFyZ2V0ZXItYmVhY29uIiwiYzp0dXJibyIsImM6Y2FibGF0b2xpLW5SbVZhd3AyIiwiYzp2aWFudC00N3gyWWhmNyIsImM6dnVibGUtY01DSlZ4NGUiLCJjOmJyYW5jaC1WMmRFQlJ4SiIsImM6c2ZyLU1kcGk3a2ZOIiwiYzphcHBzZmx5ZXItWXJQZEdGNjMiLCJjOmhhc29mZmVyLThZeU1UdFhpIiwiYzpsa3FkLWNVOVFtQjZXIiwiYzpzd2F2ZW4tTFlCcmltQVoiLCJjOmZvcnR2aXNpb24taWU2YlhUdzkiLCJjOmFkaW1vLVBoVVZtNkZFIiwiYzpvc2Nhcm9jb20tRlJjaE5kbkgiLCJjOnJldGVuY3ktQ0xlclppR0wiLCJjOmlsbHVtYXRlYy1DaHRFQjRlayIsImM6YWRsaWdodG5pLXRXWkdyZWhUIiwiYzpyb2NrZXJib3gtZlRNOEVKOVAiXSwiZGlzYWJsZWQiOltdfSwicHVycG9zZXMiOnsiZW5hYmxlZCI6WyJjb29raWVzIiwic2VsZWN0X2Jhc2ljX2FkcyIsImNyZWF0ZV9hZHNfcHJvZmlsZSIsIm1lYXN1cmVfYWRfcGVyZm9ybWFuY2UiLCJtYXJrZXRfcmVzZWFyY2giLCJpbXByb3ZlX3Byb2R1Y3RzIiwic2VsZWN0X3BlcnNvbmFsaXplZF9hZHMiLCJnZW9sb2NhdGlvbl9kYXRhIiwicGVyc29ubmFsaXNhdGlvbm1hcmtldGluZyIsInByaXgiLCJtZXN1cmVhdWRpZW5jZSIsImV4cGVyaWVuY2V1dGlsaXNhdGV1ciJdLCJkaXNhYmxlZCI6W119fQ==",
@@ -144,7 +140,6 @@ class LeboncoinScraper:
         self.proc.daemon = True
         self.proc.start()
     async def fetch(self,url,method = "POST",**kwargs):
-        print(kwargs["headers"])
         try:
             print(self.proxy)
             if method == "GET":
@@ -195,7 +190,7 @@ class LeboncoinScraper:
         #     'Connection': 'Keep-Alive',
         #     # 'Accept-Encoding': 'gzip',
         # }
-        res = await self.fetch(self.searchurl,headers=self.headers,json=parameter)
+        res = await self.fetch("https://api.leboncoin.fr/finder/search",headers=self.headers,json=parameter)
         await asyncio.sleep(3)
         return res
         jsondata = json.dumps(parameter)
@@ -204,7 +199,7 @@ class LeboncoinScraper:
         proxy_support = urllib.request.ProxyHandler({"https":"socks4://127.0.0.1:9050"})
         opener = urllib.request.build_opener(proxy_support)
         urllib.request.install_opener(opener)
-        req = urllib.request.Request(self.searchurl,headers=self.headers)
+        req = urllib.request.Request("https://api.leboncoin.fr/finder/search",headers=self.headers)
         response = urllib.request.urlopen(req, jsondataasbytes)
         # response = opener.open(req, jsondataasbytes)
         # response = requests.post(self.searchurl, headers=self.headers, verify=False,json=parameter)
