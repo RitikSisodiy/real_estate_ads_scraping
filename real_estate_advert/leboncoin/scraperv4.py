@@ -60,9 +60,13 @@ class LeboncoinScraper:
         except:
             cookie = ""
         self.headers = {
-            'Accept-Language': "en-US,en;q=0.8,fr;q=0.6",
-            'Accept-Encoding': "*",
-            'User-Agent': "LBC;Android;11;sdk_gphone_x86;phone;8b1263fac1529be6;wifi;5.70.2;570200;0"
+            "X-LBC-CC": "7",
+            "Accept": "application/json,application/hal+json",
+            "User-Agent": "LBC;Android;8.1.0;Android SDK built for x86;phone;6dcaf32b2836c4f7;wifi;5.70.2;570200;0",
+            "Content-Type": "application/json; charset=UTF-8",
+            "Host": "api.leboncoin.fr",
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip"
             }
         if not self.cookies:
             self.cookies = {
@@ -84,7 +88,7 @@ class LeboncoinScraper:
         # connector = ProxyConnector.from_url("http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225")
         self.asyncSession = aiohttp.ClientSession()
         self.parameter = parameter
-        self.updateCookies()
+        # self.updateCookies()
         self.autoSave = True
         self.outputfile = outputfilename
         self.searchurl = "https://api.leboncoin.fr/api/adfinder/v1/search"
@@ -192,6 +196,8 @@ class LeboncoinScraper:
         # }
         res = await self.fetch("https://api.leboncoin.fr/finder/search",headers=self.headers,json=parameter)
         await asyncio.sleep(3)
+        if self.autoSave:
+            await self.saveAds(res)
         return res
         jsondata = json.dumps(parameter)
         jsondataasbytes = jsondata.encode()  

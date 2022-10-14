@@ -25,8 +25,8 @@ class ProxyScraper:
         # session = AsyncHTMLSession()
         connector = ProxyConnector()
         async with aiohttp.ClientSession(connector=connector, request_class=ProxyClientRequest) as session: 
-            headers = kwargs.get("headers")
-            if not headers:kwargs['headers']=self.headers
+            #headers = kwargs.get("headers")
+            #if not headers:kwargs['headers']=self.headers
             print(url)
             res = await session.get(url,ssl=False,**kwargs)
             d =  res.status
@@ -104,7 +104,7 @@ class ProxyScraper:
             # async with session.get(,) as r:
             #     return r
             print(proxies)
-            r= await self.fetch(url, proxy=proxies["http"], timeout=2)
+            r= await self.fetch(url, proxy=proxies["http"], headers=self.headers,timeout=10)
             print(r)
             return r,proxies
         except:
