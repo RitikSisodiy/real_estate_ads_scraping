@@ -14,7 +14,7 @@ def getTimeStamp(strtime):
       t = datetime.strptime(strtime,formate)
       return t.timestamp()
     except:
-      return "1990-01-01T12:00:00.00Z"
+      return 0
 def ParseBienici(data):
   # data =data["_source"]
   now = datetime.now()
