@@ -8,10 +8,13 @@ def getFieldLlstStartWith(start,datadic):
       res[key] = val
   return res
 def getTimeStamp(strtime):
-    formate = '%Y-%m-%dT%H:%M:%S.%fZ'
-    #1970-01-01T00:00:00.000Z
-    t = datetime.strptime(strtime,formate)
-    return t.timestamp()
+    try:
+      formate = '%Y-%m-%dT%H:%M:%S.%fZ'
+      #1970-01-01T00:00:00.000Z
+      t = datetime.strptime(strtime,formate)
+      return t.timestamp()
+    except:
+      return "1990-01-01T12:00:00.00Z"
 def ParseBienici(data):
   # data =data["_source"]
   now = datetime.now()
