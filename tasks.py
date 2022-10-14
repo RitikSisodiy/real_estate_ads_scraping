@@ -154,6 +154,30 @@ def update_logicImmo_ads():
     print("Task End ================> ")
     print(data)
     return data
+@celery_app.task(name="real estate fetch lefigaro latest ad")
+def update_lefigaro_ads():
+    print("Task start ================> ")
+    try:
+        data = LefigaroScrapper({"real_state_type":"Updated/Latest Ads"})
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ================> ",e)
+        data = "exeption"
+    print("Task End ================> ")
+    print(data)
+    return data
+@celery_app.task(name="real estate fetch avendrealouer latest ad")
+def update_avendrealouer_ads():
+    print("Task start ================> ")
+    try:
+        data = avendrealouerScrapper({"real_state_type":"Updated/Latest Ads"})
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ================> ",e)
+        data = "exeption"
+    print("Task End ================> ")
+    print(data)
+    return data
 @celery_app.task(name="real estate fetch seloger latest ad")
 def update_seloger_ads():
     print("Task start ================> ")
@@ -207,7 +231,7 @@ def scrape_paruvendu_task(payload):
 def setup_periodic_tasks(sender, **kwargs):
     print("rnnnint periodic tasks")
     # Calls update_leboncoin_ads in every 20 minutes
-    # sender.add_periodic_task(20*60, update_leboncoin_ads.s(), name='update leboncoin ads in every 20 minuts')
+    sender.add_periodic_task(20*60, update_leboncoin_ads.s(), name='update leboncoin ads in every 20 minuts')
     # Calls update_peruvendu_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_paruvendu_ads.s(), name='update paruvendu ads every 20 minuts')
     # Calls update_pap_ads in every 20 minutes
@@ -218,3 +242,7 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(20*60, update_Bienci_ads.s(), name='update Bienci ads every 20 minuts')
     # Calls update_logicImmo_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_logicImmo_ads.s(), name='update logicImmo ads every 20 minuts')
+    # Calls update_logicImmo_ads in every 20 minutes
+    sender.add_periodic_task(20*60, update_lefigaro_ads.s(), name='update lefigaro ads every 20 minuts')
+    # Calls update_logicImmo_ads in every 20 minutes
+    sender.add_periodic_task(20*60, update_avendrealouer_ads.s(), name='update avendrealouer ads every 20 minuts')
