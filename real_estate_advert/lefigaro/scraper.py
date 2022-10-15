@@ -274,7 +274,7 @@ async def asyncUpdateParuvendu():
             updated = False
             p=1
             producer = AsyncKafkaTopicProducer()
-            while not updated:
+            while not updated and p<=100:
                 print(f"cheking page {p}")
                 adsres = await parstItems(session,params,page=p,save=False,producer=producer)
                 ads = adsres["classifieds"]
