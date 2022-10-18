@@ -47,7 +47,7 @@ def ParsePap(data):
       "ads_type": adtype,
       "price": float(price),
       "original_price": float(price),
-      "area":  caracteristiquesdic.get("mA2"),
+      "area":  caracteristiquesdic.get("mA2") or "",
       "city": re.search(cityRe,data.get("titre")).group(),
       "declared_habitable_surface":  caracteristiquesdic.get("mA2"),
       "declared_land_surface": caracteristiquesdic.get("Terrain"),
