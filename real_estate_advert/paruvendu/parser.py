@@ -88,7 +88,7 @@ def ParseParuvendu(data):
       "url": data.get("shortURL"),
       "dpe": detailT.get("GES"),
       "ges": detailT.get("DPE"),
-      "location":"",
+      "location":"0,0",
       "variation": {
                 "price": 0,
                 "timestamp": ""
