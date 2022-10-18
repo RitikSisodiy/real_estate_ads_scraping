@@ -68,7 +68,6 @@ def ParsePap(data):
       "available": True,
       "status": True,
       "furnished": any(word in data.get("texte").lower() for word in ["furnished","meublée","meublé"]),
-      "last_checked_at": now.timestamp(),
       "coloc_friendly": False,
       "elevator": any(word in data.get("texte").lower() for word in ["elevator","ascenseur"]),
       "pool": any(word in data.get("texte").lower() for word in ["piscine","piscina"]),
