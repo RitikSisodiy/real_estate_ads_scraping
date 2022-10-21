@@ -12,6 +12,8 @@ from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
 from real_estate_advert.logicImmo.logicImmo import main_scraper as LogicImmoScraper
 from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
+from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
+
 
 from celery import Celery
 from celery.schedules import crontab
@@ -215,6 +217,19 @@ def scrape_paruvendu_task(payload):
     print("payload : ", payload)
     try:
         ParuvenduScraper(payload)
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ==============>", e)
+    # Scraping task obj start here
+
+    print("Task End ================> ")
+
+@celery_app.task(name="real estate green-acres")
+def scrap_greenacres_task(payload):
+    print("Task start ================> ")
+    print("payload : ", payload)
+    try:
+        greenacresrScrapper(payload)
     except Exception as e:
         traceback.print_exc()
         print("Exception ==============>", e)

@@ -1,0 +1,23 @@
+{
+    "searchConfiguration": {
+        "locationsIds": [],
+        "cultureId": "en",
+        "countryId": "fr",
+        "advertType": "properties",
+        "sortOrder": "date_d",
+        "locationMode": "default",
+        "pageNumber": 1,
+        "pageSize": 500,
+        "reducePrice": false,
+        "isAgencyListing": false,
+        "isPrivateListing": false,
+        "isOldAdverts": false,
+        "isNewAdverts": false,
+        "lessThanAMonth": false,
+        "withPictures": false,
+        "withVideoLink": false,
+        "withVisual3DLink": false,
+        "investorMode": false,
+        "locations": []
+    }
+}

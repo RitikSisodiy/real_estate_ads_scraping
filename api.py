@@ -353,6 +353,39 @@ async def scrape_avendrealouer(real_args: RealStateParameter, real_state_type: R
         return {"message": "scraping request is failed",
                 "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "exception": "real_state_type is required..."}
+@router.post("/real-estate/green-acres", tags=["Real estate Advert"], status_code=status.HTTP_200_OK)
+async def scrape_GreenAcresr(real_args: RealStateParameter, real_state_type: RealStateType,
+                         vendor: Optional[VendorType] = None,
+                         property_type: Optional[PropertyType] = None):
+    """
+    :param real_args:
+    :param vendor:
+    :param real_state_type:
+    :param property_type:
+    :return:
+    """
+
+    payload = dict(real_args)
+    if real_state_type:
+        try:
+            payload.update({"real_state_type": real_state_type})
+            if vendor:
+                payload.update({"vendor": vendor})
+            if property_type:
+                payload.update({"property_type": property_type})
+
+            task_id = tasks.scrap_greenacres_task.apply_async(kwargs={"payload": payload}, retry=False)
+            return {"message": "scraping request is successfully added to web scrapping server",
+                    "status": status.HTTP_200_OK,
+                    "request_id": str(task_id)}
+
+        except Exception as e:
+            return {"message": "scraping request is failed",
+                    "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+    else:
+        return {"message": "scraping request is failed",
+                "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "exception": "real_state_type is required..."}
 
 
 @router.post("/real-estate/checkAdStatus", tags=["Real estate Advert"], status_code=status.HTTP_200_OK)
