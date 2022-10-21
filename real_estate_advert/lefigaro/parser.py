@@ -13,13 +13,13 @@ def ParseLefigaro(data):
   try:
     adtyp = "sale" if data.get("transactionType")=="vente" else "rent"
     prize  = data.get("priceLabel")
-    prize = float(re.search("[0-9.]+",prize).group())
-    location = data.get("location")
+    prize = int(re.search("[0-9.]+",prize).group())
+    location = data.get("location") or "0,0"
     rooms =  int(re.search("[0-9]+",data.get("roomCountLabel")).group()) if re.search("[0-9]+",data.get("roomCountLabel")) else 0
     bedrooms =  data.get("bedRoomCount")
     sellerdetail = data.get("client")
     sellerLocation = sellerdetail.get("location")
-    area = data.get("area") or 0
+    area = int(data.get("area")) if data.get("area") else 0 or 0
     title = f"{data.get('transactionType')} {data.get('type')} "
     if rooms:title+=str(rooms)+ "pièces "
     if area:title += str(area)+ " m²"
@@ -68,7 +68,6 @@ def ParseLefigaro(data):
       "available": True,
       "status": True,
       "furnished": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["furnished","meublée","meublé"]),
-      "last_checked_at": data.get("@timestamp"),
       "coloc_friendly": False,
       "elevator": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["elevator","ascenseur"]),
       "pool": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["piscine","piscina"]),
