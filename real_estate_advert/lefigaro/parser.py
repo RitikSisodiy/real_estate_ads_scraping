@@ -9,11 +9,11 @@ def getTimeStamp(strtime,formate=None):
     return t.timestamp()
   except:return None
 def ParseLefigaro(data):
-  now = datetime.now()
-  try:
+    now = datetime.now()
+  # try:
     adtyp = "sale" if data.get("transactionType")=="vente" else "rent"
     prize  = data.get("priceLabel")
-    prize = int(re.search("[0-9.]+",prize).group())
+    prize = float(re.search("[0-9.]+",prize).group())
     location = data.get("location")
     rooms =  int(re.search("[0-9]+",data.get("roomCountLabel")).group()) if re.search("[0-9]+",data.get("roomCountLabel")) else 0
     bedrooms =  data.get("bedRoomCount")
@@ -35,8 +35,8 @@ def ParseLefigaro(data):
     sdata = {
       "id": "lefi-"+data.get("id"),
       "ads_type": adtyp,
-      "price": prize,
-      "original_price": prize,
+      "price": int(prize),
+      "original_price": int(prize),
       "area": int(area),
       "city": location.get("city"),     # "Poitiers (86000)"
       "declared_habitable_surface": data.get("area"),
@@ -68,7 +68,6 @@ def ParseLefigaro(data):
       "available": True,
       "status": True,
       "furnished": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["furnished","meublée","meublé"]),
-      "last_checked_at": data.get("@timestamp"),
       "coloc_friendly": False,
       "elevator": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["elevator","ascenseur"]),
       "pool": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["piscine","piscina"]),
@@ -98,8 +97,8 @@ def ParseLefigaro(data):
             "priceDeviation": []
       }
     return sdata
-  except:
-    open("lefigaroerror.json",'w').write(json.dumps(data)+"\n")
-    return {}
-    traceback.print_exc()
-    raise ValidationErr
+  # except:
+  #   open("lefigaroerror.json",'w').write(json.dumps(data)+"\n")
+  #   return {}
+  #   traceback.print_exc()
+  #   raise ValidationErr
