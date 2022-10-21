@@ -9,8 +9,8 @@ def getTimeStamp(strtime,formate=None):
     return t.timestamp()
   except:return None
 def ParseLefigaro(data):
-    now = datetime.now()
-  # try:
+  now = datetime.now()
+  try:
     adtyp = "sale" if data.get("transactionType")=="vente" else "rent"
     prize  = data.get("priceLabel")
     prize = float(re.search("[0-9.]+",prize).group())
@@ -97,8 +97,8 @@ def ParseLefigaro(data):
             "priceDeviation": []
       }
     return sdata
-  # except:
-  #   open("lefigaroerror.json",'w').write(json.dumps(data)+"\n")
-  #   return {}
-  #   traceback.print_exc()
-  #   raise ValidationErr
+  except:
+    open("lefigaroerror.json",'w').write(json.dumps(data)+"\n")
+    return {}
+    traceback.print_exc()
+    raise ValidationErr
