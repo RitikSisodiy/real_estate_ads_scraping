@@ -14,12 +14,12 @@ def ParseLefigaro(data):
     adtyp = "sale" if data.get("transactionType")=="vente" else "rent"
     prize  = data.get("priceLabel")
     prize = int(re.search("[0-9.]+",prize).group())
-    location = data.get("location") or "0,0"
+    location = data.get("location")
     rooms =  int(re.search("[0-9]+",data.get("roomCountLabel")).group()) if re.search("[0-9]+",data.get("roomCountLabel")) else 0
     bedrooms =  data.get("bedRoomCount")
     sellerdetail = data.get("client")
     sellerLocation = sellerdetail.get("location")
-    area = int(data.get("area")) if data.get("area") else 0 or 0
+    area = data.get("area") or 0
     title = f"{data.get('transactionType')} {data.get('type')} "
     if rooms:title+=str(rooms)+ "pièces "
     if area:title += str(area)+ " m²"
@@ -37,7 +37,7 @@ def ParseLefigaro(data):
       "ads_type": adtyp,
       "price": prize,
       "original_price": prize,
-      "area": area,
+      "area": int(area),
       "city": location.get("city"),     # "Poitiers (86000)"
       "declared_habitable_surface": data.get("area"),
       "declared_land_surface": data.get("area"),
@@ -68,6 +68,7 @@ def ParseLefigaro(data):
       "available": True,
       "status": True,
       "furnished": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["furnished","meublée","meublé"]),
+      "last_checked_at": data.get("@timestamp"),
       "coloc_friendly": False,
       "elevator": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["elevator","ascenseur"]),
       "pool": any(word in (data.get("description").lower() + " ".join(data.get("options") or "")) for word in ["piscine","piscina"]),
@@ -96,7 +97,6 @@ def ParseLefigaro(data):
             "last_checked": now.isoformat(),
             "priceDeviation": []
       }
-    
     return sdata
   except:
     open("lefigaroerror.json",'w').write(json.dumps(data)+"\n")
