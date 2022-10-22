@@ -89,12 +89,7 @@ def ParseLefigaro(data):
       "url": data.get("recordLink"),
       "dpe": data.get("dpe").get("energyconsumptioncategory") or "",
       "ges": data.get("dpe").get("gesemissioncategory") or "",
-      "variation": {
-                "price": 0,
-                "timestamp": ""
-            },
             "last_checked": now.isoformat(),
-            "priceDeviation": []
       }
     return sdata
   except:

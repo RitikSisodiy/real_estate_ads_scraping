@@ -87,12 +87,7 @@ def ParseLeboncoin(data):
             "url": data.get("url"),
             "ges":features.get("ges"),
             "dpe":features.get("dpe"),  
-            "variation": {
-                "price": 0,
-                "timestamp": ""
-            },
             "last_checked": now.isoformat(),
-            "priceDeviation": []
         }
     except:
         traceback.print_exc()

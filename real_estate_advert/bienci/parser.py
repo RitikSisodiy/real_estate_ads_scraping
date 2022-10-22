@@ -75,12 +75,7 @@ def ParseBienici(data):
           "url":f"https://www.bienici.com/annonce/{data.get('id')}",
           "ges":"NA",
           "dpe":"NA",
-          "variation": {
-                "price": 0,
-                "timestamp": ""
-            },
             "last_checked": now.isoformat(),
-            "priceDeviation": []
         }
     return sdata
   except:

@@ -83,12 +83,7 @@ def ParseSeloger(data):
         "url": data.get("permalink"),
         "ges":data.get("energyBalance")["ges"].get("category"),
         "dpe":data.get("energyBalance")["dpe"].get("category"),
-        "variation": {
-                "price": 0,
-                "timestamp": ""
-            },
             "last_checked": now.isoformat(),
-            "priceDeviation": []  
       }
   except:
     traceback.print_exc()

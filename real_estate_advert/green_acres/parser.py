@@ -65,12 +65,7 @@ def ParseGreenAcre(data):
       "url": f"https://www.green-acres.fr/fr/properties/{data.get('id')}.htm",
       "dpe": "N/A",
       "ges": "N/A",
-      "variation": {
-                "price": 0,
-                "timestamp": ""
-            },
       "last_checked": now.isoformat(),
-      "priceDeviation": []
       }
     
     return sdata

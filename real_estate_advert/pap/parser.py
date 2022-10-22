@@ -86,12 +86,7 @@ def ParsePap(data):
       "url": data.get("url"),
       "dpe": data.get("classe_dpe").get("letter") if data.get("classe_dpe") else None,
       "ges": data.get("classe_ges").get("letter") if data.get("classe_ges") else None,
-      "variation": {
-                "price": 0,
-                "timestamp": ""
-            },
             "last_checked": now.isoformat(),
-            "priceDeviation": []
     }
     return sdata
   except: 

@@ -89,12 +89,7 @@ def ParseParuvendu(data):
       "dpe": detailT.get("GES"),
       "ges": detailT.get("DPE"),
       "location":"0,0",
-      "variation": {
-                "price": 0,
-                "timestamp": ""
-            },
             "last_checked": now.isoformat(),
-            "priceDeviation": []
       }
     return sdata
   except:

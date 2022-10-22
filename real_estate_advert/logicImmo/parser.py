@@ -82,12 +82,7 @@ def ParseLogicImmo(data):
         "url": data.get("url"),
         "ges":ges,
         "dpe":dpe ,
-        "variation": {
-                "price": 0,
-                "timestamp": ""
-            },
             "last_checked": now.isoformat(),
-            "priceDeviation": []
       }
   except:
     traceback.print_exc()

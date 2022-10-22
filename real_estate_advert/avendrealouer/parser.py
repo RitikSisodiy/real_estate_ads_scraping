@@ -130,12 +130,7 @@ def ParseAvendrealouer(data):
             "url": url,
             "ges":data.get("diagnostics").get("gasSymbol"),
             "dpe":data.get("diagnostics").get("energySymbol"),  
-            "variation": {
-                "price": 0,
-                "timestamp": ""
-            },
             "last_checked": now.isoformat(),
-            "priceDeviation": []
         }
         return sdata
     except:
