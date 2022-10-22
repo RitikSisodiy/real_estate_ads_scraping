@@ -18,6 +18,8 @@ except:
 pageSize = 499
 kafkaTopicName = "bienici_data_v1"
 commanTopicName = "common-ads-data_v1"
+nortifyTopic = "common-ads-data_v1_nortification"
+
 # define your filter here
 cpath =os.path.dirname(__file__) 
 citys = open(f"{cpath}/finalcitys.json",'r').readlines()
@@ -180,7 +182,10 @@ async def main():
 async def saveRealstateAds(ads,**kwargs):
     producer = kwargs.get("producer")
     await producer.TriggerPushDataList(kafkaTopicName,ads)
-    await producer.TriggerPushDataList(commanTopicName,[ParseBienici(ad) for ad in ads])
+    ads = [ParseBienici(ad) for ad in ads]
+    await producer.TriggerPushDataList(commanTopicName,ads)
+    await producer.TriggerPushDataList(nortifyTopic,ads)
+
     # allads = ''
     # for ad in ads:
     #     allads+= json.dumps(ad)+"\n"

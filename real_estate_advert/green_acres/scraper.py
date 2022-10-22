@@ -6,13 +6,15 @@ import asyncio
 import os
 from requests_html import HTMLSession,HTML
 import json,re
-# from .parser import ParseLefigaro
+from .parser import ParseGreenAcre
 try:
     from real_estate_advert.green_acres.uploader import AsyncKafkaTopicProducer
 except:
     from .uploader import AsyncKafkaTopicProducer
 kafkaTopicName = "green-acres-data_v1"
 commonTopicName = "common-ads-data_v1"
+nortifyTopic = "common-ads-data_v1_nortification"
+
 s= HTMLSession()
 pagesize  = 100 # maxsize is 100
 cpath =os.path.dirname(__file__)
@@ -78,7 +80,9 @@ async def savedata(session,ads,**kwargs):
                 ad["summary"] = await getDeription(session,ad["id"])
             tads.append(ad)
         await producer.TriggerPushDataList(kafkaTopicName,tads)
-        await producer.TriggerPushDataList(commonTopicName,[ParseLefigaro(ad) for ad in tads])
+        ads = [ParseGreenAcre(ad) for ad in tads]
+        await producer.TriggerPushDataList(commonTopicName,ads)
+        await producer.TriggerPushDataList(nortifyTopic,ads)
         # resstr = ''
         # for ad in tads:
         #     if len(ad["summary"])==0:

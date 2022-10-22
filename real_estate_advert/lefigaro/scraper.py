@@ -13,6 +13,8 @@ except:
     from .uploader import AsyncKafkaTopicProducer
 kafkaTopicName = "lefigaro-data_v1"
 commonTopicName = "common-ads-data_v1"
+nortifyTopic = "common-ads-data_v1_nortification"
+
 s= HTMLSession()
 pagesize  = 1000 # maxsize is 100
 cpath =os.path.dirname(__file__)
@@ -58,7 +60,10 @@ async def savedata(resjson,**kwargs):
     ads = resjson["classifieds"]
     producer = kwargs["producer"]
     await producer.TriggerPushDataList(kafkaTopicName,ads)
-    await producer.TriggerPushDataList('common-ads-data_v1',[ParseLefigaro(ad) for ad in ads])
+    ads = [ParseLefigaro(ad) for ad in ads]
+    await producer.TriggerPushDataList('common-ads-data_v1',ads)
+    await producer.TriggerPushDataList(nortifyTopic,ads)
+
     # for ad in ads:
     #     resstr += json.dumps(ad)+"\n"
     # with open("output.json",'a') as file:

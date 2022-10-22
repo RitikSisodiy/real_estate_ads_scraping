@@ -28,6 +28,8 @@ except:
 cpath =os.path.dirname(__file__)
 kafkaTopicName = "logicImmo_data_v1"
 commonTopicName = "common-ads-data_v1"
+nortifyTopic = "common-ads-data_v1_nortification"
+
 class LogicImmoScraper:
     def __init__(self,paremeter,asyncsize=20,timeout = 5,proxy = None) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
@@ -359,6 +361,8 @@ class LogicImmoScraper:
         self.producer.PushDataList(kafkaTopicName,adslist)
         parseAdList = [ParseLogicImmo(ad) for ad in adslist]
         self.producer.PushDataList(commonTopicName,parseAdList)
+        self.producer.PushDataList(nortifyTopic,parseAdList)
+
     def Crawlparam(self,param,allPage = True,first=False,save=True):
         print(param)
         if allPage:param["searchParameters"]["offset"] = 1

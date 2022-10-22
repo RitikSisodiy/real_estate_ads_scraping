@@ -27,6 +27,8 @@ except:
 cpath =os.path.dirname(__file__)
 kafkaTopicName = "seloger_data_v1"
 commonTopicName = "common-ads-data_v1"
+nortifyTopic = "common-ads-data_v1_nortification"
+
 class SelogerScraper:
     def __init__(self,paremeter,asyncsize=20,proxyThread=True,proxies = {}) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
@@ -373,6 +375,7 @@ class SelogerScraper:
         self.producer.PushDataList(kafkaTopicName,adslist)
         parseAdList = [ParseSeloger(ad) for ad in adslist]
         self.producer.PushDataList(commonTopicName,parseAdList)
+        self.producer.PushDataList(nortifyTopic,parseAdList)
     def Crawlparam(self,param,allPage = True,first=False,save=True,page=1):
         print(param)
         if allPage:param['pageIndex'] = page
