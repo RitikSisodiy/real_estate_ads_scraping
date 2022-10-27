@@ -11,6 +11,7 @@ from real_estate_advert.bienci.scraper import UpdateBienci
 from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
 from real_estate_advert.logicImmo.logicImmo import main_scraper as LogicImmoScraper
 from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
+from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceScrapper
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
 
@@ -83,6 +84,19 @@ def scrap_avendrealouer_task(payload):
     print("payload : ", payload)
     try:
         data = avendrealouerScrapper(payload)
+    except Exception as e:
+        print(traceback.format_exc())
+        print("Exception ================> ",e)
+        data= "exception"
+    # Scraping task obj start here
+    print("Task End ================> ")
+    return data
+@celery_app.task(name="real estate OuestFranceScrapper")
+def scrap_OuestFranceScrapper_task(payload):
+    print("Task start ================> ")
+    print("payload : ", payload)
+    try:
+        data = OuestFranceScrapper(payload)
     except Exception as e:
         print(traceback.format_exc())
         print("Exception ================> ",e)
@@ -223,6 +237,14 @@ def scrape_paruvendu_task(payload):
     # Scraping task obj start here
 
     print("Task End ================> ")
+@celery_app.task(name="real estate OuestFrance")
+def update_OuestFranceScrapper_ads():
+    print("Task start ================> ")
+    try:OuestFranceScrapper({},update=True)
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ================> ",e)
+    print("Task End ================> ")
 
 @celery_app.task(name="real estate green-acres")
 def scrap_greenacres_task(payload):
@@ -248,8 +270,8 @@ def setup_periodic_tasks(sender, **kwargs):
     # Calls update_leboncoin_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_leboncoin_ads.s(), name='update leboncoin ads in every 20 minuts')
     # Calls update_peruvendu_ads in every 20 minutes
-    sender.add_periodic_task(20*60, update_paruvendu_ads.s(), name='update paruvendu ads every 20 minuts')
-    # Calls update_pap_ads in every 20 minutes
+    # sender.add_periodic_task(20*60, update_paruvendu_ads.s(), name='update paruvendu ads every 20 minuts')
+    # # Calls update_pap_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_pap_ads.s(), name='update pap ads every 20 minuts')
     # Calls update_seloger_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_seloger_ads.s(), name='update seloger ads every 20 minuts')
@@ -261,3 +283,5 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(20*60, update_lefigaro_ads.s(), name='update lefigaro ads every 20 minuts')
     # Calls update_logicImmo_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_avendrealouer_ads.s(), name='update avendrealouer ads every 20 minuts')
+    # Calls update_logicImmo_ads in every 20 minutes
+    sender.add_periodic_task(20*60, update_OuestFranceScrapper_ads.s(), name='update OuestFranceScrapper ads every 20 minuts')
