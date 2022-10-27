@@ -45,7 +45,6 @@ async def savedata(resjson,**kwargs):
     await producer.TriggerPushDataList('paruvendu-data_v1',ads)
     ads = [ParseParuvendu(ad) for ad in ads]
     await producer.TriggerPushDataList('common-ads-data_v1',ads)
-    await producer.TriggerPushDataList("common-ads-data_v1_nortification",ads)
     # for ad in ads:
     #     resstr += json.dumps(ad)+"\n"
     # with open("output.json",'a') as file:

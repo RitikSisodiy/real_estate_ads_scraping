@@ -20,7 +20,6 @@ from kafka_publisher import KafkaTopicProducer
 producer = AsyncKafkaTopicProducer()
 kafkaTopicName = "pap_data_v1"
 commanPattern ="common-ads-data_v1"
-nortifyTopic = "common-ads-data_v1_nortification"
 cpath =os.path.dirname(__file__)
 chrome = getChromePath()
 class PapScraper:
@@ -225,7 +224,6 @@ class PapScraper:
             producer.PushDataList(kafkaTopicName,adlist)
             ads  = [ParsePap(ad) for ad in adlist]
             producer.PushDataList(commanPattern,ads)
-            producer.PushDataList(nortifyTopic,ads)
 
             final = ""
             # for da in adsdata:

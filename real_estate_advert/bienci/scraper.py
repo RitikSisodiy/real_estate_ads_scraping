@@ -18,7 +18,6 @@ except:
 pageSize = 499
 kafkaTopicName = "bienici_data_v1"
 commanTopicName = "common-ads-data_v1"
-nortifyTopic = "common-ads-data_v1_nortification"
 
 # define your filter here
 cpath =os.path.dirname(__file__) 
@@ -184,7 +183,6 @@ async def saveRealstateAds(ads,**kwargs):
     await producer.TriggerPushDataList(kafkaTopicName,ads)
     ads = [ParseBienici(ad) for ad in ads]
     await producer.TriggerPushDataList(commanTopicName,ads)
-    await producer.TriggerPushDataList(nortifyTopic,ads)
 
     # allads = ''
     # for ad in ads:

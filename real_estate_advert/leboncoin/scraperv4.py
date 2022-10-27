@@ -25,7 +25,6 @@ cpath =os.path.dirname(__file__)
 producer = AsyncKafkaTopicProducer()
 KafkaTopicName = 'leboncoin-data_v1'
 commonAdsTopic= "common-ads-data_v1"
-nortifyTopic = "common-ads-data_v1_nortification"
 def now_time_int():
     dateobj = datetime.now()
     total = int(dateobj.strftime('%S'))
@@ -273,7 +272,6 @@ class LeboncoinScraper:
         await producer.TriggerPushDataList(KafkaTopicName,ads)
         parseAds = [ParseLeboncoin(ad) for ad in ads]
         await producer.TriggerPushDataList(commonAdsTopic,parseAds)
-        await producer.TriggerPushDataList(nortifyTopic,parseAds)
         # totalads = ''
         # for ad in ads:
         #     totalads+= json.dumps(ad)+"\n"

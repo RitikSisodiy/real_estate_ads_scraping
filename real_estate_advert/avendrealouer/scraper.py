@@ -14,7 +14,6 @@ except:
 from .parser import ParseAvendrealouer
 kafkaTopicName = "avendrealouer-data_v1"
 commonTopicName = "common-ads-data_v1"
-nortifyTopic = "common-ads-data_v1_nortification"
 s= HTMLSession()
 pagesize  = 100 # maxsize is 100
 cpath =os.path.dirname(__file__)
@@ -63,7 +62,6 @@ async def savedata(resjson,**kwargs):
     await producer.TriggerPushDataList(kafkaTopicName,ads)
     ads = [ParseAvendrealouer(ad) for ad in ads]
     await producer.TriggerPushDataList(commonTopicName,ads)
-    await producer.TriggerPushDataList(nortifyTopic,ads)
     # for ad in ads:
     #     resstr += json.dumps(ad)+"\n"
     # with open("output.json",'a') as file:

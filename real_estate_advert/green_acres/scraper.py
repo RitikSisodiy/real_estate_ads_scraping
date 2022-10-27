@@ -13,7 +13,6 @@ except:
     from .uploader import AsyncKafkaTopicProducer
 kafkaTopicName = "green-acres-data_v1"
 commonTopicName = "common-ads-data_v1"
-nortifyTopic = "common-ads-data_v1_nortification"
 
 s= HTMLSession()
 pagesize  = 100 # maxsize is 100
@@ -82,7 +81,6 @@ async def savedata(session,ads,**kwargs):
         await producer.TriggerPushDataList(kafkaTopicName,tads)
         ads = [ParseGreenAcre(ad) for ad in tads]
         await producer.TriggerPushDataList(commonTopicName,ads)
-        await producer.TriggerPushDataList(nortifyTopic,ads)
         # resstr = ''
         # for ad in tads:
         #     if len(ad["summary"])==0:
