@@ -42,9 +42,6 @@ def getAjency(id):
           return data["data"]
         else: return {}
     else:
-        print(id," ")
-        print(response.status_code)
-        input()
         return {}
 def getOrCreateDb(id):
     data = db.get(id)
