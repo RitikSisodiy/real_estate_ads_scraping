@@ -72,7 +72,7 @@ def ParseOuestfrance(data):
   if data.get("nb_pieces"): title += str(data.get("nb_pieces"))+ "pièce"
   try:
     sdata = {
-        "id":"quest-"+data.get("id"),
+        "id":"quest-"+str(data.get("id")),
         "ads_type": "buy" if data.get("transac_lib_encode")=="vente" else "rent",
         "price": data.get("prix") or 0,
         "original_price": data.get("prix") or 0,
