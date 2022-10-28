@@ -60,7 +60,7 @@ def ParseOuestfrance(data):
   now = datetime.now()
   title = ""
   seller = getOrCreateDb(data.get("cli"))
-  location = data.get("lieu")
+  location = data.get("lieu") or {}
   if location:postalcode = location.get("insee")
   else:postalcode = ""
   if data.get("lieu_encode"): title+=data.get("lieu_encode")+" "
@@ -131,6 +131,7 @@ def ParseOuestfrance(data):
         "dpe":data.get("dpe_lettre") or ""
       }
   except:
+    sdata = {}
     traceback.print_exc()
     with open("error.json","w") as file:
       file.write(json.dumps(data))
