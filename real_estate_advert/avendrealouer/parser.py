@@ -1,7 +1,7 @@
 from datetime import datetime
 from xml.dom import ValidationErr
 import requests ,json,re
-from .temp import tempDb
+from temp import tempDb
 db = tempDb()
 def try_or(func, default=None, expected_exc=(Exception,)):
     try:

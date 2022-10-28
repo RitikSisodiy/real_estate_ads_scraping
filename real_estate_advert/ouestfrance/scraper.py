@@ -1,12 +1,16 @@
+from operator import imod
 import os,traceback,requests,time,json
 from datetime import datetime
 from tqdm import tqdm
+from .parser import ParseOuestfrance
 try:
     from uploader import AsyncKafkaTopicProducer
 except:
     from .uploader import AsyncKafkaTopicProducer
 cpath =os.path.dirname(__file__)
 kafkaTopicName = "ouestfrance-immo-v1"
+commanPattern ="common-ads-data_v1"
+
 class OuestFranceScraper:
     def __init__(self,paremeter,timeout = 5) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
@@ -64,6 +68,13 @@ class OuestFranceScraper:
         return r
     def save(self,adslist):
         self.producer.PushDataList(kafkaTopicName,adslist)
+        adslist = [ParseOuestfrance(ad) for ad in adslist]
+        self.producer.PushDataList(commanPattern,adslist)
+        # data = ""
+        # for ad in adslist:
+        #     data += json.dumps(ad)+"\n"
+        # with open(f"{cpath}/out.json","a") as file:
+        #     file.write(data)
         # parseAdList = [ParseLogicImmo(ad) for ad in adslist]
         # self.producer.PushDataList(commonTopicName,parseAdList)
         # self.producer.PushDataList(nortifyTopic,parseAdList)
@@ -193,7 +204,7 @@ def main_scraper(payload,update=False):
 if __name__ == "__main__":
     data = {
         "limit":200,
-        "tri":"date_decroissant"
+        "tri":"date_desc"
     }
     ob = OuestFranceScraper(data,timeout=30)
     ob.CrawlOuestfrance()
