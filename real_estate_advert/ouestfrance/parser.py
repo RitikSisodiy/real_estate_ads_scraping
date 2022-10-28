@@ -61,7 +61,7 @@ def ParseOuestfrance(data):
   title = ""
   seller = getOrCreateDb(data.get("cli"))
   location = data.get("lieu") or {}
-  if location:postalcode = location.get("insee")
+  if location:postalcode = location.get("cp") or location.get("insee")  
   else:postalcode = ""
   if data.get("lieu_encode"): title+=data.get("lieu_encode")+" "
   if data.get("typ_lib"): title += data.get("typ_lib")+" "
