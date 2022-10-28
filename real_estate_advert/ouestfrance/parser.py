@@ -131,7 +131,6 @@ def ParseOuestfrance(data):
         "dpe":data.get("dpe_lettre") or ""
       }
   except:
-    sdata = {}
     traceback.print_exc()
     with open("error.json","w") as file:
       file.write(json.dumps(data))
