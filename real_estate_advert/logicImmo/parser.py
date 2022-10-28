@@ -73,6 +73,7 @@ def ParseLogicImmo(data):
         "property_type": data.get("propertyType"),
         "published_at": data.get("firstOnlineDate")-(3600*3),
         "created_at": data.get("updateDate")-(3600*3),
+        "last_modified": data.get("updateDate")-(3600*3),
         "others": {
           "assets":[],
           **getFieldLlstStartWith("has",data),

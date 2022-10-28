@@ -82,6 +82,7 @@ def ParsePap(data):
       "property_type": data.get("typebien"),
       "published_at": None,
       "created_at": GetTImeStamp(data.get("date")),
+      "last_modified": GetTImeStamp(data.get("date")),
       "visite_virtuelle": data.get("visite_virtuelle"),
       "url": data.get("url"),
       "dpe": data.get("classe_dpe").get("letter") if data.get("classe_dpe") else None,

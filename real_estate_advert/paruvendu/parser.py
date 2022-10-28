@@ -81,7 +81,7 @@ def ParseParuvendu(data):
       "property_type": detailT.get("_R2").lower(),
       "published_at": data.get("datePublish"),
       "created_at": getTimeStamp(data.get("datePublish"),"%d/%m/%Y"),
-      "updated_at": getTimeStamp(data.get("dateRefresh"),"%d/%m/%Y") or  getTimeStamp(data.get("datePublish"),"%d/%m/%Y"),
+      "last_modified": getTimeStamp(data.get("datePublish"),"%d/%m/%Y"),
       "others":{
         "assets":assetlist
       },

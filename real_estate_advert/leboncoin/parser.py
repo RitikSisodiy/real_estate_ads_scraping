@@ -78,7 +78,7 @@ def ParseLeboncoin(data):
             "property_type": featureslabels.get("real_estate_type"),
             "published_at": getTimeStamp(data.get("first_publication_date")),
             "created_at": getTimeStamp(data.get("index_date")),
-            "updated_at": getTimeStamp(data.get("index_date")),
+            "last_modified": getTimeStamp(data.get("index_date")),
             "others": {
             "assets":assetlist,
             "ges":features.get("ges"),        

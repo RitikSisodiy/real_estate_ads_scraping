@@ -75,6 +75,7 @@ def ParseSeloger(data):
         "property_type": re.search(r"(annonces/[a-z-]*)/([a-z]*)",data.get("permalink")).group(2),
         "published_at": data.get("created"),
         "created_at": getTimeStamp(data.get("lastModified")),
+        "last_modified": getTimeStamp(data.get("lastModified")),
         "others": {
           "assets":assetlist,
           "ges":data.get("energyBalance")["ges"].get("category"),        
@@ -83,7 +84,7 @@ def ParseSeloger(data):
         "url": data.get("permalink"),
         "ges":data.get("energyBalance")["ges"].get("category"),
         "dpe":data.get("energyBalance")["dpe"].get("category"),
-            "last_checked": now.isoformat(),
+        "last_checked": now.isoformat(),
       }
   except:
     traceback.print_exc()

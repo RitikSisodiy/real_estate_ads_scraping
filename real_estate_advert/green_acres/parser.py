@@ -58,6 +58,7 @@ def ParseGreenAcre(data):
       "property_type": data.get("type"),
       "published_at": getTimeStamp(data.get("creationDate")),
       "created_at": getTimeStamp(data.get("lastAdvertUpdate")),
+      "last_modified": getTimeStamp(data.get("lastAdvertUpdate")),
       "visite_virtuelle":data.get("visual3DUrl") or f'https://www.youtube.com/watch?v={data.get("videoLink")}' if data.get("videoLink") else "" ,
       "others":{
         "assets":[f'{info["formattedText"]}:{info["value"]}' for info in data.get("characteristics")] if  data.get("characteristics") else []

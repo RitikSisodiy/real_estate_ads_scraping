@@ -119,6 +119,7 @@ def ParseOuestfrance(data):
         "property_type": data.get("typ_encode"),
         "published_at": getTimeStamp(data.get("date_creation")),
         "created_at": getTimeStamp(data.get("date_deb_aff")),
+        "last_modified": getTimeStamp(data.get("date_deb_aff")),
         "visite_virtuelle": (data.get("has_visite_virtuelle") and data.get("url_visite_virtuelle")) or "",
         "url":f"https://www.ouestfrance-immo.com/immobilier/vente/appartement/paris-7e-75-75107/3-pieces-{data.get('id')}.htm",
         "others": {

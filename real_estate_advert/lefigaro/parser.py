@@ -82,6 +82,7 @@ def ParseLefigaro(data):
       "property_type": data.get("type"),
       "published_at": getTimeStamp(data.get("creationDate")),
       "created_at": getTimeStamp(data.get("updatedAt")),
+      "last_modified": getTimeStamp(data.get("updatedAt")),
       "visite_virtuelle":visual.get("3dVisualizationUrl") or visual.get("plan3dUrl") or visual.get("virtualTourUrl"),
       "others":{
         "assets":[opt for opt in data.get("options")] if  data.get("options") else []

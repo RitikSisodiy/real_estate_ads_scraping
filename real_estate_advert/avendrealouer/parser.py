@@ -121,7 +121,7 @@ def ParseAvendrealouer(data):
             "property_type": data.get("title").split(" ")[0] if data.get("title").split(" ") else "",
             "published_at": getTimeStamp(data.get("releaseDate")),
             "created_at": getTimeStamp(data.get("insertDate")),
-            "updated_at": getTimeStamp(data.get("insertDate")),
+            "last_modified": getTimeStamp(data.get("insertDate")),
             "others": {
             "assets":[],
             "ges":data.get("diagnostics").get("gasSymbol"),        

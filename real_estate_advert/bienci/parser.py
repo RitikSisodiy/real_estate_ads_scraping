@@ -68,6 +68,7 @@ def ParseBienici(data):
           "property_type": propername.get(data.get("propertyType")),
           "published_at": data.get("publicationDate"),
           "created_at": dates[0],
+          "last_modified": dates[0],
           "others":{
             "assets":[],
             **getFieldLlstStartWith("has",data),
