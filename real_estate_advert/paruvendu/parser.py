@@ -5,8 +5,8 @@ def getTimeStamp(strtime,formate=None):
     if not formate:
       formate = '%Y-%m-%d %H:%M:%S'
     t = datetime.strptime(strtime,formate)
-    return t.timestamp()
-  except:return None
+    return int(t.timestamp())
+  except:return 0
 def ParseParuvendu(data):
   now = datetime.now()
   try:

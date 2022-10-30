@@ -18,7 +18,7 @@ def getTimeStamp(strtime):
     formate = '%Y-%m-%d %H:%M:%S'
     # "2022-09-26 12:00:00"
     t = datetime.strptime(strtime,formate)
-    return t.timestamp()
+    return int(t.timestamp())
 session = requests.session()
 def getAjency(id,id2):
 

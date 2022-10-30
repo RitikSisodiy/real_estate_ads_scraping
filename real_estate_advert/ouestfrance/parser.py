@@ -9,7 +9,7 @@ def getTimeStamp(strtime):
         # 2022-06-19T05:26:55
         # "2022-10-28 08:07:14"
         t = datetime.strptime(strtime,formate)
-        return t.timestamp()
+        return int(t.timestamp())
 def getFieldLlstStartWith(start,datadic):
   res = {}
   for key,val in datadic.items():

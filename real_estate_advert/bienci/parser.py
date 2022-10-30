@@ -12,7 +12,7 @@ def getTimeStamp(strtime):
       formate = '%Y-%m-%dT%H:%M:%S.%fZ'
       #1970-01-01T00:00:00.000Z
       t = datetime.strptime(strtime,formate)
-      return t.timestamp()
+      return int(t.timestamp())
     except:
       return 0
 def ParseBienici(data):

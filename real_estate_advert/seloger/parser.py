@@ -6,7 +6,7 @@ def getTimeStamp(strtime):
         formate = '%Y-%m-%dT%H:%M:%S'
         # 2022-06-19T05:26:55
         t = datetime.strptime(strtime,formate)
-        return t.timestamp()
+        return int(t.timestamp())
 def ParseSeloger(data):
   now = datetime.now()
   assetlist = [d.get("label") for d in data.get("features")]

@@ -56,7 +56,7 @@ def getTimeStamp(strtime):
     formate = '%Y-%m-%dT%H:%M:%S'
     # 2022-06-19T05:26:55
     t = datetime.strptime(strtime,formate)
-    return t.timestamp()
+    return int(t.timestamp())
 async def getDeription(session,id):
     url = f"https://www.green-acres.fr/fr/properties/{id}.htm"
     r = await fetch(session,url,jsonresponce=False,headers={

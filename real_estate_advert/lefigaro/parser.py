@@ -6,7 +6,7 @@ def getTimeStamp(strtime,formate=None):
       # 2022-09-05T10:21:18
       formate = '%Y-%m-%dT%H:%M:%S'
     t = datetime.strptime(strtime,formate)
-    return t.timestamp()
+    return int(t.timestamp())
   except:return None
 def ParseLefigaro(data):
   now = datetime.now()

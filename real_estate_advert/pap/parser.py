@@ -8,7 +8,7 @@ def GetTImeStamp(time):
   date = f"{d}/{m}/{y}"
   formate = "%d/%m/%Y"
   t = datetime.strptime(date,formate)
-  return t.timestamp()
+  return int(t.timestamp())
 def GetTImeStamp(time):
   d,m,y = time.split(" ")
   dic2 = {'janvier': 'January', 'fevrier': 'February', 'mars': 'March', 'avril': 'April', 'mai': 'May', 'juin': 'June', 'juillet': 'July', 'aout': 'August', 'septembre': 'September', 'octobre': 'October', 'novembre': 'November', 'decembre': 'December'}
@@ -16,7 +16,7 @@ def GetTImeStamp(time):
   date = f"{d}/{m}/{y}"
   formate = "%d/%b/%Y"
   t = datetime.strptime(date,formate)
-  return t.timestamp()
+  return int(t.timestamp())
 # with open("pap_data_v1_response.json",'r') as file:
 #     data = json.load(file)
 def ParsePap(data):
