@@ -5,7 +5,7 @@ from datetime import datetime
 def getTimeStamp(strtime):
     formate = '%Y-%m-%d %H:%M:%S'
     t = datetime.strptime(strtime,formate)
-    return t.timestamp()
+    return int(t.timestamp())
 def ParseLeboncoin(data):
     now = datetime.now()
     # pinRegx = r'(\d{5}\-?\d{0,4})'
