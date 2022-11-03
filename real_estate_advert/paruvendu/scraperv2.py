@@ -10,10 +10,7 @@ try:
     from getfiterparam import getFilter
 except:
     from .getfiterparam import getFilter
-try:
-    from uploader import AsyncKafkaTopicProducer
-except:
-    from .uploader import AsyncKafkaTopicProducer
+from HttpRequest.uploader import AsyncKafkaTopicProducer
 pagesize  = 100 # maxsize is 100
 cpath =os.path.dirname(__file__)
 url = "https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list"

@@ -7,10 +7,7 @@ import os
 from requests_html import HTMLSession
 import json,re
 from .parser import ParseLefigaro
-try:
-    from uploader import AsyncKafkaTopicProducer
-except:
-    from .uploader import AsyncKafkaTopicProducer
+from HttpRequest.uploader import AsyncKafkaTopicProducer
 kafkaTopicName = "lefigaro-data_v1"
 commonTopicName = "common-ads-data_v1"
 

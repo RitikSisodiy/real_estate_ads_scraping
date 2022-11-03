@@ -7,10 +7,7 @@ import asyncio
 import os
 from requests_html import HTMLSession
 import json,re
-try:
-    from uploader import AsyncKafkaTopicProducer
-except:
-    from .uploader import AsyncKafkaTopicProducer
+from HttpRequest.uploader import AsyncKafkaTopicProducer
 from .parser import ParseAvendrealouer
 kafkaTopicName = "avendrealouer-data_v1"
 commonTopicName = "common-ads-data_v1"

@@ -20,11 +20,7 @@ ViewAddUrl = "https://api-logicimmo.svc.groupe-seloger.com/api/v3/listings/"
 resultcounturl = "https://api-logicimmo.svc.groupe-seloger.com/api/v1/listings/count/"
 session = requests.session()
 proxy = {'https': proxyurl, 'http': proxyurl}
-
-try:
-    from uploader import AsyncKafkaTopicProducer
-except:
-    from .uploader import AsyncKafkaTopicProducer
+from HttpRequest.uploader import AsyncKafkaTopicProducer
 cpath =os.path.dirname(__file__)
 kafkaTopicName = "logicImmo_data_v1"
 commonTopicName = "common-ads-data_v1"

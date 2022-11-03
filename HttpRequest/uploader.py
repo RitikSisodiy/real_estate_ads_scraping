@@ -82,7 +82,6 @@ class AsyncKafkaTopicProducer:
             da = json.dumps(da)
             tasks.append(asyncio.ensure_future(self.send_one(topic,da)))
         await asyncio.gather(*tasks)
-        print("uploaded")
         await self.stopProducer()
     def PushDataList(self,topic,data):
         asyncio.run(self.TriggerPushDataList(topic,data))

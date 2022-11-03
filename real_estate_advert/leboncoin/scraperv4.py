@@ -17,10 +17,7 @@ from .scrapProxy import ProxyScraper
 from .parser import ParseLeboncoin
 # from aiohttp_socks import ProxyType, ProxyConnector, ChainProxyConnector
 from aiosocksy.connector import ProxyConnector, ProxyClientRequest
-try:
-    from uploader import AsyncKafkaTopicProducer
-except:
-    from .uploader import AsyncKafkaTopicProducer
+from HttpRequest.uploader import AsyncKafkaTopicProducer
 cpath =os.path.dirname(__file__)
 producer = AsyncKafkaTopicProducer()
 KafkaTopicName = 'leboncoin-data_v1'

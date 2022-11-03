@@ -7,10 +7,7 @@ import os
 from requests_html import HTMLSession,HTML
 import json,re
 from .parser import ParseGreenAcre
-try:
-    from real_estate_advert.green_acres.uploader import AsyncKafkaTopicProducer
-except:
-    from .uploader import AsyncKafkaTopicProducer
+from HttpRequest.uploader import AsyncKafkaTopicProducer
 kafkaTopicName = "green-acres-data_v1"
 commonTopicName = "common-ads-data_v1"
 

@@ -3,10 +3,7 @@ import os,traceback,requests,time,json
 from datetime import datetime
 from tqdm import tqdm
 from .parser import ParseOuestfrance
-try:
-    from uploader import AsyncKafkaTopicProducer
-except:
-    from .uploader import AsyncKafkaTopicProducer
+from HttpRequest.uploader import AsyncKafkaTopicProducer
 cpath =os.path.dirname(__file__)
 kafkaTopicName = "ouestfrance-immo-v1"
 commanPattern ="common-ads-data_v1"

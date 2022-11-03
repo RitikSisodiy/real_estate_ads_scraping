@@ -13,8 +13,7 @@ from datetime import datetime
 # from .formater import formater
 try:from scrapProxy import ProxyScraper
 except:from .scrapProxy import ProxyScraper
-try:from uploader import AsyncKafkaTopicProducer
-except:from .uploader import AsyncKafkaTopicProducer
+from HttpRequest.uploader import AsyncKafkaTopicProducer
 from kafka_publisher import KafkaTopicProducer
 # producer = KafkaTopicProducer()
 producer = AsyncKafkaTopicProducer()

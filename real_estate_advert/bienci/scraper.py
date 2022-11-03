@@ -9,12 +9,11 @@ import requests
 from .parser import ParseBienici
 from requests_html import AsyncHTMLSession,HTMLSession
 import random
+from HttpRequest.uploader import AsyncKafkaTopicProducer
 try:
     from fetch import fetch,getUserAgent
-    from uploader import AsyncKafkaTopicProducer
 except:
     from .fetch import fetch,getUserAgent
-    from .uploader import AsyncKafkaTopicProducer
 pageSize = 499
 kafkaTopicName = "bienici_data_v1"
 commanTopicName = "common-ads-data_v1"
