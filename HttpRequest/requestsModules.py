@@ -194,7 +194,7 @@ class okHTTpClient(ProxyServer):
             "proxy":self.proxy[sid]["http"]
             }
             # print(jsonbody)
-            r = self.session[sid].post("http://127.0.0.1:8001/seloger-auth",json=jsonbody)
+            r = self.session[sid].post("http://127.0.0.1:8001/makerequest",json=jsonbody)
             # print(r.headers)
             j = r.json()
             return r
@@ -214,7 +214,7 @@ class okHTTpClient(ProxyServer):
             "proxy":self.proxy[sid]["http"]
             }
             # print(jsonbody)
-            r = await self.AsyncSession.post("http://127.0.0.1:8001/seloger-auth",json=jsonbody)
+            r = await self.AsyncSession.post("http://127.0.0.1:8001/makerequest",json=jsonbody)
             r= await r.json()
             return r 
         except:

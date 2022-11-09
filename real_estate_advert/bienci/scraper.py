@@ -281,7 +281,7 @@ def CreatelastupdateLog(session,typ):
     with open(f'{cpath}/lastUpdate.json','w') as file:
         file.write(json.dumps(updates))
 def asyncUpdateBienci():
-    session = AsyncHTMLSession()
+    session = HttpRequest(True,'https://www.bienici.com/realEstateAds.json?filters={"size":"1"}',{},headers,{},False,cpath,1,10)
     producer = AsyncKafkaTopicProducer()
     # await producer.statProducer()
     param  = {
