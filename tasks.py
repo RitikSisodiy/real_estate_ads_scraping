@@ -14,8 +14,6 @@ from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
 from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceScrapper
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
-
-
 from celery import Celery
 from celery.schedules import crontab
 from settings import *
