@@ -1,4 +1,5 @@
 import asyncio
+import time
 import fake_useragent
 import datetime
 import traceback
@@ -9,7 +10,7 @@ cpath =os.path.dirname(__file__)
 ua = fake_useragent.UserAgent(fallback='Your favorite Browser')
 def getUserAgent():
     return ua.random
-async def fetch(url,session,Json=False,file=False,**kwargs):
+def fetch(url,session,Json=False,file=False,**kwargs):
     print(url)
     if not kwargs.get('headers'):
         kwargs["headers"] = {
@@ -18,11 +19,12 @@ async def fetch(url,session,Json=False,file=False,**kwargs):
     try:
         # async with session.get(url,**kwargs) as response:
             try:
-                response = await session.get(url,**kwargs)
+                response = session.fetch(url,**kwargs)
             except:
                 traceback.print_exc()
-                await asyncio.sleep(2)
-                return await fetch(url,session,Json,file,**kwargs)
+                # await asyncio.sleep(2)
+                time.sleep(1)
+                return fetch(url,session,Json,file,**kwargs)
             try:
                 if response.status_code==404:
                     return {}
@@ -35,8 +37,9 @@ async def fetch(url,session,Json=False,file=False,**kwargs):
                     html = response.html
                     return html
                 else:
-                    await asyncio.sleep(1)
-                    return await fetch(url,session,Json)
+                    # await asyncio.sleep(1)
+                    time.sleep(1)
+                    return fetch(url,session,Json)
             except Exception as e:
                 # print(response)
                 # print(traceback.format_exc())

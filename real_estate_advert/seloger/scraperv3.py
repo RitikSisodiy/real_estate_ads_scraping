@@ -19,90 +19,34 @@ ViewAddUrl = "https://api-seloger.svc.groupe-seloger.com/api/v2/listings/"
 resultcounturl = "https://api-seloger.svc.groupe-seloger.com/api/v1/listings/count/"
 session = requests.session()
 proxy = {'https': proxyurl, 'http': proxyurl}
+cpath =os.path.dirname(__file__)
 
 from HttpRequest.uploader import AsyncKafkaTopicProducer
-cpath =os.path.dirname(__file__)
+from HttpRequest.requestsModules import HttpRequest
 kafkaTopicName = "seloger_data_v1"
 commonTopicName = "common-ads-data_v1"
 
-class SelogerScraper:
+class SelogerScraper(HttpRequest):
     def __init__(self,paremeter,asyncsize=20,proxyThread=True,proxies = {}) -> None:
+        cpath =os.path.dirname(__file__)
         self.logfile = open(f"{cpath}/error.log",'a')
         self.timeout = 5
-        
-        
+        self.paremeter = paremeter
+        self.producer = AsyncKafkaTopicProducer()
         SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security/register"
         headers = {
                 "User-Agent": "SeLoger/6.8.1 Dalvik/2.1.0 (Linux; U; Android 8.1.0; Android SDK built for x86 Build/OSM1.180201.007)",
                 "Accept": "application/json",
                 "Content-Type":"application/json"
                 }
-        self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
-        self.paremeter= paremeter
-        if not proxies:
-            try:
-                self.proxies = self.readProxy()
-                if not self.proxies:
-                    self.getProxyList()
-            except:
-                self.getProxyList()
-        else:self.proxies=proxies
-        if proxyThread: self.proxyUpdateThread()
-        self.asyncsize=asyncsize
-        self.headers = {}
-        self.proxy = {}
-        self.session = {i:requests.Session() for i in range(0,asyncsize)}
-        self.headers = {}
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
-            futures = excuter.map(self.init_headers,[i for i in range(0,asyncsize)])
-            count = 0
-            for f in futures:
-                self.headers[count] = f
-                count+=1
-        self.producer = AsyncKafkaTopicProducer()
-    def getProxyList(self):
-        self.prox.FetchNGetProxy()
-        self.prox.save(cpath)
-        self.proxies = self.readProxy()
-    def proxyUpdateThread(self):
-        print("proxy thread is started")
-        self.startThread = True
-        self.proc = threading.Thread(target=self.updateProxyList, args=())
-        self.proc.daemon = True
-        self.proc.start()
+        super().__init__(proxyThread, SELOGER_SECURITY_URL,{}, headers, proxies, False, cpath, asyncsize, 5)
     
-    def threadsleep(self,t):
-        while(t>0):
-            if not self.startThread:
-                return True
-            time.sleep(1)
-            t-=1
-        return False
-    def updateProxyList(self,interval=300):
-        if self.readProxy():time.sleep(interval)
-        while self.startThread:
-            self.getProxyList()
-            b = self.threadsleep(interval)
-            if b:
-                break
-        print("thread is stopped")
-
-    def __del__(self):
-        self.startThread = False
-        print("proxy thread is terminated")
-    def readProxy(self):
-        with open(f"{cpath}/working.txt","r") as file:
-            proxies = file.readlines()
-        return [json.loads(proxy) for proxy in proxies]
-    def getRandomProxy(self):
-        proxy = random.choice(self.proxies)
-        return proxy
     def __exit__(self):
         self.logfile.close()
-    def init_headers(self,sid=0):
+    def init_headers(self,sid=0,init=False):
         self.session[sid].close()
         self.session[sid] = requests.Session()
-        try:self.proxy[sid] = self.getRandomProxy()
+        try:self.proxy[sid] = (init and self.proxy.get(sid)) or self.getRandomProxy()
         except:
             self.getProxyList()
             self.init_headers()
@@ -137,34 +81,6 @@ class SelogerScraper:
             print("excepition==============>",e)
             traceback.print_exc(file=self.logfile)
             return self.init_headers(sid=sid)
-    def fetch(self,url,method = "get",sid=0,retry=0,**kwargs):
-        kwargs['headers'] = self.headers[sid]
-        kwargs['proxies'] = self.proxy[sid]
-        try:
-            if method=="post":
-                r = self.session[sid].post(url,timeout=self.timeout,**kwargs)
-            else:
-                r = self.session[sid].get(url,timeout=self.timeout,**kwargs)
-            print(f"{r.status_code} : response status")
-        except Exception as e:
-            traceback.print_exc(file=self.logfile)
-            print(e)
-            time.sleep(1)
-            self.init_headers(sid=sid)
-            if retry<10:
-                retry+=1
-                return self.fetch(url,method=method,sid=sid,retry=retry,**kwargs)
-            else:return None
-        if r.status_code not in [200,404,400]:
-            print(url)
-            print(method)
-            print(kwargs)
-            self.init_headers(sid=sid)
-            if retry<10:
-                retry+=1
-                return self.fetch(url,method=method,sid=sid,retry=retry,**kwargs)
-            else:return None
-        return r
     def GetAdInfo(self,addId:int,sid=0):
         url = f"{ViewAddUrl}{addId}"
         response = self.fetch(url,sid=sid,proxies=self.proxy[sid])
@@ -269,7 +185,6 @@ class SelogerScraper:
                     last = 1
                     dic.update({"pageIndex":page})
                     print(page,dic)
-                    input()
                     self.Crawlparam(dic,page=page)
                     page=1
                     # filterurllist += json.dumps(dic) + "/n/:"
@@ -367,6 +282,8 @@ class SelogerScraper:
                 page+=1
         else:
             print("there is no update available l")
+    def __del__(self):
+        return super().__del__()
     def save(self,adslist):
         self.producer.PushDataList(kafkaTopicName,adslist)
         parseAdList = [ParseSeloger(ad) for ad in adslist]

@@ -6,6 +6,8 @@ import urllib
 import sys
 import traceback
 import requests
+
+from HttpRequest.requestsModules import HttpRequest
 from .parser import ParseBienici
 from requests_html import AsyncHTMLSession,HTMLSession
 import random
@@ -103,7 +105,7 @@ def genFilter(parameter,typ):
             # print("condition is stisfy going to next interval",totalresult)
             # print(iniinterval,">apending")
             filterurllist += json.dumps(iniinterval) + "/n/:"
-            asyncio.run(FetchFilter(dic))
+            FetchFilter(dic)
             print("going to next")
             iniinterval[0] = iniinterval[1]+1
             iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
@@ -137,51 +139,51 @@ def genFilter(parameter,typ):
 
 asyncpage = 10
 # change the url of filter data to scrap all the ads
-async def main():
-    tasks = []
-    count = 0
-    global start
-    global lastpin
-    global lastpage
-    session = AsyncHTMLSession()
-    producer = AsyncKafkaTopicProducer()
-    await producer.statProducer()
-    # session.proxies.update({"http": "socks5://218.1.142.41:57114", "https": "socks5://218.1.142.41:57114"})
-    print(lastpin, "this ", start)
-    Filter = {
-    "size":pageSize,
-    "from":0,
-    "showAllModels":False,
-    "filterType":"buy",
-    "propertyType":["house","flat"],
-    "newProperty":False,
-    "sortBy":"relevance",
-    "sortOrder":"desc",
-    "onTheMarket":[True],
-    }
-    for pin,zonid in citys:
-        if lastpin == pin:
-            print("this is last pin")
-            start = True 
-        if start:
-            count +=1
-            Filter['zoneIdsByTypes']['zoneIds'] = zonid
-            baseurl = getFilterUrl(Filter)
-            tasks.append(asyncio.ensure_future(GetAllPages(baseurl,session,first=True,Filter=Filter,producer=producer)))
-            if len(tasks) == asyncpage or count == len(citys):
-                await asyncio.gather(*tasks)
-                t=random.randint(5,15)
-                print(f"wait for {t} seconds")
-                await asyncio.sleep(t)
-                tasks=[]
-    await asyncio.gather(*tasks)
-    await producer.stopProducer()
+# async def main():
+#     tasks = []
+#     count = 0
+#     global start
+#     global lastpin
+#     global lastpage
+#     session = AsyncHTMLSession()
+#     producer = AsyncKafkaTopicProducer()
+#     # await producer.statProducer()
+#     # session.proxies.update({"http": "socks5://218.1.142.41:57114", "https": "socks5://218.1.142.41:57114"})
+#     print(lastpin, "this ", start)
+#     Filter = {
+#     "size":pageSize,
+#     "from":0,
+#     "showAllModels":False,
+#     "filterType":"buy",
+#     "propertyType":["house","flat"],
+#     "newProperty":False,
+#     "sortBy":"relevance",
+#     "sortOrder":"desc",
+#     "onTheMarket":[True],
+#     }
+#     for pin,zonid in citys:
+#         if lastpin == pin:
+#             print("this is last pin")
+#             start = True 
+#         if start:
+#             count +=1
+#             Filter['zoneIdsByTypes']['zoneIds'] = zonid
+#             baseurl = getFilterUrl(Filter)
+#             tasks.append(asyncio.ensure_future(GetAllPages(baseurl,session,first=True,Filter=Filter,producer=producer)))
+#             if len(tasks) == asyncpage or count == len(citys):
+#                 await asyncio.gather(*tasks)
+#                 t=random.randint(5,15)
+#                 print(f"wait for {t} seconds")
+#                 await asyncio.sleep(t)
+#                 tasks=[]
+#     await asyncio.gather(*tasks)
+#     await producer.stopProducer()
 
-async def saveRealstateAds(ads,**kwargs):
+def saveRealstateAds(ads,**kwargs):
     producer = kwargs.get("producer")
-    await producer.TriggerPushDataList(kafkaTopicName,ads)
+    producer.PushDataList(kafkaTopicName,ads)
     ads = [ParseBienici(ad) for ad in ads]
-    await producer.TriggerPushDataList(commanTopicName,ads)
+    producer.PushDataList(commanTopicName,ads)
 
     # allads = ''
     # for ad in ads:
@@ -189,14 +191,14 @@ async def saveRealstateAds(ads,**kwargs):
     # with open("output/output.json",'a') as file:
     #     file.write(allads)
 
-async def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
+def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
     print(Filter)
-    r= await fetch(baseurl,session,Json=True)
+    r= fetch(baseurl,session,Json=True)
     if r:
         # print(baseurl,"-200")
         print(f"from===========>{r['from']}")
         if save:
-            await saveRealstateAds(r['realEstateAds'],**kwargs)
+            saveRealstateAds(r['realEstateAds'],**kwargs)
         else:
             return r["realEstateAds"]
         if first:
@@ -209,17 +211,20 @@ async def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs
             for i in range(1,totalpage):
                 Filter['from'] += Filter['size']
                 baseurl = getFilterUrl(Filter,page=i)
-                tasks.append(asyncio.ensure_future(GetAllPages(baseurl,session,first=False,Filter=Filter,**kwargs)))
-            await asyncio.gather(*tasks)
+                GetAllPages(baseurl,session,first=False,Filter=Filter,**kwargs)
+            # await asyncio.gather(*tasks)
 
-async def FetchFilter(filters):
+def FetchFilter(filters):
     filters['size'] = 400
-    session = AsyncHTMLSession()
+    headers  = {
+                "user-agent":getUserAgent(),
+    }
+    session = HttpRequest(True,'https://www.bienici.com/realEstateAds.json?filters={"size":"1"}',{},headers,{},False,cpath,1,10)
     baseurl = getFilterUrl(filters)
     producer = AsyncKafkaTopicProducer()
-    await producer.statProducer()
-    await GetAllPages(baseurl,session,first=True,Filter=filters,producer=producer)
-    await producer.stopProducer()
+    # await producer.statProducer()
+    GetAllPages(baseurl,session,first=True,Filter=filters,producer=producer)
+    # await producer.stopProducer()
 
 def getLastUpdates():
     try:
@@ -241,7 +246,7 @@ def GetAdUpdate(ad):
             "lastadId": ad["id"],
         }
     return update
-async def CreatelastupdateLog(session,typ):
+def CreatelastupdateLog(session,typ):
     updates = getLastUpdates()
     if typ == "sale" or typ=="buy":
         typ = "buy"
@@ -261,7 +266,7 @@ async def CreatelastupdateLog(session,typ):
     }
     url = getFilterUrl(param)
     print("fetching url :", url)
-    d = await fetch(url,session,Json=True)
+    d = fetch(url,session,Json=True)
 
     try:
         ad = d["realEstateAds"][0]
@@ -275,10 +280,10 @@ async def CreatelastupdateLog(session,typ):
     print(updates)
     with open(f'{cpath}/lastUpdate.json','w') as file:
         file.write(json.dumps(updates))
-async def asyncUpdateBienci():
+def asyncUpdateBienci():
     session = AsyncHTMLSession()
     producer = AsyncKafkaTopicProducer()
-    await producer.statProducer()
+    # await producer.statProducer()
     param  = {
     "size":pageSize,
     "from":0,
@@ -294,15 +299,15 @@ async def asyncUpdateBienci():
     print(updates)
     res = ""
     if updates:
-        await CreatelastupdateLog(session,'rent')
-        await CreatelastupdateLog(session,'buy')
+        CreatelastupdateLog(session,'rent')
+        CreatelastupdateLog(session,'buy')
         for key,val in updates.items():
             param.update({"filterType":key})
             updated = False
             page= 1
             while not updated and page*param['size']<2400:
                 url = getFilterUrl(param,page=page)
-                r = await fetch(url,session,Json=True)
+                r = fetch(url,session,Json=True)
                 ads = r['realEstateAds']
                 adslist = []
                 for ad in ads:
@@ -316,18 +321,18 @@ async def asyncUpdateBienci():
                         print(msg)
                         updated = True
                         break
-                await producer.TriggerPushDataList(kafkaTopicName,adslist)
+                producer.TriggerPushDataList(kafkaTopicName,adslist)
                 page +=1
-        await producer.stopProducer()
+        # producer.stopProducer()
         
     else:
-        await CreatelastupdateLog(session,'rent')
-        await CreatelastupdateLog(session,'buy')
+        CreatelastupdateLog(session,'rent')
+        CreatelastupdateLog(session,'buy')
     return res
-async def CheckId(id):
-    session = AsyncHTMLSession()
+def CheckId(id):
+    session = HTMLSession()
     url = f"https://www.bienici.com/realEstateAd.json?id={id}"
-    res = await fetch(url,session,Json=True)
+    res = fetch(url,session,Json=True)
     return bool(res)
 def UpdateBienci():
     return asyncio.run(asyncUpdateBienci())

@@ -3,11 +3,12 @@ from email import header
 from socket import timeout
 import traceback
 import aiohttp
-import asyncio
+import asyncio,requests
 import os
 from requests_html import HTMLSession
-import json,re
+import json,re,time
 from HttpRequest.uploader import AsyncKafkaTopicProducer
+from HttpRequest.requestsModules import HttpRequest
 from .parser import ParseAvendrealouer
 kafkaTopicName = "avendrealouer-data_v1"
 commonTopicName = "common-ads-data_v1"
@@ -33,43 +34,44 @@ headers = {
     "Connection": "Keep-Alive",
     "Accept-Encoding": "gzip",
 }
-async def fetch(session,url,params = None,method="get",**kwargs):
+def fetch(session,url,params = None,method="get",**kwargs):
     # if params:
     #     query_string = urllib.parse.urlencode( params )
     #     url += "?"+query_string 
     try:
-        res = await session.get(url,headers = headers,params=params,timeout=10)
+        res = session.fetch(url,headers = headers,params=params)
     except Exception as e:
-        await asyncio.sleep(3)
-        return await fetch(session,url,params,method,**kwargs)
-    if res.status==200:
-        response = await res.json()
+        time.sleep(3)
+        return fetch(session,url,params,method,**kwargs)
+    if res and res.status_code==200:
+        response = res.json()
     else:
-        return await fetch(session,url,params,method,**kwargs)
+        return fetch(session,url,params,method,**kwargs)
     return response
 def getTimeStamp(strtime):
     formate = '%Y-%m-%d %H:%M:%S'
     # 2022-09-14 20:00:00
     t = datetime.strptime(strtime,formate)
     return t.timestamp()
-async def savedata(resjson,**kwargs):
+def savedata(resjson,**kwargs):
     resstr = ''
     ads = resjson["items"]
     producer = kwargs["producer"]
-    await producer.TriggerPushDataList(kafkaTopicName,ads)
+    producer.PushDataList(kafkaTopicName,ads)
     ads = [ParseAvendrealouer(ad) for ad in ads]
-    await producer.TriggerPushDataList(commonTopicName,ads)
+    producer.PushDataList(commonTopicName,ads)
+    print("saved")
     # for ad in ads:
     #     resstr += json.dumps(ad)+"\n"
     # with open("output.json",'a') as file:
     #     file.write(resstr)
     # print('saved data')
-async def startCrawling(session,param,**kwargs):
+def startCrawling(session,param,**kwargs):
     # for param in filterParamList:
         param["size"] = pagesize
-        data = await fetch(session,url,param)
+        data = fetch(session,url,param)
         # data= json.load(res)
-        await savedata(data,**kwargs)
+        savedata(data,**kwargs)
         totalres = data.get("count") or 0
         totalpage = totalres/pagesize
         totalpage = int(totalpage) if totalpage==int(totalpage) else int(totalpage)+1
@@ -91,9 +93,9 @@ async def startCrawling(session,param,**kwargs):
             for i in range(start,totalpage+1):
                 param['currentPage'] = i
                 # print(param)
-                await parstItems(session,param,page=i,**kwargs)
+                parstItems(session,param,page=i,**kwargs)
                 # tasks.append(asyncio.ensure_future(parstItems(session,param,page=i,**kwargs)))
-            await asyncio.gather(*tasks)
+            # await asyncio.gather(*tasks)
             start=1  
         # totaldata = 0
         # for d in data:
@@ -102,14 +104,14 @@ async def startCrawling(session,param,**kwargs):
         #     totaldata += results
         #     await savedata(d,**kwargs)
         # print(totaldata)
-async def getTotalResult(session,params,url):
+def getTotalResult(session,params,url):
     totalres = {
         'size':1,
     }
     params.update(totalres)
-    r = await fetch(session,url,params=params)
+    r = fetch(session,url,params=params)
     return int(r.get("count") or 0)
-async def getMaxPrize(session,params,url):
+def getMaxPrize(session,params,url):
     # dic,burl = GetUrlFilterdDict(url)
     # dic["ajaxAffinage"] = 0
     # dic["ddlTri"] = "prix_seul"
@@ -121,14 +123,15 @@ async def getMaxPrize(session,params,url):
         "sorts[0].Order":"desc"
     }
     params.update(prizefilter)
-    r = await fetch(session,url,params=params)
+    r = fetch(session,url,params=params)
     print(params)
     try:
         prize = r["items"][0]["price"]
     except:prize = 0
     return float(prize)
-async def getFilter(session,params,producer):
+def getFilter(session,params,producer):
     dic,baseurl = params , "https://ws-web.avendrealouer.fr/realestate/properties/"
+    print("genrating filters")
     # url = getUrl(baseurl,dic)
     # url = baseurl
     maxresult = 700
@@ -136,23 +139,23 @@ async def getFilter(session,params,producer):
         del dic['price.gte']
         del dic['price.lte']
     except:pass
-    totalresult =await getTotalResult(session,dic,baseurl)
+    totalresult =getTotalResult(session,dic,baseurl)
     acres = totalresult
     fetchedresult = 0
     iniinterval = [0,1000]
     finalresult = 0
-    maxprice = await  getMaxPrize(session,params,baseurl)
+    maxprice = getMaxPrize(session,params,baseurl)
     if totalresult>=maxresult:
         while iniinterval[1]<=maxprice:
             print(iniinterval)
             dic['price.gte'],dic['price.lte'] = iniinterval
-            totalresult = await getTotalResult(session,dic,baseurl)
+            totalresult = getTotalResult(session,dic,baseurl)
             if totalresult <= 1400 and totalresult>0:
                 print("condition is stisfy going to next interval")
                 print(iniinterval,">apending")
                 # filterurllist.append(iniinterval)
                 # filterurllist+=json.dumps(dic)+":\n"
-                await startCrawling(session,dic,producer=producer)
+                startCrawling(session,dic,producer=producer)
                 # print(filterurllist)
                 iniinterval[0] = iniinterval[1]+1
                 iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
@@ -167,7 +170,7 @@ async def getFilter(session,params,producer):
                 iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
             print(totalresult,"-",maxresult)
         print(iniinterval,">apending")
-        await startCrawling(session,dic,producer=producer)
+        startCrawling(session,dic,producer=producer)
         finalresult +=totalresult
     # finallsit = [json.loads(d) for d in filterurllist.split(":\n")]
     # print(finallsit)
@@ -179,28 +182,28 @@ async def getFilter(session,params,producer):
     # print(filterurllist)
     # time.sleep(10)
     return 0
-async def parstItems(session,param,page=None,save=True,**kwargs):
+def parstItems(session,param,page=None,save=True,**kwargs):
     if page:
         param.update({"from":((page-1)*pagesize)})
-    data = await fetch(session,url,param)
+    data = fetch(session,url,param)
     # print(param['p'])
     # data = json.load(res)
     if save:
-        await savedata(data,**kwargs)
+        savedata(data,**kwargs)
     return data
-async def CheckId(id):
-    headers = {
-        "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36"
-    }
-    async with aiohttp.ClientSession() as session:
-        furl  = f"https://ws-web.avendrealouer.fr/realestate/properties/?id={id}"
-        # print(furl)
-        try:
-            await fetch(session,furl,headers=headers)
+def CheckId(id):
+    
+    furl  = f"https://ws-web.avendrealouer.fr/realestate/properties/?id={id}"
+    # print(furl)
+    try:
+        r = requests.get(furl,headers=headers)
+        if r.status_code==200:
             return True
-        except:return False
-async def main(adsType = ""):
+        else:return False
+    except:return False
+def main(adsType = ""):
     params = gparams
+    session = HttpRequest(True,'https://ws-web.avendrealouer.fr/',headers,{},{},False,cpath,1,10)
     # catid info
     # vente is for  Vente immobilier 
     # location is for Location immobilier
@@ -210,21 +213,21 @@ async def main(adsType = ""):
         catid = "1,3"
     params["transactionIds"] = catid
     # filterParamList = [*getFilter(param) for param in params
-    async with aiohttp.ClientSession() as session:
-        await CreatelastupdateLog(session,adsType)
-        producer = AsyncKafkaTopicProducer()
-        flist = [2,3,6,7,19]
-        for f in flist:
-            params.update({"typeIds":f})
-            await getFilter(session,params,producer)
-        # await startCrawling(session,filterParamList,producer=producer)
-        await producer.stopProducer()
+    # async with aiohttp.ClientSession() as session:
+    CreatelastupdateLog(session,adsType)
+    producer = AsyncKafkaTopicProducer()
+    flist = [2,3,6,7,19]
+    for f in flist:
+        params.update({"typeIds":f})
+        getFilter(session,params,producer)
+    # await startCrawling(session,filterParamList,producer=producer)
+    # await producer.stopProducer()
 def main_scraper(payload):
     adtype = payload["real_state_type"]
     if adtype == "Updated/Latest Ads":
         UpdateParuvendu()
     else:
-        asyncio.run(main(adtype))
+        main(adtype)
 def getLastUpdates():
     try:
         with open(f'{cpath}/lastUpdate.json','r') as file:
@@ -232,7 +235,7 @@ def getLastUpdates():
     except:
         return {}
     return updates
-async def GetAdUpdate(ad):
+def GetAdUpdate(ad):
     updates = {}
     modifiedtime = ad.get("insertDate") or ad.get("releaseDate")
     id = ad.get("id")
@@ -244,7 +247,7 @@ async def GetAdUpdate(ad):
     }
     return updates
 
-async def CreatelastupdateLog(session,typ):
+def CreatelastupdateLog(session,typ):
     params = gparams
     updates = getLastUpdates()
     if typ == "rental":
@@ -256,11 +259,10 @@ async def CreatelastupdateLog(session,typ):
         "transactionIds":catid,
         'pageSize':1
         })
-    d = await fetch(session,url,params)
-    print(d)
+    d = fetch(session,url,params)
     try:
         data = d['items'][0]
-        latupdate = await GetAdUpdate(data)
+        latupdate = GetAdUpdate(data)
         # print(latupdate)
         updates.update({typ:latupdate})
     except Exception as e:
@@ -272,46 +274,46 @@ async def CreatelastupdateLog(session,typ):
     with open(f'{cpath}/lastUpdate.json','w') as file:
         file.write(json.dumps(updates))
 
-async def asyncUpdateParuvendu():
+def asyncUpdateParuvendu():
     params= gparams
     updates = getLastUpdates()
     # print(updates)
-    async with aiohttp.ClientSession() as session:
-        if not updates:
-            await CreatelastupdateLog(session,'rental')
-            await CreatelastupdateLog(session,'sale')
-        updates = getLastUpdates()
-        for key,val in updates.items():
-            await CreatelastupdateLog(session,key)
-            if key == "rental":
-                catid = "2"
-            else:
-                catid = "1,3"
-            params.update({
-            'sorts[0].Name':"_newest",
-            'transactionIds':catid,
-            'pageSize':100,
-            })
-            updated = False
-            p=1
-            producer = AsyncKafkaTopicProducer()
-            await producer.statProducer()
-            while not updated and p*pagesize<=700:
-                print(f"cheking page {p}")
-                adsres = await parstItems(session,params,page=p,save=False,producer=producer)
-                ads = adsres["items"]
-                lastad = ads[len(ads)-1]
-                webupdates = await GetAdUpdate(lastad)
-                await savedata(adsres,producer=producer)
-                res = val['lastupdate']>webupdates['lastupdate']
-                print(f"{val['lastupdate']}>{webupdates['lastupdate']} ={res} and type {key}")
-                if res:
-                    updated = True
-                p+=1
-            await producer.stopProducer()
+    session = HttpRequest(True,URL="https://www.avendrealouer.fr",aio=True,headers=headers)
+    if not updates:
+        CreatelastupdateLog(session,'rental')
+        CreatelastupdateLog(session,'sale')
+    updates = getLastUpdates()
+    for key,val in updates.items():
+        CreatelastupdateLog(session,key)
+        if key == "rental":
+            catid = "2"
+        else:
+            catid = "1,3"
+        params.update({
+        'sorts[0].Name':"_newest",
+        'transactionIds':catid,
+        'pageSize':100,
+        })
+        updated = False
+        p=1
+        producer = AsyncKafkaTopicProducer()
+        # await producer.statProducer()
+        while not updated and p*pagesize<=700:
+            print(f"cheking page {p}")
+            adsres = parstItems(session,params,page=p,save=False,producer=producer)
+            ads = adsres["items"]
+            lastad = ads[len(ads)-1]
+            webupdates = GetAdUpdate(lastad)
+            savedata(adsres,producer=producer)
+            res = val['lastupdate']>webupdates['lastupdate']
+            print(f"{val['lastupdate']}>{webupdates['lastupdate']} ={res} and type {key}")
+            if res:
+                updated = True
+            p+=1
+            # await producer.stopProducer()
 
 def UpdateParuvendu():
-    asyncio.run(asyncUpdateParuvendu())
+    asyncUpdateParuvendu()
 if __name__=="__main__":
     url = "https://ws-web.avendrealouer.fr/realestate/properties/"
     asyncio.run(main())

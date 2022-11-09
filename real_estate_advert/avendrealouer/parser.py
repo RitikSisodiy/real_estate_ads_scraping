@@ -40,7 +40,6 @@ def getAjency(id,id2):
     else:
         print(id," ",id2)
         print(response.status_code)
-        input()
         return {}
 def getOrCreateDb(id,id2):
     data = db.get(id)

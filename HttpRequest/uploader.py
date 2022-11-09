@@ -49,16 +49,19 @@ async def PushData(data,producer=None):
     await producer.start()
 class AsyncKafkaTopicProducer:
     def __init__(self) -> None:
+        self.start = False
         pass
         # self.producer = asyncio.run(self.statProducer())
         # print(self.producer,"producer started")
     async def statProducer(self):
         self.producer = AIOKafkaProducer(bootstrap_servers=[f"10.8.0.27:9091",f"10.8.0.27:9092", f"10.8.0.27:9093"])
         await self.producer.start()
+        self.start = True
         # return producer
     async def stopProducer(self):
         await self.producer.stop()
-    async def send_one(self,topic,data):
+        self.start = False
+    async def send_one(self,topic,data,retry=0):
     # Get cluster layout and initial topic/partition leadership information
         try:
             # Produce message
@@ -70,8 +73,8 @@ class AsyncKafkaTopicProducer:
         except Exception as e:
             print(e)
             traceback.print_exc()
-            input()
-            await self.send_one(topic,data)
+            retry+=1
+            if retry<10:await self.send_one(topic,data,retry)
         finally:
             # Wait for all pending messages to be delivered or expire.
             pass
