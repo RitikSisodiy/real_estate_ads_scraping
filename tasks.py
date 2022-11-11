@@ -3,6 +3,7 @@ import time
 from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
 from real_estate_advert.leboncoin.scraperv4 import updateLebonCoin,leboncoinAdScraper
 from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
+from real_estate_advert.gensdeconfiance.scraper import main_scraper as gensdeconfianceScraper
 from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
 from real_estate_advert.pap.scraper2 import pap_scraper as PapScraper
 from real_estate_advert.pap.scraper2 import UpdatePap
@@ -95,6 +96,19 @@ def scrap_OuestFranceScrapper_task(payload):
     print("payload : ", payload)
     try:
         data = OuestFranceScrapper(payload)
+    except Exception as e:
+        print(traceback.format_exc())
+        print("Exception ================> ",e)
+        data= "exception"
+    # Scraping task obj start here
+    print("Task End ================> ")
+    return data
+@celery_app.task(name="real estate gensdeconfianceScraper")
+def scrap_gensdeconfiance_task(payload):
+    print("Task start ================> ")
+    print("payload : ", payload)
+    try:
+        data = gensdeconfianceScraper(payload)
     except Exception as e:
         print(traceback.format_exc())
         print("Exception ================> ",e)

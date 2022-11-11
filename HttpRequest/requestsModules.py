@@ -137,6 +137,7 @@ class okHTTpClient(ProxyServer):
         self.Async = False
         self.asyncsize = asyncsize
         self.session = {i:requests.Session() for i in range(0,asyncsize)}
+        self.headers = [self.headers for i in range(0,asyncsize)]
         with concurrent.futures.ThreadPoolExecutor(max_workers=asyncsize) as excuter:
             futures = excuter.map(self.init_headers,[i for i in range(0,asyncsize)],[True for i in range(0,asyncsize)])
             count = 0
@@ -150,7 +151,7 @@ class okHTTpClient(ProxyServer):
     def init_headers(self,sid=0,init= False):
         self.session[sid].close()
         self.session[sid] = requests.Session()
-        try:self.proxy[sid] = self.getRandomProxy()
+        try:self.proxy[sid] =(init and self.proxy.get(sid))or self.getRandomProxy()
         except:
             self.getProxyList()
             # self.init_headers(sid)
@@ -165,7 +166,7 @@ class okHTTpClient(ProxyServer):
                 r = self.session[sid].post(url,timeout=self.timeout,**kwargs)
             else:
                 r = self.session[sid].get(url,timeout=self.timeout,**kwargs)
-            print(f"{r.status_code} : {kwargs['proxies']} {sid}")
+            print(f"{r.status_code} : {kwargs['proxies']} {sid} {kwargs['headers'].get('Cookie')}")
         except Exception as e:
             traceback.print_exc(file=self.logfile)
             print(e)
@@ -190,13 +191,27 @@ class okHTTpClient(ProxyServer):
         # try:
             jsonbody = {
             "url":f"{url}?{urlencode(params)}",
-            "headers":self.headers,
+            "headers":self.headers[sid],
             "proxy":self.proxy[sid]["http"]
             }
             # print(jsonbody)
             r = self.session[sid].post("http://127.0.0.1:8001/makerequest",json=jsonbody)
             # print(r.headers)
             j = r.json()
+            return r
+    def post(self,url,sid=0,params = {},body={}):
+        # try:
+            jsonbody = {
+            "url":f"{url}?{urlencode(params)}",
+            "headers":self.headers[sid],
+            "proxy":self.proxy[sid]["http"],
+            "body":body,
+            "method":"post"
+            }
+            print(jsonbody)
+            r = self.session[sid].post("http://127.0.0.1:8001/makerequest",json=jsonbody)
+            # print(r.headers)
+            # r.json()
             return r
         # except:
         #     print("in reuests module except")
