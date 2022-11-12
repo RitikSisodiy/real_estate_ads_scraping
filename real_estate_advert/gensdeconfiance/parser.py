@@ -20,7 +20,7 @@ def ParseGensdeconfiance(data):
         "ads_type": "rent" if adtype=="rent" else "buy",
         "price": data.get("price") or 0,
         "original_price": data.get("price") or 0,
-        "area": attrs.get("nbSquareMeters") ,
+        "area": attrs.get("nbSquareMeters"),
         "city": data.get("city"),     # "Poitiers (86000)"
         "declared_habitable_surface": attrs.get("nbSquareMeters") ,
         "declared_land_surface": attrs.get("nbSquareMeters") ,
