@@ -58,6 +58,7 @@ def ParseGensdeconfiance(data):
         "property_type": protype,
         "published_at": data.get("displayDate"),
         "created_at": data.get("displayDate"),
+        "last_modified": data.get("displayDate"),
         "others":{
             "dpe": attrs.get("dpe"),
             "ges": attrs.get("ges"),
