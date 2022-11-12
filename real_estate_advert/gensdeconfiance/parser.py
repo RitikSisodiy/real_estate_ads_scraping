@@ -14,9 +14,10 @@ def ParseGensdeconfiance(data):
             protype = attrs.get("propertyType")
         if len(adtype)==2:
             adtype = adtype[1]
+        else:adtype= adtype[0]
         sdata = {
         "id": data.get("uuid"),
-        "ads_type": "sale" if data.get("transactionType")=="sale" else "rent",
+        "ads_type": "rent" if adtype=="rent" else "buy",
         "price": data.get("price") or 0,
         "original_price": data.get("price") or 0,
         "area": attrs.get("nbSquareMeters") ,
