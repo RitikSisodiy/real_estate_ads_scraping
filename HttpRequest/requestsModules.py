@@ -3,7 +3,6 @@ from .AsyncProxy import ProxyScraper as AsyncScraper
 import threading,time,json,random,traceback,requests,os,concurrent.futures
 from requests_html import AsyncHTMLSession
 from urllib.parse import urlencode
-cpath = os.path.dirname(__file__)
 class ProxyServer:
     def __init__(self,proxyThread, URL, headers, proxies, aio, cpath) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
@@ -258,6 +257,7 @@ def GetAdInfo(ads,sid,ob):
             file.write(json.dumps(ad)+"\n")
         return "dome"
 if __name__ == "__main__":
+    cpath =os.path.dirname(__file__)
     headers = {
         "Accept": "*/*",
         "X-App-Version": "4.0.10",
