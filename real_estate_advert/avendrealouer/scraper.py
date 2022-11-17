@@ -14,7 +14,7 @@ kafkaTopicName = "avendrealouer-data_v1"
 commonTopicName = "common-ads-data_v1"
 s= HTMLSession()
 pagesize  = 100 # maxsize is 100
-cpath =os.path.dirname(__file__)
+cpath =os.path.dirname(__file__) or "."
 url = "https://ws-web.avendrealouer.fr/realestate/properties/"
 ajencyurl = "https://ws-web.avendrealouer.fr/common/accounts/?id="
 gparams = {

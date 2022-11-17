@@ -115,7 +115,7 @@ def getFilter(session,params,**kwargs):
     print(filterurllist)
     # time.sleep(10)
     return finallsit
-cpath =os.path.dirname(__file__)
+cpath =os.path.dirname(__file__) or "."
 url = "https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list"
 params = {
         'ver':'4.1.4',

@@ -66,7 +66,7 @@ chrome.webRequest.onAuthRequired.addListener(
 );
 """ % ("zproxy.lum-superproxy.io", 22225, "lum-customer-c_5afd76d0-zone-residential", "7nuh5ts3gu7z")
 kafkaTopicName = "pap_data_v1"
-cpath =os.path.dirname(__file__)
+cpath =os.path.dirname(__file__) or "."
 class PapScraper:
     def __init__(self,parameter,proxy=None) -> None:
         self.parameter = parameter

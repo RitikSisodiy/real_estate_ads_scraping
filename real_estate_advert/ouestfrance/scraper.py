@@ -4,7 +4,7 @@ from datetime import datetime
 from tqdm import tqdm
 from .parser import ParseOuestfrance
 from HttpRequest.uploader import AsyncKafkaTopicProducer
-cpath =os.path.dirname(__file__)
+cpath =os.path.dirname(__file__) or "."
 kafkaTopicName = "ouestfrance-immo-v1"
 commanPattern ="common-ads-data_v1"
 

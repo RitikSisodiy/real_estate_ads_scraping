@@ -21,7 +21,7 @@ resultcounturl = "https://api-logicimmo.svc.groupe-seloger.com/api/v1/listings/c
 session = requests.session()
 proxy = {'https': proxyurl, 'http': proxyurl}
 from HttpRequest.uploader import AsyncKafkaTopicProducer
-cpath =os.path.dirname(__file__)
+cpath =os.path.dirname(__file__) or "."
 kafkaTopicName = "logicImmo_data_v1"
 commonTopicName = "common-ads-data_v1"
 

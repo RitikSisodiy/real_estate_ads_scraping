@@ -21,7 +21,7 @@ kafkaTopicName = "bienici_data_v1"
 commanTopicName = "common-ads-data_v1"
 
 # define your filter here
-cpath =os.path.dirname(__file__) 
+cpath =os.path.dirname(__file__) or "." 
 citys = open(f"{cpath}/finalcitys.json",'r').readlines()
 citys = [[json.loads(d)['name'],json.loads(d)['zoneIds'] ] for d in citys]
 citys.sort()

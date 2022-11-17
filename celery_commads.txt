@@ -8,3 +8,10 @@ celery -A tasks.celery_app worker -l info -P eventlet
 
 to run scheduler
 celery -A tasks.celery_app beat -l info 
+
+
+to run script
+cd /apps/KI/real-estate-ads-scraping/ && source env/bin/activate && ( uvicorn main:app  --host 0.0.0.0 --port 8000 & celery -A tasks.celery_app flower --port=38000 & celery -A tasks.celery_app worker --loglevel=info & celery -A tasks.celery_app beat -l info & java -jar real_estate_advert/seloger/selger.jar )
+
+kill the script
+ps aux | grep -i "/apps/KI/real-estate-ads-scraping/env/bin/python3.8 /apps/KI/real-estate-ads-scraping/env/bin/uvicorn\|/apps/KI/real-estate-ads-scraping/env/bin/python3.8 /apps/KI/real-estate-ads-scraping/env/bin/celery" | grep -v grep | awk {'print $2'} | xargs kill -9

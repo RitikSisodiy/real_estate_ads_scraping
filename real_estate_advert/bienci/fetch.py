@@ -5,7 +5,7 @@ import datetime
 import traceback
 import aiofiles
 import os
-cpath =os.path.dirname(__file__) 
+cpath =os.path.dirname(__file__) or "." 
 
 ua = fake_useragent.UserAgent(fallback='Your favorite Browser')
 def getUserAgent():

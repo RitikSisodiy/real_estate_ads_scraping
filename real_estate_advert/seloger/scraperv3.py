@@ -19,7 +19,7 @@ ViewAddUrl = "https://api-seloger.svc.groupe-seloger.com/api/v2/listings/"
 resultcounturl = "https://api-seloger.svc.groupe-seloger.com/api/v1/listings/count/"
 session = requests.session()
 proxy = {'https': proxyurl, 'http': proxyurl}
-cpath =os.path.dirname(__file__)
+cpath =os.path.dirname(__file__) or "."
 
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 from HttpRequest.requestsModules import HttpRequest
@@ -28,7 +28,7 @@ commonTopicName = "common-ads-data_v1"
 
 class SelogerScraper(HttpRequest):
     def __init__(self,paremeter,asyncsize=20,proxyThread=True,proxies = {}) -> None:
-        cpath =os.path.dirname(__file__)
+        cpath =os.path.dirname(__file__) or "."
         self.logfile = open(f"{cpath}/error.log",'a')
         self.timeout = 5
         self.paremeter = paremeter

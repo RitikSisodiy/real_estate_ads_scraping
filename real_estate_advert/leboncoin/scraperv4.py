@@ -18,7 +18,7 @@ from .parser import ParseLeboncoin
 # from aiohttp_socks import ProxyType, ProxyConnector, ChainProxyConnector
 from aiosocksy.connector import ProxyConnector, ProxyClientRequest
 from HttpRequest.uploader import AsyncKafkaTopicProducer
-cpath =os.path.dirname(__file__)
+cpath =os.path.dirname(__file__) or "."
 producer = AsyncKafkaTopicProducer()
 KafkaTopicName = 'leboncoin-data_v1'
 commonAdsTopic= "common-ads-data_v1"

@@ -13,7 +13,7 @@ commonTopicName = "common-ads-data_v1"
 
 s= HTMLSession()
 pagesize  = 100 # maxsize is 100
-cpath =os.path.dirname(__file__)
+cpath =os.path.dirname(__file__) or "."
 url = "https://apifront.green-acres.com/api/v8.0/visitors/registered/listings/search"
 params = json.load(open(cpath+"/filter.json"))
 headers = {

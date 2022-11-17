@@ -1,7 +1,7 @@
 from .scrapProxy import ProxyScraper
 import time
 import os 
-cpath =os.path.dirname(__file__)
+cpath =os.path.dirname(__file__) or "."
 def updateProxyList(interval=300):
     SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security/register"
     headers = {

@@ -13,7 +13,7 @@ commonTopicName = "common-ads-data_v1"
 
 s= HTMLSession()
 pagesize  = 1000 # maxsize is 100
-cpath =os.path.dirname(__file__)
+cpath =os.path.dirname(__file__) or "."
 url = "https://fi-classified-search-api.immo.fcms.io/apps/classifieds"
 params = {
         "version":1,
