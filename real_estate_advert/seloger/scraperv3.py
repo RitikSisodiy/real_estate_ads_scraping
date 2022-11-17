@@ -15,7 +15,7 @@ import traceback
 proxyurl = "http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225"
 import time
 searchurl = 'https://api-seloger.svc.groupe-seloger.com/api/v1/listings/search'
-ViewAddUrl = "https://api-seloger.svc.groupe-seloger.com/api/v2/listings/"
+ViewAddUrl = "https://api-seloger.svc.groupe-seloger.com/api/v1/listings/"
 resultcounturl = "https://api-seloger.svc.groupe-seloger.com/api/v1/listings/count/"
 session = requests.session()
 proxy = {'https': proxyurl, 'http': proxyurl}
@@ -43,7 +43,7 @@ class SelogerScraper(HttpRequest):
                 "Connection": "Keep-Alive",
                 "Accept-Encoding": "gzip",
             }
-        super().__init__(proxyThread, SELOGER_SECURITY_URL,{}, headers, proxies, False, cpath, asyncsize, 5)
+        super().__init__(proxyThread, SELOGER_SECURITY_URL,{}, headers,{}, proxies, False, cpath, asyncsize, 5)
     
     def __exit__(self):
         self.logfile.close()
