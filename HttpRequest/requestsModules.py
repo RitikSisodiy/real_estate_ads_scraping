@@ -257,7 +257,7 @@ def GetAdInfo(ads,sid,ob):
             file.write(json.dumps(ad)+"\n")
         return "dome"
 if __name__ == "__main__":
-    cpath =os.path.dirname(__file__)
+    cpath =os.path.dirname(__file__) or "." 
     headers = {
         "Accept": "*/*",
         "X-App-Version": "4.0.10",
