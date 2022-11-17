@@ -278,7 +278,7 @@ def asyncUpdateParuvendu():
     params= gparams
     updates = getLastUpdates()
     # print(updates)
-    session = HttpRequest(True,URL="https://www.avendrealouer.fr",aio=True,headers=headers)
+    session =  HttpRequest(True,'https://ws-web.avendrealouer.fr/',headers,{},{},False,cpath,1,10)
     if not updates:
         CreatelastupdateLog(session,'rental')
         CreatelastupdateLog(session,'sale')
