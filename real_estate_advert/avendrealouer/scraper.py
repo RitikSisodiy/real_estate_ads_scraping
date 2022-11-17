@@ -220,6 +220,7 @@ def main(adsType = ""):
     for f in flist:
         params.update({"typeIds":f})
         getFilter(session,params,producer)
+    session.__del__()
     # await startCrawling(session,filterParamList,producer=producer)
     # await producer.stopProducer()
 def main_scraper(payload):
@@ -311,7 +312,7 @@ def asyncUpdateParuvendu():
                 updated = True
             p+=1
             # await producer.stopProducer()
-
+    session.__del__()
 def UpdateParuvendu():
     asyncUpdateParuvendu()
 if __name__=="__main__":

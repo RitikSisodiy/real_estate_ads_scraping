@@ -224,6 +224,7 @@ def FetchFilter(filters):
     producer = AsyncKafkaTopicProducer()
     # await producer.statProducer()
     GetAllPages(baseurl,session,first=True,Filter=filters,producer=producer)
+    session.__del__()
     # await producer.stopProducer()
 
 def getLastUpdates():
@@ -331,6 +332,7 @@ def asyncUpdateBienci():
     else:
         CreatelastupdateLog(session,'rent')
         CreatelastupdateLog(session,'buy')
+    session.__del__()
     return res
 def CheckId(id):
     session = HTMLSession()
