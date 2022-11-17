@@ -324,7 +324,7 @@ def asyncUpdateBienci():
                         print(msg)
                         updated = True
                         break
-                producer.TriggerPushDataList(kafkaTopicName,adslist)
+                producer.PushDataList(kafkaTopicName,adslist)
                 page +=1
         # producer.stopProducer()
         
@@ -338,7 +338,7 @@ def CheckId(id):
     res = fetch(url,session,Json=True)
     return bool(res)
 def UpdateBienci():
-    return asyncio.run(asyncUpdateBienci())
+    return asyncUpdateBienci()
 
 def main_scraper(payload):
     # asyncio.run(main())
