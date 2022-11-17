@@ -35,10 +35,14 @@ class SelogerScraper(HttpRequest):
         self.producer = AsyncKafkaTopicProducer()
         SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security/register"
         headers = {
-                "User-Agent": "SeLoger/6.8.1 Dalvik/2.1.0 (Linux; U; Android 8.1.0; Android SDK built for x86 Build/OSM1.180201.007)",
                 "Accept": "application/json",
-                "Content-Type":"application/json"
-                }
+                "Content-Type": "application/json",
+                "User-Agent": "SeLoger/6.8.5 Dalvik/2.1.0 (Linux; U; Android 8.1.0; ASUS_X00TD Build/OPM1)",
+                "Accept": "application/json",
+                "Host": "api-seloger.svc.groupe-seloger.com",
+                "Connection": "Keep-Alive",
+                "Accept-Encoding": "gzip",
+            }
         super().__init__(proxyThread, SELOGER_SECURITY_URL,{}, headers, proxies, False, cpath, asyncsize, 5)
     
     def __exit__(self):
@@ -52,12 +56,13 @@ class SelogerScraper(HttpRequest):
             self.init_headers()
         try:
             headers = {
-                "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjaGEiOiJkZmNhODhkMjJlMTJhYjRkYjZiOWVlNzA0MjRlZTUzYTo2MGZkZWUxMzY1MzJhMTE4ZGJmNjY0NDM3YWI5ZjIyNSIsImV4cCI6IjE2NjM4NDQyMzAiLCJwZXAiOiI5Njk4OGFhYzBiODM0NGExOTUyNzY1ZWJiNDlhZmJlNSIsInNsdCI6IjA5ZGEzNTYzMDQyNzRhNGY4MDUxMGEwYjJmNWFhN2Q1IiwiZGF0YSI6IjVlOTYxY2E4NjNkNmY4MTVjZmVhMTcxNmUyN2ZkNjk1OmNhMTdkZjE2ZDUwYmU3OTY2Nzc1MGJiN2Y3ZTVlNTIzYmRmODI1MzUxZDdlZGIwODdmMTUzMjVkOGUxNDVmNDg3NjEwZTE0YzVkMGM2ZTdmYWE1MGE4ZjY0ZWM3MjI2YmYwYTA3ODRkOWFlMDcxYWU0OGQ5Y2JjZTNmMDEzOWUzYTk5Y2M3M2EzODcyMmMwYjlmNjJhNWZmMDZkYjNmMGUiLCJpc3MiOiJNb2JpbGUiLCJhdWQiOiJWNl91YSIsInN1YiI6IjEyMzQ3OSJ9.ZB3bv18Z2Bxb-cOwhE_Sep2qiXXfBZ2ytHSBczYnZJo",
-                "User-Agent": "SeLoger/6.8.1 Dalvik/2.1.0 (Linux; U; Android 8.1.0; Android SDK built for x86 Build/OSM1.180201.007)",
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "User-Agent": "SeLoger/6.8.5 Dalvik/2.1.0 (Linux; U; Android 8.1.0; ASUS_X00TD Build/OPM1)",
                 "Accept": "application/json",
                 "Host": "api-seloger.svc.groupe-seloger.com",
                 "Connection": "Keep-Alive",
-                "Accept-Encoding": "gzip"
+                "Accept-Encoding": "gzip",
             }
             seloger_token_host = os.environ.get('HS_SELOGER_TOKEN_HOST', 'localhost')
             seloger_token_port = os.environ.get('HS_SELOGER_TOKEN_PORT', '8001')
@@ -70,10 +75,8 @@ class SelogerScraper(HttpRequest):
             final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid],timeout=self.timeout).text[1:-1]
 
             self.headers[sid] = {
-               "User-Agent": "SeLoger/6.8.1 Dalvik/2.1.0 (Linux; U; Android 8.1.0; Android SDK built for x86 Build/OSM1.180201.007)",
-                "Accept": "application/json",
                 'authorization': f'Bearer {final_token}',
-                "Content-Type":"application/json"
+                **headers
             }
             print(final_token,"<==========final token")
             return self.headers[sid]
