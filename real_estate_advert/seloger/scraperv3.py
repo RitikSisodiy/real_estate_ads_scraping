@@ -43,7 +43,7 @@ class SelogerScraper(HttpRequest):
                 "Connection": "Keep-Alive",
                 "Accept-Encoding": "gzip",
             }
-        super().__init__(proxyThread, SELOGER_SECURITY_URL,{}, headers,{}, proxies, False, cpath, asyncsize, 5)
+        super().__init__(proxyThread, SELOGER_SECURITY_URL,{}, headers, proxies, False, cpath, asyncsize, 5)
     
     def __exit__(self):
         self.logfile.close()
