@@ -257,6 +257,14 @@ def update_OuestFranceScrapper_ads():
         traceback.print_exc()
         print("Exception ================> ",e)
     print("Task End ================> ")
+@celery_app.task(name="real estate gensdeconfiance")
+def update_gensdeconfianceScrapper_ads():
+    print("Task start ================> ")
+    try:gensdeconfianceScraper({},update=True)
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ================> ",e)
+    print("Task End ================> ")
 
 @celery_app.task(name="real estate green-acres")
 def scrap_greenacres_task(payload):
@@ -282,7 +290,7 @@ def setup_periodic_tasks(sender, **kwargs):
     # Calls update_leboncoin_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_leboncoin_ads.s(), name='update leboncoin ads in every 20 minuts')
     # Calls update_peruvendu_ads in every 20 minutes
-    # sender.add_periodic_task(20*60, update_paruvendu_ads.s(), name='update paruvendu ads every 20 minuts')
+    sender.add_periodic_task(20*60, update_paruvendu_ads.s(), name='update paruvendu ads every 20 minuts')
     # # Calls update_pap_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_pap_ads.s(), name='update pap ads every 20 minuts')
     # Calls update_seloger_ads in every 20 minutes
@@ -297,3 +305,5 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(20*60, update_avendrealouer_ads.s(), name='update avendrealouer ads every 20 minuts')
     # Calls update_logicImmo_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_OuestFranceScrapper_ads.s(), name='update OuestFranceScrapper ads every 20 minuts')
+    # Calls update_logicImmo_ads in every 20 minutes
+    sender.add_periodic_task(20*60, update_gensdeconfianceScrapper_ads.s(), name='update gensdeconfiance ads every 20 minuts')
