@@ -220,11 +220,13 @@ def FetchFilter(filters):
                 "user-agent":getUserAgent(),
     }
     session = HttpRequest(True,'https://www.bienici.com/realEstateAds.json?filters={"size":"1"}',{},headers,{},False,cpath,1,10)
-    baseurl = getFilterUrl(filters)
-    producer = AsyncKafkaTopicProducer()
-    # await producer.statProducer()
-    GetAllPages(baseurl,session,first=True,Filter=filters,producer=producer)
-    session.__del__()
+    try:
+        baseurl = getFilterUrl(filters)
+        producer = AsyncKafkaTopicProducer()
+        # await producer.statProducer()
+        GetAllPages(baseurl,session,first=True,Filter=filters,producer=producer)
+    finally:
+        session.__del__()
     # await producer.stopProducer()
 
 def getLastUpdates():
@@ -286,53 +288,55 @@ def asyncUpdateBienci():
                 "user-agent":getUserAgent(),
     }
     session = HttpRequest(True,'https://www.bienici.com/realEstateAds.json?filters={"size":"1"}',{},headers,{},False,cpath,1,10)
-    producer = AsyncKafkaTopicProducer()
-    # await producer.statProducer()
-    param  = {
-    "size":pageSize,
-    "from":0,
-    "showAllModels":False,
-    "propertyType":["house","flat"],
-    "newProperty":False,
-    "page":1,
-    "sortBy":"publicationDate",
-    "sortOrder":"desc",
-    "onTheMarket":[True],
-    }
-    updates = getLastUpdates()
-    print(updates)
     res = ""
-    if updates:
-        CreatelastupdateLog(session,'rent')
-        CreatelastupdateLog(session,'buy')
-        for key,val in updates.items():
-            param.update({"filterType":key})
-            updated = False
-            page= 1
-            while not updated and page*param['size']<2400:
-                url = getFilterUrl(param,page=page)
-                r = fetch(url,session,Json=True)
-                ads = r['realEstateAds']
-                adslist = []
-                for ad in ads:
-                    adtime = getTimeStamp(ad["publicationDate"])
-                    print(f"{val['lastupdate']}<{adtime} = ",val['lastupdate']<getTimeStamp(ad["publicationDate"]))
-                    if val['lastupdate']<getTimeStamp(ad["publicationDate"]):
-                        adslist.append(ad)
-                    else:
-                        msg = f"{len(adslist)} {key} new ads scraped"
-                        res += " "+ msg
-                        print(msg)
-                        updated = True
-                        break
-                producer.PushDataList(kafkaTopicName,adslist)
-                page +=1
-        # producer.stopProducer()
-        
-    else:
-        CreatelastupdateLog(session,'rent')
-        CreatelastupdateLog(session,'buy')
-    session.__del__()
+    try:
+        producer = AsyncKafkaTopicProducer()
+        # await producer.statProducer()
+        param  = {
+        "size":pageSize,
+        "from":0,
+        "showAllModels":False,
+        "propertyType":["house","flat"],
+        "newProperty":False,
+        "page":1,
+        "sortBy":"publicationDate",
+        "sortOrder":"desc",
+        "onTheMarket":[True],
+        }
+        updates = getLastUpdates()
+        print(updates)
+        if updates:
+            CreatelastupdateLog(session,'rent')
+            CreatelastupdateLog(session,'buy')
+            for key,val in updates.items():
+                param.update({"filterType":key})
+                updated = False
+                page= 1
+                while not updated and page*param['size']<2400:
+                    url = getFilterUrl(param,page=page)
+                    r = fetch(url,session,Json=True)
+                    ads = r['realEstateAds']
+                    adslist = []
+                    for ad in ads:
+                        adtime = getTimeStamp(ad["publicationDate"])
+                        print(f"{val['lastupdate']}<{adtime} = ",val['lastupdate']<getTimeStamp(ad["publicationDate"]))
+                        if val['lastupdate']<getTimeStamp(ad["publicationDate"]):
+                            adslist.append(ad)
+                        else:
+                            msg = f"{len(adslist)} {key} new ads scraped"
+                            res += " "+ msg
+                            print(msg)
+                            updated = True
+                            break
+                    producer.PushDataList(kafkaTopicName,adslist)
+                    page +=1
+            # producer.stopProducer()
+            
+        else:
+            CreatelastupdateLog(session,'rent')
+            CreatelastupdateLog(session,'buy')
+    finally:
+        session.__del__()
     return res
 def CheckId(id):
     session = HTMLSession()

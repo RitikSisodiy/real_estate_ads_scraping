@@ -1,10 +1,9 @@
 from datetime import datetime
 import traceback
-import aiohttp
 import asyncio
 import os,time
 from requests_html import HTML
-import json
+import json,requests
 
 from HttpRequest.requestsModules import HttpRequest
 from .parser import ParseParuvendu
@@ -188,11 +187,9 @@ def parstItems(session,param,page=None,**kwargs):
     savedata(data,**kwargs)
     return data
 def CheckId(id):
-    session = HttpRequest(True,'https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list?itemsPerPage=1',headers,{},{},False,cpath,1,10)
-    # async with aiohttp.ClientSession() as session:
     furl  = f"https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list?paId={id}&showdetail=1&mobId=dFlRt5PY0Gg:APA91bHEo1pJb5ChJsqkD-kzsxabz7I3tE8UctG_yN9_Do7_3QQM5ecUvw9jJln3Tm4UxghOmk4H2jozt9dZ8QFu2KuDWwc16av2QQ3SZOVCInP6TB5af9xoW2m_tvpc885HY4JZqsmd&key=lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh"
         # print(furl)
-    r = fetch(session,furl,headers=headers)
+    r = requests.get(furl,headers=headers)
     # print(r)
     data = r
     print(len(data["feed"]["row"]))
@@ -213,7 +210,10 @@ def main(adsType = ""):
     session = HttpRequest(True,'https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list?itemsPerPage=1',headers,{},{},False,cpath,1,10)
     CreatelastupdateLog(session,adsType)
     producer = AsyncKafkaTopicProducer()
-    filterParamList = getFilter(session,params,producer=producer)
+    try:
+        filterParamList = getFilter(session,params,producer=producer)
+    finally:
+        session.__del__()
     # startCrawling(session,filterParamList,producer=producer)
 def main_scraper(payload):
     adtype = payload["real_state_type"]

@@ -203,24 +203,26 @@ def CheckId(id):
     except:return False
 def main(adsType = ""):
     params = gparams
-    session = HttpRequest(True,'https://ws-web.avendrealouer.fr/',headers,{},{},False,cpath,1,10)
-    # catid info
-    # vente is for  Vente immobilier 
-    # location is for Location immobilier
-    if adsType == "rental":
-        catid = "2"
-    else:
-        catid = "1,3"
-    params["transactionIds"] = catid
-    # filterParamList = [*getFilter(param) for param in params
-    # async with aiohttp.ClientSession() as session:
-    CreatelastupdateLog(session,adsType)
-    producer = AsyncKafkaTopicProducer()
-    flist = [2,3,6,7,19]
-    for f in flist:
-        params.update({"typeIds":f})
-        getFilter(session,params,producer)
-    session.__del__()
+    try:
+        session = HttpRequest(True,'https://ws-web.avendrealouer.fr/',headers,{},{},False,cpath,1,10)
+        # catid info
+        # vente is for  Vente immobilier 
+        # location is for Location immobilier
+        if adsType == "rental":
+            catid = "2"
+        else:
+            catid = "1,3"
+        params["transactionIds"] = catid
+        # filterParamList = [*getFilter(param) for param in params
+        # async with aiohttp.ClientSession() as session:
+        CreatelastupdateLog(session,adsType)
+        producer = AsyncKafkaTopicProducer()
+        flist = [2,3,6,7,19]
+        for f in flist:
+            params.update({"typeIds":f})
+            getFilter(session,params,producer)
+    finally:
+        session.__del__()
     # await startCrawling(session,filterParamList,producer=producer)
     # await producer.stopProducer()
 def main_scraper(payload):
@@ -279,40 +281,42 @@ def asyncUpdateParuvendu():
     params= gparams
     updates = getLastUpdates()
     # print(updates)
-    session =  HttpRequest(True,'https://ws-web.avendrealouer.fr/',headers,{},{},False,cpath,1,10)
-    if not updates:
-        CreatelastupdateLog(session,'rental')
-        CreatelastupdateLog(session,'sale')
-    updates = getLastUpdates()
-    for key,val in updates.items():
-        CreatelastupdateLog(session,key)
-        if key == "rental":
-            catid = "2"
-        else:
-            catid = "1,3"
-        params.update({
-        'sorts[0].Name':"_newest",
-        'transactionIds':catid,
-        'pageSize':100,
-        })
-        updated = False
-        p=1
-        producer = AsyncKafkaTopicProducer()
-        # await producer.statProducer()
-        while not updated and p*pagesize<=700:
-            print(f"cheking page {p}")
-            adsres = parstItems(session,params,page=p,save=False,producer=producer)
-            ads = adsres["items"]
-            lastad = ads[len(ads)-1]
-            webupdates = GetAdUpdate(lastad)
-            savedata(adsres,producer=producer)
-            res = val['lastupdate']>webupdates['lastupdate']
-            print(f"{val['lastupdate']}>{webupdates['lastupdate']} ={res} and type {key}")
-            if res:
-                updated = True
-            p+=1
-            # await producer.stopProducer()
-    session.__del__()
+    try:
+        session =  HttpRequest(True,'https://ws-web.avendrealouer.fr/',headers,{},{},False,cpath,1,10)
+        if not updates:
+            CreatelastupdateLog(session,'rental')
+            CreatelastupdateLog(session,'sale')
+        updates = getLastUpdates()
+        for key,val in updates.items():
+            CreatelastupdateLog(session,key)
+            if key == "rental":
+                catid = "2"
+            else:
+                catid = "1,3"
+            params.update({
+            'sorts[0].Name':"_newest",
+            'transactionIds':catid,
+            'pageSize':100,
+            })
+            updated = False
+            p=1
+            producer = AsyncKafkaTopicProducer()
+            # await producer.statProducer()
+            while not updated and p*pagesize<=700:
+                print(f"cheking page {p}")
+                adsres = parstItems(session,params,page=p,save=False,producer=producer)
+                ads = adsres["items"]
+                lastad = ads[len(ads)-1]
+                webupdates = GetAdUpdate(lastad)
+                savedata(adsres,producer=producer)
+                res = val['lastupdate']>webupdates['lastupdate']
+                print(f"{val['lastupdate']}>{webupdates['lastupdate']} ={res} and type {key}")
+                if res:
+                    updated = True
+                p+=1
+                # await producer.stopProducer()
+    finally:
+        session.__del__()
 def UpdateParuvendu():
     asyncUpdateParuvendu()
 if __name__=="__main__":

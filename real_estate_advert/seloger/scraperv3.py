@@ -359,13 +359,15 @@ def CheckId(id):
     return False
 def main_scraper(payload,update=False):
     data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
-    adtype = payload.get("real_state_type")
-    if adtype == "Updated/Latest Ads" or update:
-        ob = SelogerScraper(data,asyncsize=5)
-        print(" latedst ads")
-        ob.updateLatestAd("rental")
-        ob.updateLatestAd("sale")
-    else:
-        ob = SelogerScraper(data,asyncsize=10)
-        ob.CrawlSeloger(adtype)
-    ob.__del__()
+    try:
+        adtype = payload.get("real_state_type")
+        if adtype == "Updated/Latest Ads" or update:
+            ob = SelogerScraper(data,asyncsize=5)
+            print(" latedst ads")
+            ob.updateLatestAd("rental")
+            ob.updateLatestAd("sale")
+        else:
+            ob = SelogerScraper(data,asyncsize=10)
+            ob.CrawlSeloger(adtype)
+    finally:
+        ob.__del__()
