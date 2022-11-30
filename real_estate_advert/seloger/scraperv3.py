@@ -75,8 +75,8 @@ class SelogerScraper(HttpRequest):
             final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid],timeout=self.timeout).text[1:-1]
 
             self.headers[sid] = {
-                'authorization': f'Bearer {final_token}',
-                **headers
+                **headers,
+                'authorization': f'Bearer {final_token}'
             }
             print(final_token,"<==========final token")
             return self.headers[sid]
