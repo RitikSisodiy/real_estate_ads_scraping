@@ -282,40 +282,42 @@ def asyncUpdateParuvendu():
     updates = getLastUpdates()
     session = HttpRequest(True,'https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list?itemsPerPage=1',headers,{},{},False,cpath,1)
     # async with aiohttp.ClientSession() as session:
-    if not updates:
-        CreatelastupdateLog(session,'rental')
-        CreatelastupdateLog(session,'sale')
-    updates = getLastUpdates()
-    for key,val in updates.items():
-        CreatelastupdateLog(session,key)
-        print("lastupdates",updates)
-        if key == "sale":
-            catid = "IVH00000"
-        else:
-            catid = "ILH00000"
-        params.update({
-        'sortOn':'dateMiseEnLigne',
-        'sortTo':'DESC',
-        'catId':catid,
-        'itemsPerPage':100,
-        'showdetail':1
-        })
-        updated = False
-        p=1
-        producer = AsyncKafkaTopicProducer()
-        while not updated:
-            print(f"cheking page {p}")
-            adsres = parstItems(session,params,page=p,producer=producer)
-            ads = adsres['feed']['row']
-            lastadurl = ads[len(ads)-1]['shortURL']
-            webupdates = GetAdUpdate(session,lastadurl)
-            # savedata(adsres,producer=producer)
-            res = val['lastupdate']>webupdates['lastupdate']
-            print(f"{val['lastupdate']}>{webupdates['lastupdate']} ={res} and type {key}")
-            if res:
-                updated = True
-            p+=1
-
+    try:
+        if not updates:
+            CreatelastupdateLog(session,'rental')
+            CreatelastupdateLog(session,'sale')
+        updates = getLastUpdates()
+        for key,val in updates.items():
+            CreatelastupdateLog(session,key)
+            print("lastupdates",updates)
+            if key == "sale":
+                catid = "IVH00000"
+            else:
+                catid = "ILH00000"
+            params.update({
+            'sortOn':'dateMiseEnLigne',
+            'sortTo':'DESC',
+            'catId':catid,
+            'itemsPerPage':100,
+            'showdetail':1
+            })
+            updated = False
+            p=1
+            producer = AsyncKafkaTopicProducer()
+            while not updated:
+                print(f"cheking page {p}")
+                adsres = parstItems(session,params,page=p,producer=producer)
+                ads = adsres['feed']['row']
+                lastadurl = ads[len(ads)-1]['shortURL']
+                webupdates = GetAdUpdate(session,lastadurl)
+                # savedata(adsres,producer=producer)
+                res = val['lastupdate']>webupdates['lastupdate']
+                print(f"{val['lastupdate']}>{webupdates['lastupdate']} ={res} and type {key}")
+                if res:
+                    updated = True
+                p+=1
+    finally:
+        session.__del__()
 def UpdateParuvendu():
     asyncUpdateParuvendu()
 if __name__=="__main__":
