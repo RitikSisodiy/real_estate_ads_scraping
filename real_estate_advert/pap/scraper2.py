@@ -32,7 +32,7 @@ class PapScraper:
         headers = {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
                 }
-        self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
+        self.prox = ProxyScraper(SELOGER_SECURITY_URL)
         try:
             self.proxies = self.readProxy()
         except:
@@ -52,7 +52,7 @@ class PapScraper:
             "Host": "api.pap.fr",
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
-            }
+        }
         # self.driver.request_interceptor = self.interceptor
         pass
     def GenCookie(self,proxy=None):
