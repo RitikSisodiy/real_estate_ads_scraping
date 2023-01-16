@@ -26,12 +26,11 @@ class PapScraper:
         self.parameter = parameter
         self.apiurl = "https://api.pap.fr/app/annonces"
         self.proxy = proxy
-        SELOGER_SECURITY_URL = "https://www.pap.fr"
-        
         self.cookie = ""
+        SELOGER_SECURITY_URL = "https://www.meilleursagents.com/"
         headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
-                }
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
+        }
         self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
         try:
             self.proxies = self.readProxy()
