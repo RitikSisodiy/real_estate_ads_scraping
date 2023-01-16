@@ -77,7 +77,7 @@ class ProxyScraper:
                 for d in data:
                     if d:
                         r, proxy = d
-                        if r.status_code == 200:
+                        if r.status_code in [200,400]:
                             working += json.dumps(proxy)+"\n"
                             # restext.append(proxy)
                             self.proxylist.append(proxy)
