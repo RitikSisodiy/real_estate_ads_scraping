@@ -287,11 +287,15 @@ def pap_scraper(payload):
     ob.Crawl(typ)
     ob.__del__()
 def UpdatePap():
-    types = ['location',"vente"]
-    ob= PapScraper(dic,proxy=False)
-    for typ in types:
-        ob.CrawlLatestV2(typ)
-    ob.__del__()
+    try:
+        types = ['location',"vente"]
+        ob= PapScraper(dic,proxy=False)
+        for typ in types:
+            ob.CrawlLatestV2(typ)
+        ob.__del__()
+    except:
+        if os.path.exists("./working.txt"):
+            os.remove("./working.txt")
 
 if __name__== "__main__":
     typ ="rental"
