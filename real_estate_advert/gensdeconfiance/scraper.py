@@ -19,7 +19,7 @@ class gensdeconfiance(okHTTpClient):
         self.createurl = "https://gensdeconfiance.com/api/v2/members"
         self.loginurl = "https://gensdeconfiance.com/api/v2/members/login"
         cpath = os.path.dirname(__file__)
-        URL = "https://www.meilleursagents.com/"
+        URL = "https://www.google.com/"
         self.params = params
         proxyheaders = {}
         self.producer = AsyncKafkaTopicProducer()

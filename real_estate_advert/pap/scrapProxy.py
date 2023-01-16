@@ -97,7 +97,7 @@ class ProxyScraper:
             # async with session.get(,) as r:
             #     return r
             print(proxies)
-            r= await self.fetch(url, proxies=proxies, headers=self.headers,timeout=2)
+            r= await self.fetch(url, proxies=proxies, headers=self.headers,timeout=1)
             print(r)
             return r,proxies
         except:
