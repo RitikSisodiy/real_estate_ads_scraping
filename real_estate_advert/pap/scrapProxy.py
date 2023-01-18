@@ -22,25 +22,23 @@ class ProxyScraper:
         pass
     async def fetch(self,url,**kwargs):
         session = AsyncHTMLSession()
-        # headers = kwargs.get("headers")
-        # if not headers:kwargs['headers']=self.headers
+        headers = kwargs.get("headers")
+        if not headers:kwargs['headers']=self.headers
         print(url)
         res = await session.get(url,**kwargs)
         return res
 
     async def main(self):
-        headers = {
-            "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
-        }
         # self.session = AsyncHTMLSession()
-        tasks = [asyncio.ensure_future(self.getProxy(url,protocol,headers)) for url,protocol in self.urls]
+        tasks = [asyncio.ensure_future(self.getProxy(url,protocol)) for url,protocol in self.urls]
+        
         await asyncio.gather(*tasks)
         self.proxylist = []
         await asyncio.gather(asyncio.ensure_future(self.checkproxy()))
         return self.proxylist
-    async def getProxy(self,url,protocol,headers):
+    async def getProxy(self,url,protocol):
         global restext
-        r = await self.fetch(url,headers=headers)
+        r = await self.fetch(url)
         content = r.content
         with open(f"{protocol}.txt",'wb') as file:
             file.write(content)
@@ -77,7 +75,7 @@ class ProxyScraper:
                 for d in data:
                     if d:
                         r, proxy = d
-                        if r.status_code in [200,400]:
+                        if r.status_code == 200:
                             working += json.dumps(proxy)+"\n"
                             # restext.append(proxy)
                             self.proxylist.append(proxy)
@@ -97,7 +95,7 @@ class ProxyScraper:
             # async with session.get(,) as r:
             #     return r
             print(proxies)
-            r= await self.fetch(url, proxies=proxies, headers=self.headers,timeout=1)
+            r= await self.fetch(url, proxies=proxies, timeout=1)
             print(r)
             return r,proxies
         except:

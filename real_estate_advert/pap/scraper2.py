@@ -1,3 +1,4 @@
+
 import random
 from tabnanny import check
 import threading
@@ -26,12 +27,12 @@ class PapScraper:
         self.parameter = parameter
         self.apiurl = "https://api.pap.fr/app/annonces"
         self.proxy = proxy
+        SELOGER_SECURITY_URL = "https://www.google.com"
+        
         self.cookie = ""
-        SELOGER_SECURITY_URL = "https://www.google.com/"
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
-        }
-
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
+                }
         self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
         try:
             self.proxies = self.readProxy()
@@ -43,7 +44,16 @@ class PapScraper:
         self.proxy = self.getRandomProxy()
         # self.driver.proxy = self.getRandomProxy()
         # self.driver.set_page_load_timeout(5)
-        
+        self.headers = {
+            "Accept": "*/*",
+            "X-App-Version": "4.0.10",
+            "X-App-Target": "android",
+            "X-App-Uuid": "b8c75b38-b638-4269-acaf-722f42936bec",
+            "User-Agent": "PAP/G-4.0.10 (Google sdk_gphone_x86 Android SDK 30) okhttp/5.0.0-alpha.2",
+            "Host": "api.pap.fr",
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            }
         # self.driver.request_interceptor = self.interceptor
         pass
     def GenCookie(self,proxy=None):
@@ -287,15 +297,11 @@ def pap_scraper(payload):
     ob.Crawl(typ)
     ob.__del__()
 def UpdatePap():
-    try:
-        types = ['location',"vente"]
-        ob= PapScraper(dic,proxy=False)
-        for typ in types:
-            ob.CrawlLatestV2(typ)
-        ob.__del__()
-    except:
-        if os.path.exists("./working.txt"):
-            os.remove("./working.txt")
+    types = ['location',"vente"]
+    ob= PapScraper(dic,proxy=False)
+    for typ in types:
+        ob.CrawlLatestV2(typ)
+    ob.__del__()
 
 if __name__== "__main__":
     typ ="rental"
