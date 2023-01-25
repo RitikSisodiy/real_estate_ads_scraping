@@ -16,16 +16,20 @@ from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceSc
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
 from celery import Celery
-from celery.schedules import crontab
 from settings import *
-from celery_singleton import Singleton
 
 
 celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
+# Set the default queue for all tasks
+celery_app.conf.task_default_queue = 'default'
+celery_app.conf.task_default_exchange = 'default'
+celery_app.conf.task_default_routing_key = 'default'
+celery_app.conf.task_default_queue_arguments = {'x-deduplication-header': 'task-id'}
+
 celery_app.config_from_object(__name__)
 
 
-@celery_app.task(base=Singleton,name="real estate")
+@celery_app.task(name="real estate")
 def real_estate_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -36,7 +40,7 @@ def real_estate_task(payload):
 
     print("Task End ================> ")
 import traceback
-@celery_app.task(base=Singleton,name="bienci task")
+@celery_app.task(name="bienci task")
 def scrap_bienci_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -50,7 +54,7 @@ def scrap_bienci_task(payload):
     # Scraping task obj start here
     print("Task End ================> ")
     return data
-@celery_app.task(base=Singleton,name="real estate logic-immo")
+@celery_app.task(name="real estate logic-immo")
 def scrap_logicimmo_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -64,7 +68,7 @@ def scrap_logicimmo_task(payload):
     # Scraping task obj start here
     print("Task End ================> ")
     return data
-@celery_app.task(base=Singleton,name="real estate Lefigaro")
+@celery_app.task(name="real estate Lefigaro")
 def scrap_lefigaro_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -78,7 +82,7 @@ def scrap_lefigaro_task(payload):
     print("Task End ================> ")
     return data
 
-@celery_app.task(base=Singleton,name="real estate avendrealouer")
+@celery_app.task(name="real estate avendrealouer")
 def scrap_avendrealouer_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -91,7 +95,7 @@ def scrap_avendrealouer_task(payload):
     # Scraping task obj start here
     print("Task End ================> ")
     return data
-@celery_app.task(base=Singleton,name="real estate OuestFranceScrapper")
+@celery_app.task(name="real estate OuestFranceScrapper")
 def scrap_OuestFranceScrapper_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -104,7 +108,7 @@ def scrap_OuestFranceScrapper_task(payload):
     # Scraping task obj start here
     print("Task End ================> ")
     return data
-@celery_app.task(base=Singleton,name="real estate gensdeconfianceScraper")
+@celery_app.task(name="real estate gensdeconfianceScraper")
 def scrap_gensdeconfiance_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -119,7 +123,7 @@ def scrap_gensdeconfiance_task(payload):
     return data
 
 
-@celery_app.task(base=Singleton,name="real estate leboncoin")
+@celery_app.task(name="real estate leboncoin")
 def scrape_leboncoin_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -132,7 +136,7 @@ def scrape_leboncoin_task(payload):
 
     print("Task End ================> ")
 
-@celery_app.task(base=Singleton,name="real estate fetch leboncoin latest ad")
+@celery_app.task(name="real estate fetch leboncoin latest ad")
 def update_leboncoin_ads():
     print("Task start ================> ")
     try:leboncoinAdScraper({
@@ -142,7 +146,7 @@ def update_leboncoin_ads():
         traceback.print_exc()
         print("Exception ================> ",e)
     print("Task End ================> ")
-@celery_app.task(base=Singleton,name="real estate fetch paruvedu latest ad")
+@celery_app.task(name="real estate fetch paruvedu latest ad")
 def update_paruvendu_ads():
     print("Task start ================> ")
     try:UpdateParuvendu()
@@ -151,7 +155,7 @@ def update_paruvendu_ads():
         print("Exception ================> ",e)
     print("Task End ================> ")
 
-@celery_app.task(base=Singleton,name="real estate fetch pap latest ad")
+@celery_app.task(name="real estate fetch pap latest ad")
 def update_pap_ads():
     print("Task start ================> ")
     try:UpdatePap()
@@ -159,7 +163,7 @@ def update_pap_ads():
         traceback.print_exc()
         print("Exception ================> ",e)
     print("Task End ================> ")
-@celery_app.task(base=Singleton,name="real estate fetch Bienci latest ad")
+@celery_app.task(name="real estate fetch Bienci latest ad")
 def update_Bienci_ads():
     print("Task start ================> ")
     try:
@@ -171,7 +175,7 @@ def update_Bienci_ads():
     print("Task End ================> ")
     print(data)
     return data
-@celery_app.task(base=Singleton,name="real estate fetch logicImmo latest ad")
+@celery_app.task(name="real estate fetch logicImmo latest ad")
 def update_logicImmo_ads():
     print("Task start ================> ")
     try:
@@ -183,7 +187,7 @@ def update_logicImmo_ads():
     print("Task End ================> ")
     print(data)
     return data
-@celery_app.task(base=Singleton,name="real estate fetch lefigaro latest ad")
+@celery_app.task(name="real estate fetch lefigaro latest ad")
 def update_lefigaro_ads():
     print("Task start ================> ")
     try:
@@ -195,7 +199,7 @@ def update_lefigaro_ads():
     print("Task End ================> ")
     print(data)
     return data
-@celery_app.task(base=Singleton,name="real estate fetch avendrealouer latest ad")
+@celery_app.task(name="real estate fetch avendrealouer latest ad")
 def update_avendrealouer_ads():
     print("Task start ================> ")
     try:
@@ -207,7 +211,7 @@ def update_avendrealouer_ads():
     print("Task End ================> ")
     print(data)
     return data
-@celery_app.task(base=Singleton,name="real estate fetch seloger latest ad")
+@celery_app.task(name="real estate fetch seloger latest ad")
 def update_seloger_ads():
     print("Task start ================> ")
     try:selogerScraper({},update=True)
@@ -217,7 +221,7 @@ def update_seloger_ads():
     print("Task End ================> ")
 
 
-@celery_app.task(base=Singleton,name="real estate pap")
+@celery_app.task(name="real estate pap")
 def scrape_pap_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -226,7 +230,7 @@ def scrape_pap_task(payload):
     # Scraping task obj start here
 
     print("Task End ================> ")
-@celery_app.task(base=Singleton,name="real estate seloger")
+@celery_app.task(name="real estate seloger")
 def scrape_seloger_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -238,7 +242,7 @@ def scrape_seloger_task(payload):
 
 
 
-@celery_app.task(base=Singleton,name="real estate paruvendu")
+@celery_app.task(name="real estate paruvendu")
 def scrape_paruvendu_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -250,7 +254,7 @@ def scrape_paruvendu_task(payload):
     # Scraping task obj start here
 
     print("Task End ================> ")
-@celery_app.task(base=Singleton,name="real estate OuestFrance")
+@celery_app.task(name="real estate OuestFrance")
 def update_OuestFranceScrapper_ads():
     print("Task start ================> ")
     try:OuestFranceScrapper({},update=True)
@@ -258,7 +262,7 @@ def update_OuestFranceScrapper_ads():
         traceback.print_exc()
         print("Exception ================> ",e)
     print("Task End ================> ")
-@celery_app.task(base=Singleton,name="real estate gensdeconfiance")
+@celery_app.task(name="real estate gensdeconfiance")
 def update_gensdeconfianceScrapper_ads():
     print("Task start ================> ")
     try:gensdeconfianceScraper({},update=True)
@@ -267,7 +271,7 @@ def update_gensdeconfianceScrapper_ads():
         print("Exception ================> ",e)
     print("Task End ================> ")
 
-@celery_app.task(base=Singleton,name="real estate green-acres")
+@celery_app.task(name="real estate green-acres")
 def scrap_greenacres_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
