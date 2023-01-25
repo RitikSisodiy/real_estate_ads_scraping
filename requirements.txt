@@ -75,3 +75,4 @@ wcwidth==0.2.5
 webdriver-manager==3.5.2
 websockets==10.1
 wsproto==1.0.0
+celery-singleton
