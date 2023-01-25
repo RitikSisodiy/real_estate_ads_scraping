@@ -15,7 +15,7 @@ from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
 from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceScrapper
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
-from celery import Celery
+from celery import Celery,Task
 from celery.schedules import crontab
 from settings import *
 
@@ -24,23 +24,27 @@ celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
 celery_app.config_from_object(__name__)
 runningTasks = set()
 # ignore the task if it is already running
-def ignoreIfRunning(task, *args, **kwargs):
-    # Middleware logic here
-    global runningTasks 
-    if task.__name__ in runningTasks:
-        print(task.__name__, " : is already running")
-        return 
-    print('Task started:', task.__name__)
-    try:
-        runningTasks.add(task.__name__)
-        result = task(*args, **kwargs)
-    except:
-        pass
-    finally:
-        runningTasks.remove(task.__name__)
-    print('Task finished:', task.__name__)
-    return result
-celery_app.task_middleware.append(ignoreIfRunning)
+# def ignoreIfRunning(task, *args, **kwargs):
+#     # Middleware logic here
+# middle ware for all tasks 
+class IgnoreIfRunning(Task):
+    def __call__(self, *args, **kwargs):
+        global runningTasks
+        name =  self.name
+        if name in runningTasks:
+            print(name, " : is already running")
+            return 
+        print('Task started:', name)
+        try:
+            runningTasks.add(name)
+            result = super().__call__(*args, **kwargs)
+        except:
+            pass
+        finally:
+            runningTasks.remove(name)
+        print('Task finished:', name)
+        return result
+celery_app.Task = IgnoreIfRunning.bind(celery_app)
 @celery_app.task(name="real estate")
 def real_estate_task(payload):
     print("Task start ================>")
