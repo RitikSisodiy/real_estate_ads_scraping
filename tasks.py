@@ -16,22 +16,34 @@ from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceSc
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
 from celery import Celery
+from celery.schedules import crontab
 from settings import *
 
 
 celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
-# Set the default queue for all tasks
-celery_app.conf.task_default_queue = 'default'
-celery_app.conf.task_default_exchange = 'default'
-celery_app.conf.task_default_routing_key = 'default'
-celery_app.conf.task_default_queue_arguments = {'x-deduplication-header': 'task-id'}
-
 celery_app.config_from_object(__name__)
-
-
+runningTasks = set()
+# ignore the task if it is already running
+def ignoreIfRunning(task, *args, **kwargs):
+    # Middleware logic here
+    global runningTasks 
+    if task.__name__ in runningTasks:
+        print(task.__name__, " : is already running")
+        return 
+    print('Task started:', task.__name__)
+    try:
+        runningTasks.add(task.__name__)
+        result = task(*args, **kwargs)
+    except:
+        pass
+    finally:
+        runningTasks.remove(task.__name__)
+    print('Task finished:', task.__name__)
+    return result
+celery_app.task_middleware.append(ignoreIfRunning)
 @celery_app.task(name="real estate")
 def real_estate_task(payload):
-    print("Task start ================> ")
+    print("Task start ================>")
     print("payload : ", payload)
     obj = leboncoinAd()
     obj.visit_url()
