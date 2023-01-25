@@ -15,7 +15,8 @@ from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
 from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceScrapper
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
-from celery import Celery,Task
+from celery import Celery
+from celery.signals import task_prerun,task_postrun
 from celery.schedules import crontab
 from settings import *
 
@@ -24,27 +25,20 @@ celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
 celery_app.config_from_object(__name__)
 runningTasks = set()
 # ignore the task if it is already running
-# def ignoreIfRunning(task, *args, **kwargs):
-#     # Middleware logic here
-# middle ware for all tasks 
-class IgnoreIfRunning(Task):
-    def __call__(self, *args, **kwargs):
-        global runningTasks
-        name =  self.name
-        if name in runningTasks:
-            print(name, " : is already running")
-            return 
-        print('Task started:', name)
-        try:
-            runningTasks.add(name)
-            result = super().__call__(*args, **kwargs)
-        except:
-            pass
-        finally:
-            runningTasks.remove(name)
-        print('Task finished:', name)
-        return result
-celery_app.Task = IgnoreIfRunning.bind(celery_app)
+@task_prerun.connect
+def task_prerun_handler(task_id, task, args, kwargs, **kw):
+    global runningTasks
+    if task.name in runningTasks:
+        print('Stopping task:', task.name)
+        return False  # This will stop the task execution
+    print('Starting task:', task.name)
+@task_postrun.connect
+def task_postrun_handler(task_id, task, args, kwargs, **kw):
+    global runningTasks
+    try:runningTasks.remove(task.name) 
+    except:pass
+    print('completed task:', task.name)
+
 @celery_app.task(name="real estate")
 def real_estate_task(payload):
     print("Task start ================>")
