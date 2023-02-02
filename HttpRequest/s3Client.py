@@ -52,7 +52,6 @@ class S3:
         except:return url
         # return if any error response
         if r.status_code is not 200:
-            print (r.status_code)
             return url
         if r.headers.get('Content-Disposition'):
             # If the response has Content-Disposition, we take file name from it
@@ -66,7 +65,6 @@ class S3:
             filename = self.getBaseName(url)
         fileext = filename.rsplit(".",1)
         randomfilename = str(uuid.uuid4())
-        print(fileext)
         if len(fileext)<2 or len(fileext[1])>5:
             extention =   self.filetype.get((r.headers.get("Content-Type") and (r.headers.get("Content-Type").lower() ) or ""),"").replace(".","")
         else:
