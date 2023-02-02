@@ -1,6 +1,6 @@
 import aioboto3
 import dotenv,os
-import aiohttp
+from requests_html import AsyncHTMLSession
 from os.path import basename
 import io ,asyncio,time,json
 import uuid
@@ -18,7 +18,8 @@ class S3:
         # self.aiosession = aioboto3.Session()
         self.aiosession = aioboto3.Session()
         self.bucket = bucketname
-        self.session = aiohttp.ClientSession()
+        # self.session = aiohttp.ClientSession()
+        self.session = AsyncHTMLSession()
         self.filetype = json.load(open(f"{cpath}/filetype.json"))
         
     def getBaseName(self,url):
@@ -43,11 +44,16 @@ class S3:
             counter+=1
     async def uploadUrl(self,s3,url,uploadPath):
         # Multipart upload
+        headers = {
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+        }
         try:
-            r = await self.session.get(url)
+            r = await self.session.get(url,headers=headers)
         except:return url
         # return if any error response
-        if r.status is not 200:return None
+        if r.status_code is not 200:
+            print (r.status_code)
+            return url
         if r.headers.get('Content-Disposition'):
             # If the response has Content-Disposition, we take file name from it
             filename = r.headers['Content-Disposition'].split('filename=')[1]
@@ -60,14 +66,15 @@ class S3:
             filename = self.getBaseName(url)
         fileext = filename.rsplit(".",1)
         randomfilename = str(uuid.uuid4())
-        if len(fileext)<2:
+        print(fileext)
+        if len(fileext)<2 or len(fileext[1])>5:
             extention =   self.filetype.get((r.headers.get("Content-Type") and (r.headers.get("Content-Type").lower() ) or ""),"").replace(".","")
         else:
             filename, extention = fileext
         filename =".".join([randomfilename,extention])
         if uploadPath:filename = uploadPath+"/"+filename
         # print(f"Uploading {filename} to s3")
-        await s3.upload_fileobj(io.BytesIO(await r.read()), self.bucket, filename,ExtraArgs={'ACL': 'public-read'})
+        await s3.upload_fileobj(io.BytesIO(r.content), self.bucket, filename,ExtraArgs={'ACL': 'public-read'})
         # print(f"Finished Uploading {filename} to s3")
         return f"https://{self.bucket}.s3.{self.region}.amazonaws.com/{filename}"
     async def bulkUrlUpload(self,urls,uploadPath=""):
@@ -84,8 +91,7 @@ class S3:
 async def main():
     ob =  S3("adimages-upload-scrapping-new","test")
     imgs =  [
-			"https://v.seloger.com/s/cdn/x/visuels/1/v/l/a/1vlaeqkqdvl4qo62iq13h8btbc7ibkyxxlyipwv2s.jpg",
-			"https://v.seloger.com/s/cdn/x/visuels/0/z/f/f/0zfftrjck98gqkrjzrlik8t6ms67gcviwx4yyhd1w.jpg",
+			"http://thbr.figarocms.net/external/uRUmDsiK-59ZaktS5--lJp4YSb0=/0x1600/filters:fill(white):quality(80):strip_icc()/https%3A%2F%2Fpasserelle.static.iadfrance.com%2Fphotos%2Frealestate%2F2023-01%2Fproduct-1278136-1.jpg%3Fbridge%3Dexplorimmo%26ts%3D202302020002"
 	]
     start_time = time.time()
     urls = await  ob.bulkUrlUpload(imgs,uploadPath="leboncoin")
