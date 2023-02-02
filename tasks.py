@@ -19,8 +19,8 @@ from celery import Celery
 from celery.signals import task_prerun,task_postrun
 from celery.schedules import crontab
 from settings import *
-
-
+import dotenv
+dotenv.load_dotenv()
 celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
 celery_app.config_from_object(__name__)
 runningTasks = set()
