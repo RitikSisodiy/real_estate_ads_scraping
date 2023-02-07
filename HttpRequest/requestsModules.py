@@ -68,7 +68,7 @@ class ProxyServer:
         print("proxy thread is terminated")
     def readProxy(self):
         filepath = f"{self.cpath}/working.txt"
-        lastmodifiled = os.stat(filepath).st_mtime() 
+        lastmodifiled = os.stat(filepath).st_mtime
         ctime = datetime.now().timestamp()
         if ctime-lastmodifiled>=60*60*24:return None
         with open(filepath,"r") as file:
