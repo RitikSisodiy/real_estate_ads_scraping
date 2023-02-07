@@ -3,12 +3,14 @@ from .AsyncProxy import ProxyScraper as AsyncScraper
 import threading,time,json,random,traceback,requests,os,concurrent.futures
 from requests_html import AsyncHTMLSession
 from urllib.parse import urlencode
+from datetime import datetime
 class ProxyServer:
-    def __init__(self,proxyThread, URL, headers, proxies, aio, cpath) -> None:
+    def __init__(self,proxyThread, URL, headers, proxies, aio, cpath,interval) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
         self.proxy = self.getLastProxy()
         print(aio,"this is aio")
         self.cpath = cpath
+        self.interval = interval
         if not headers:
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
@@ -43,11 +45,11 @@ class ProxyServer:
             time.sleep(1)
             t-=1
         return False
-    def updateProxyList(self,interval=300):
-        if self.readProxy():time.sleep(interval)
+    def updateProxyList(self):
+        if self.readProxy() and not self.threadsleep(self.interval):return
         while self.startThread:
             self.getProxyList()
-            b = self.threadsleep(interval)
+            b = self.threadsleep(self.interval)
             if b:
                 break
         print("thread is stopped")
@@ -65,7 +67,11 @@ class ProxyServer:
         self.startThread = False
         print("proxy thread is terminated")
     def readProxy(self):
-        with open(f"{self.cpath}/working.txt","r") as file:
+        filepath = f"{self.cpath}/working.txt"
+        lastmodifiled = os.stat(filepath).st_mtime() 
+        ctime = datetime.now().timestamp()
+        if ctime-lastmodifiled>=60*60*24:return None
+        with open(filepath,"r") as file:
             proxies = file.readlines()
         return [json.loads(proxy) for proxy in proxies]
     def getRandomProxy(self):
@@ -74,8 +80,8 @@ class ProxyServer:
     # def __exit__(self):
     #     self.logfile.close()
 class HttpRequest(ProxyServer):
-    def __init__(self, proxyThread=True, URL="https://www.google.com", headers={},proxyheaders={}, proxies={}, aio=True, cpath="",asyncsize=1,timeout=5) -> None:
-        super().__init__(proxyThread, URL, proxyheaders, proxies, aio, cpath)
+    def __init__(self, proxyThread=True, URL="https://www.google.com", headers={},proxyheaders={}, proxies={}, aio=True, cpath="",asyncsize=1,timeout=5,interval=300) -> None:
+        super().__init__(proxyThread, URL, proxyheaders, proxies, aio, cpath,interval)
         self.asyncsize=asyncsize
         self.headers = {}
         self.headerlist = headers
@@ -128,8 +134,8 @@ class HttpRequest(ProxyServer):
         return r
 
 class okHTTpClient(ProxyServer):
-    def __init__(self, proxyThread=True, URL="https://www.google.com", headers={},proxyheaders={}, proxies={}, aio=True, cpath="",asyncsize = 1) -> None:
-        super().__init__(proxyThread, URL, proxyheaders, proxies, aio, cpath)
+    def __init__(self, proxyThread=True, URL="https://www.google.com", headers={},proxyheaders={}, proxies={}, aio=True, cpath="",asyncsize = 1,interval=300) -> None:
+        super().__init__(proxyThread, URL, proxyheaders, proxies, aio, cpath,interval)
         self.headers = headers or {
             "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
         }
