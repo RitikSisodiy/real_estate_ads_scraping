@@ -125,20 +125,23 @@ params = {
         'sortTo':'DESC',
         'key':'lafNgtmagb6VrZugp7Wim2SUf32gZtask2iomq+lo891jsyq2N2Sx9+dfZnaqpm3lqZ+l6qDn8F1opyRmIODsWbGxIXb3GrPr9KimbrSlbermZ+HnqCaqmOd1KzZa5a+abKnpZewpqm83ZeXnMbXlISDaouLhLyleqG1aLl0Z8WXmtmfvJeexNncpMmenZaqjGaBkqKo08ZUVpZommZkmmSTmmCIiKPKy6eY2KaZwpSohW6tqG2pypKh',
     }
-def fetch(session,url,params = None,method="get",Json=True,**kwargs):
+def fetch(session,url,params = None,method="get",Json=True,retry=0,**kwargs):
     # if params:
     #     query_string = urllib.parse.urlencode( params )
     #     url += "?"+query_string 
+    if retry>3:
+        return None
+    retry+=1
     try:
         res = session.fetch(url,params=params)
     except Exception as e:
         time.sleep(3)
-        return fetch(session,url,params,method,**kwargs)
+        return fetch(session,url,params,method,Json=Json,retry=retry,**kwargs)
     try:
         print(res.status_code)
         if Json:response = res.json()
         else:response=res
-    except: return fetch(session,url,params,method,**kwargs)
+    except: return fetch(session,url,params,method,Json=Json,retry=retry,**kwargs)
     return response
 
 def savedata(resjson,**kwargs):
