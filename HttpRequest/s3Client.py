@@ -43,38 +43,38 @@ class S3:
                     raise
             counter+=1
     async def uploadUrl(self,s3,url,uploadPath):
-        # Multipart upload
-        headers = {
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
-        }
         try:
+            # Multipart upload
+            headers = {
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+            }
             r = await self.session.get(url,headers=headers)
+            # return if any error response
+            if r.status_code is not 200:
+                return url
+            if r.headers.get('Content-Disposition'):
+                # If the response has Content-Disposition, we take file name from it
+                filename = r.headers['Content-Disposition'].split('filename=')[1]
+                if filename[0] == '"' or filename[0] == "'":
+                    filename = filename[1:-1]
+            elif r.url and str(r.url) != url: 
+                # if we were redirected, the real file name we take from the final URL
+                filename = self.getBaseName(str(r.url))
+            else:
+                filename = self.getBaseName(url)
+            fileext = filename.rsplit(".",1)
+            randomfilename = str(uuid.uuid4())
+            if len(fileext)<2 or len(fileext[1])>5:
+                extention =   self.filetype.get((r.headers.get("Content-Type") and (r.headers.get("Content-Type").lower() ) or ""),"").replace(".","")
+            else:
+                filename, extention = fileext
+            filename =".".join([randomfilename,extention])
+            if uploadPath:filename = uploadPath+"/"+filename
+            # print(f"Uploading {filename} to s3")
+            await s3.upload_fileobj(io.BytesIO(r.content), self.bucket, filename,ExtraArgs={'ACL': 'public-read'})
+            # print(f"Finished Uploading {filename} to s3")
+            return f"https://{self.bucket}.s3.{self.region}.amazonaws.com/{filename}"
         except:return url
-        # return if any error response
-        if r.status_code is not 200:
-            return url
-        if r.headers.get('Content-Disposition'):
-            # If the response has Content-Disposition, we take file name from it
-            filename = r.headers['Content-Disposition'].split('filename=')[1]
-            if filename[0] == '"' or filename[0] == "'":
-                filename = filename[1:-1]
-        elif r.url and str(r.url) != url: 
-            # if we were redirected, the real file name we take from the final URL
-            filename = self.getBaseName(str(r.url))
-        else:
-            filename = self.getBaseName(url)
-        fileext = filename.rsplit(".",1)
-        randomfilename = str(uuid.uuid4())
-        if len(fileext)<2 or len(fileext[1])>5:
-            extention =   self.filetype.get((r.headers.get("Content-Type") and (r.headers.get("Content-Type").lower() ) or ""),"").replace(".","")
-        else:
-            filename, extention = fileext
-        filename =".".join([randomfilename,extention])
-        if uploadPath:filename = uploadPath+"/"+filename
-        # print(f"Uploading {filename} to s3")
-        await s3.upload_fileobj(io.BytesIO(r.content), self.bucket, filename,ExtraArgs={'ACL': 'public-read'})
-        # print(f"Finished Uploading {filename} to s3")
-        return f"https://{self.bucket}.s3.{self.region}.amazonaws.com/{filename}"
     async def bulkUrlUpload(self,urls,uploadPath=""):
         urlTask =[]
         async with self.aiosession.client("s3",region_name=self.region) as s3:
