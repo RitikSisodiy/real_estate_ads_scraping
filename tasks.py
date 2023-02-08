@@ -16,18 +16,19 @@ from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceSc
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
 from celery import Celery
-from celery.result import AsyncResult
 from celery.signals import task_received
-from celery.schedules import crontab
+from celery.result import AsyncResult
 from settings import *
 import dotenv
 dotenv.load_dotenv()
 celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
 celery_app.config_from_object(__name__)
-    # ignore the task if it is already running
-inspect = celery_app.control.inspect()
+runningTasks = set()
+# ignore the task if it is already running
 @task_received.connect
 def task_received_handler(request=None,**kwargs):
+    inspect = celery_app.control.inspect()
+    print("inside received")
     activetasks = inspect.active()#{'celery@DESKTOP-G6UNTK5': [{'id': 'eac73c1f-4368-4db7-8c1f-831cb8c2a13a', 'name': 'real estate test-task', 'args': [], 'kwargs': {'payload': {'text': '', 'min_price': 0.0, 'max_price': 0.0, 'city': '', 'rooms': 0, 'real_state_type': 'Updated/Latest Ads'}}, 'type': 'real estate test-task', 'hostname': 'celery@DESKTOP-G6UNTK5', 'time_start': 1675773176.4143288, 'acknowledged': True, 'delivery_info': {'exchange': '', 'routing_key': 'celery', 'priority': 0, 'redelivered': False}, 'worker_pid': 2471040022664}]}
     if activetasks:
         activetasks = [taskinfo["name"] for taskinfo in [value for key,value in activetasks.items()][0] if taskinfo.get("name")]
@@ -35,7 +36,11 @@ def task_received_handler(request=None,**kwargs):
             print(f"ignoring the dublicate task and removing it from waiting queue: {request.task.name}")
             result = AsyncResult(request.id)
             result.revoke()
+            # print(result)
+            print(inspect.reserved())
             return False
+
+
 
 @celery_app.task(name="real estate")
 def real_estate_task(payload):
@@ -150,6 +155,17 @@ def update_leboncoin_ads():
     try:leboncoinAdScraper({
         "real_state_type":"Updated/Latest Ads"
     })
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ================> ",e)
+    print("Task End ================> ")
+@celery_app.task(name="test task to")
+def update_test_ads():
+    print("Task start ================> ")
+    try:
+        print("sleeping...")
+        time.sleep(1000)
+        print("good morning")
     except Exception as e:
         traceback.print_exc()
         print("Exception ================> ",e)
