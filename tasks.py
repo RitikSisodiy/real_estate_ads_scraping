@@ -16,7 +16,7 @@ from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceSc
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
 from celery import Celery
-from celery.signals import task_received
+from celery.signals import task_received,task_prerun,task_postrun
 from celery.result import AsyncResult
 from settings import *
 import dotenv
@@ -39,7 +39,21 @@ def task_received_handler(request=None,**kwargs):
             # print(result)
             print(inspect.reserved())
             return False
-
+runningTasks = set()
+# ignore the task if it is already running
+@task_prerun.connect
+def task_prerun_handler(task_id, task, args, kwargs, **kw):
+    global runningTasks
+    if task.name in runningTasks:
+        print('Stopping task:', task.name)
+        return False  # This will stop the task execution
+    print('Starting task:', task.name)
+@task_postrun.connect
+def task_postrun_handler(task_id, task, args, kwargs, **kw):
+    global runningTasks
+    try:runningTasks.remove(task.name) 
+    except:pass
+    print('completed task:', task.name)
 
 
 @celery_app.task(name="real estate")
