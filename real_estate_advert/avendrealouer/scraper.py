@@ -34,20 +34,25 @@ headers = {
     "Connection": "Keep-Alive",
     "Accept-Encoding": "gzip",
 }
-def fetch(session,url,params = None,method="get",**kwargs):
+def fetch(session,url,params = None,method="get",retry=0,**kwargs):
     # if params:
     #     query_string = urllib.parse.urlencode( params )
     #     url += "?"+query_string 
+    if retry>3:
+        return None
+    retry+=1
     try:
         res = session.fetch(url,headers = headers,params=params)
     except Exception as e:
         time.sleep(3)
-        return fetch(session,url,params,method,**kwargs)
+        return fetch(session,url,params,method,retry=retry,**kwargs)
     if res and res.status_code==200:
         response = res.json()
     else:
-        return fetch(session,url,params,method,**kwargs)
+        return fetch(session,url,params,method,retry=retry,**kwargs)
     return response
+
+
 def getTimeStamp(strtime):
     formate = '%Y-%m-%d %H:%M:%S'
     # 2022-09-14 20:00:00

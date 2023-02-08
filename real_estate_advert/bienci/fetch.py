@@ -10,12 +10,14 @@ cpath =os.path.dirname(__file__) or "."
 ua = fake_useragent.UserAgent(fallback='Your favorite Browser')
 def getUserAgent():
     return ua.random
-def fetch(url,session,Json=False,file=False,**kwargs):
+def fetch(url,session,Json=False,file=False,retry=0,**kwargs):
     print(url)
     if not kwargs.get('headers'):
         kwargs["headers"] = {
                 "user-agent":getUserAgent(),
                 }
+    if retry>=3:return
+    retry +=1
     try:
         # async with session.get(url,**kwargs) as response:
             try:
@@ -24,7 +26,7 @@ def fetch(url,session,Json=False,file=False,**kwargs):
                 traceback.print_exc()
                 # await asyncio.sleep(2)
                 time.sleep(1)
-                return fetch(url,session,Json,file,**kwargs)
+                return fetch(url,session,Json,file,retry=retry,**kwargs)
             try:
                 if response.status_code==404:
                     return {}
@@ -39,7 +41,7 @@ def fetch(url,session,Json=False,file=False,**kwargs):
                 else:
                     # await asyncio.sleep(1)
                     time.sleep(1)
-                    return fetch(url,session,Json)
+                    return fetch(url,session,Json,file,retry=retry,**kwargs)
             except Exception as e:
                 # print(response)
                 # print(traceback.format_exc())
