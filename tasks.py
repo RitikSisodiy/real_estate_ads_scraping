@@ -25,6 +25,19 @@ celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
 celery_app.config_from_object(__name__)
 runningTasks = set()
 # ignore the task if it is already running
+def keep_one_active_task(i,task_name):
+    # i = celery_app.control.inspect()
+    active_tasks = i.active()
+    active_task_ids = [task["id"] for task in [value for key,value in active_tasks.items()][0] if task["name"] == task_name]
+    reserved_tasks = i.reserved()
+    reserved_task_ids = [task["id"] for task in  [value for key,value in reserved_tasks.items()][0] if task["name"] == task_name]
+    
+    if len(active_task_ids) > 1:
+        for task_id in active_task_ids[1:]:
+            celery_app.control.revoke(task_id, terminate=True)
+    
+    for task_id in reserved_task_ids:
+        celery_app.control.revoke(task_id, terminate=True)
 @task_received.connect
 def task_received_handler(request=None,**kwargs):
     inspect = celery_app.control.inspect()
@@ -32,12 +45,17 @@ def task_received_handler(request=None,**kwargs):
     activetasks = inspect.active()#{'celery@DESKTOP-G6UNTK5': [{'id': 'eac73c1f-4368-4db7-8c1f-831cb8c2a13a', 'name': 'real estate test-task', 'args': [], 'kwargs': {'payload': {'text': '', 'min_price': 0.0, 'max_price': 0.0, 'city': '', 'rooms': 0, 'real_state_type': 'Updated/Latest Ads'}}, 'type': 'real estate test-task', 'hostname': 'celery@DESKTOP-G6UNTK5', 'time_start': 1675773176.4143288, 'acknowledged': True, 'delivery_info': {'exchange': '', 'routing_key': 'celery', 'priority': 0, 'redelivered': False}, 'worker_pid': 2471040022664}]}
     if activetasks:
         activetasks = [taskinfo["name"] for taskinfo in [value for key,value in activetasks.items()][0] if taskinfo.get("name")]
-        if request.task.name in activetasks:
-            print(f"ignoring the dublicate task and removing it from waiting queue: {request.task.name}")
+        task_name = request.task.name
+        if task_name in activetasks:
+            # results = [AsyncResult(task.id) for task in celery_app.tasks.values() if task.name == task_name]
+            # print(f"ignoring the dublicate task and removing it from waiting queue: {task_name}")
+            # # for result in results:result.revoke()
+            # print(results)
             result = AsyncResult(request.id)
             result.revoke()
-            # print(result)
-            print(inspect.reserved())
+            keep_one_active_task(inspect,task_name)
+            # # print(result)
+            # print(inspect.reserved())
             return False
 runningTasks = set()
 # ignore the task if it is already running
@@ -332,6 +350,7 @@ def setup_periodic_tasks(sender, **kwargs):
     print("rnnnint periodic tasks")
     # Calls update_leboncoin_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_leboncoin_ads.s(), name='update leboncoin ads in every 20 minuts')
+    # sender.add_periodic_task(10, update_test_ads.s(), name='update leboncoin ads in every 20 minuts')
     # Calls update_peruvendu_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_paruvendu_ads.s(), name='update paruvendu ads every 20 minuts')
     # # Calls update_pap_ads in every 20 minutes
