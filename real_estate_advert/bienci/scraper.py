@@ -293,7 +293,7 @@ def asyncUpdateBienci():
         producer = AsyncKafkaTopicProducer()
         # await producer.statProducer()
         param  = {
-        "size":60,
+        "size":26,
         "from":0,
         "showAllModels":False,
         "propertyType":["house","flat"],
