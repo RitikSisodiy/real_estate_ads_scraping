@@ -245,7 +245,7 @@ def GetAdUpdate(ad):
     nowtime  = datetime.now()
     update = {
             "timestamp": nowtime.timestamp(),
-            "lastupdate": getTimeStamp(ad['publicationDate']),
+            "lastupdate": getTimeStamp(ad['modificationDate']),
             "lastadId": ad["id"],
         }
     return update
@@ -318,9 +318,9 @@ def asyncUpdateBienci():
                     ads = r['realEstateAds']
                     adslist = []
                     for ad in ads:
-                        adtime = getTimeStamp(ad["publicationDate"])
-                        print(f"{val['lastupdate']}<{adtime} = ",val['lastupdate']<getTimeStamp(ad["publicationDate"]))
-                        if val['lastupdate']<getTimeStamp(ad["publicationDate"]):
+                        adtime = getTimeStamp(ad["modificationDate"])
+                        print(f"{val['lastupdate']}<{adtime} = ",val['lastupdate']<getTimeStamp(ad["modificationDate"]))
+                        if val['lastupdate']<getTimeStamp(ad["modificationDate"]):
                             adslist.append(ad)
                         else:
                             msg = f"{len(adslist)} {key} new ads scraped"

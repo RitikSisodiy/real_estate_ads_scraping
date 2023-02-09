@@ -64,6 +64,7 @@ class ProxyScraper:
             with open(f"{protocol}.txt",'r') as file:
                 proxies = file.readlines()
                 tasks = []
+                data = []
                 for proxy in proxies:
                     # curl = "https://google.com"
                     # curl = "https://www.cci.fr"
@@ -72,7 +73,10 @@ class ProxyScraper:
                     # curl = "https://www.avendrealouer.fr"
                     proxy = proxy.replace('\n','')
                     tasks.append(asyncio.ensure_future(self.check_if_proxy_is_working(proxy,protocol,self.url)))
-                data = await asyncio.gather(*tasks)
+                    if (len(tasks)>=100):
+                        data += await asyncio.gather(*tasks)
+                        tasks =[]
+                data += await asyncio.gather(*tasks)
                 working = ""
                 for d in data:
                     if d:
