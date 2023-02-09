@@ -328,7 +328,7 @@ def asyncUpdateBienci():
                             print(msg)
                             updated = True
                             break
-                    producer.PushDataList(kafkaTopicName,adslist)
+                    saveRealstateAds(adslist,producer=producer)
                     page +=1
             # producer.stopProducer()
             
