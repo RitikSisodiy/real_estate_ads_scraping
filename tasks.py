@@ -64,6 +64,8 @@ def task_prerun_handler(task_id, task, args, kwargs, **kw):
     global runningTasks
     if task.name in runningTasks:
         print('Stopping task:', task.name)
+        result = AsyncResult(task_id)
+        result.revoke()
         return False  # This will stop the task execution
     print('Starting task:', task.name)
 @task_postrun.connect
