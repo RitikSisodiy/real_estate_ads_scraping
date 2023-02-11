@@ -20,45 +20,63 @@ from celery.signals import task_received,task_prerun,task_postrun
 from celery.result import AsyncResult
 from settings import *
 import dotenv
+from celery.signals import worker_ready
+from celery_singleton import clear_locks
+from celery_singleton import Singleton
 dotenv.load_dotenv()
 celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
 celery_app.config_from_object(__name__)
 runningTasks = set()
 # ignore the task if it is already running
-def keep_one_active_task(i,task_name):
-    # i = celery_app.control.inspect()
-    active_tasks = i.active()
-    active_task_ids = [task["id"] for task in [value for key,value in active_tasks.items()][0] if task["name"] == task_name]
-    reserved_tasks = i.reserved()
-    reserved_task_ids = [task["id"] for task in  [value for key,value in reserved_tasks.items()][0] if task["name"] == task_name]
-    
-    if len(active_task_ids) > 1:
-        for task_id in active_task_ids[1:]:
-            celery_app.control.revoke(task_id, terminate=True)
-    
-    for task_id in reserved_task_ids:
-        celery_app.control.revoke(task_id, terminate=True)
-@task_received.connect
-def task_received_handler(request=None,**kwargs):
-    inspect = celery_app.control.inspect()
-    print("inside received")
-    activetasks = inspect.active()#{'celery@DESKTOP-G6UNTK5': [{'id': 'eac73c1f-4368-4db7-8c1f-831cb8c2a13a', 'name': 'real estate test-task', 'args': [], 'kwargs': {'payload': {'text': '', 'min_price': 0.0, 'max_price': 0.0, 'city': '', 'rooms': 0, 'real_state_type': 'Updated/Latest Ads'}}, 'type': 'real estate test-task', 'hostname': 'celery@DESKTOP-G6UNTK5', 'time_start': 1675773176.4143288, 'acknowledged': True, 'delivery_info': {'exchange': '', 'routing_key': 'celery', 'priority': 0, 'redelivered': False}, 'worker_pid': 2471040022664}]}
-    if activetasks:
-        activetasks = [taskinfo["name"] for taskinfo in [value for key,value in activetasks.items()][0] if taskinfo.get("name")]
-        task_name = request.task.name
-        if task_name in activetasks:
-            # results = [AsyncResult(task.id) for task in celery_app.tasks.values() if task.name == task_name]
-            # print(f"ignoring the dublicate task and removing it from waiting queue: {task_name}")
-            # # for result in results:result.revoke()
-            # print(results)
-            result = AsyncResult(request.id)
-            result.revoke()
-            keep_one_active_task(inspect,task_name)
-            # # print(result)
-            # print(inspect.reserved())
-            return False
+@worker_ready.connect
+def unlock_all(**kwargs):
+    clear_locks(celery_app)
+@celery_app.task
+def keep_one_active_task():
+    while True:
+        print("checking dublicate tasks....")
+        task_names = set()
+        for task in celery_app.tasks.values():
+            if task.name and  "." not in task.name:task_names.add(task.name)
+
+        i = celery_app.control.inspect()
+        cleaned = []
+        for task_name in task_names:
+            active_tasks = i.active()
+            active_task_ids = [task["id"] for task in [value for key,value in active_tasks.items()][0] if task["name"] == task_name]
+            reserved_tasks = i.items()
+            reserved_task_ids = [task["id"] for task in  [value for key,value in reserved_tasks.items()][0] if task["name"] == task_name and task["state"]=="PENDING"]
+            if len(active_task_ids) > 1:
+                for task_id in active_task_ids[1:]:
+                    celery_app.control.revoke(task_id, terminate=True)
+                cleaned.append(task_name)
+            for task_id in reserved_task_ids:
+                celery_app.control.revoke(task_id, terminate=True)
+                cleaned.append(task_name)
+        print(" ".join(cleaned),": are cleaned")
+        time.sleep(100)
+# keep_one_active_task.apply_async()
+# @task_received.connect
+# def task_received_handler(request=None,**kwargs):
+#     inspect = celery_app.control.inspect()
+#     print("inside received")
+#     activetasks = inspect.active()#{'celery@DESKTOP-G6UNTK5': [{'id': 'eac73c1f-4368-4db7-8c1f-831cb8c2a13a', 'name': 'real estate test-task', 'args': [], 'kwargs': {'payload': {'text': '', 'min_price': 0.0, 'max_price': 0.0, 'city': '', 'rooms': 0, 'real_state_type': 'Updated/Latest Ads'}}, 'type': 'real estate test-task', 'hostname': 'celery@DESKTOP-G6UNTK5', 'time_start': 1675773176.4143288, 'acknowledged': True, 'delivery_info': {'exchange': '', 'routing_key': 'celery', 'priority': 0, 'redelivered': False}, 'worker_pid': 2471040022664}]}
+#     if activetasks:
+#         activetasks = [taskinfo["name"] for taskinfo in [value for key,value in activetasks.items()][0] if taskinfo.get("name")]
+#         task_name = request.task.name
+#         if task_name in activetasks:
+#             # results = [AsyncResult(task.id) for task in celery_app.tasks.values() if task.name == task_name]
+#             # print(f"ignoring the dublicate task and removing it from waiting queue: {task_name}")
+#             # # for result in results:result.revoke()
+#             # print(results)
+#             result = AsyncResult(request.id)
+#             result.revoke()
+#             # keep_one_active_task(inspect,task_name)
+#             # # print(result)
+#             # print(inspect.reserved())
+#             return False
 runningTasks = set()
-# ignore the task if it is already running
+# # ignore the task if it is already running
 @task_prerun.connect
 def task_prerun_handler(task_id, task, args, kwargs, **kw):
     global runningTasks
@@ -67,6 +85,7 @@ def task_prerun_handler(task_id, task, args, kwargs, **kw):
         result = AsyncResult(task_id)
         result.revoke()
         return False  # This will stop the task execution
+    if task.name:runningTasks.add(task.name)
     print('Starting task:', task.name)
 @task_postrun.connect
 def task_postrun_handler(task_id, task, args, kwargs, **kw):
@@ -76,7 +95,7 @@ def task_postrun_handler(task_id, task, args, kwargs, **kw):
     print('completed task:', task.name)
 
 
-@celery_app.task(name="real estate")
+@celery_app.task(base=Singleton,name="real estate")
 def real_estate_task(payload):
     print("Task start ================>")
     print("payload : ", payload)
@@ -87,7 +106,7 @@ def real_estate_task(payload):
 
     print("Task End ================> ")
 import traceback
-@celery_app.task(name="bienci task")
+@celery_app.task(base=Singleton,name="bienci task")
 def scrap_bienci_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -101,7 +120,7 @@ def scrap_bienci_task(payload):
     # Scraping task obj start here
     print("Task End ================> ")
     return data
-@celery_app.task(name="real estate logic-immo")
+@celery_app.task(base=Singleton,name="real estate logic-immo")
 def scrap_logicimmo_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -115,7 +134,7 @@ def scrap_logicimmo_task(payload):
     # Scraping task obj start here
     print("Task End ================> ")
     return data
-@celery_app.task(name="real estate Lefigaro")
+@celery_app.task(base=Singleton,name="real estate Lefigaro")
 def scrap_lefigaro_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -129,7 +148,7 @@ def scrap_lefigaro_task(payload):
     print("Task End ================> ")
     return data
 
-@celery_app.task(name="real estate avendrealouer")
+@celery_app.task(base=Singleton,name="real estate avendrealouer")
 def scrap_avendrealouer_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -142,7 +161,7 @@ def scrap_avendrealouer_task(payload):
     # Scraping task obj start here
     print("Task End ================> ")
     return data
-@celery_app.task(name="real estate OuestFranceScrapper")
+@celery_app.task(base=Singleton,name="real estate OuestFranceScrapper")
 def scrap_OuestFranceScrapper_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -155,7 +174,7 @@ def scrap_OuestFranceScrapper_task(payload):
     # Scraping task obj start here
     print("Task End ================> ")
     return data
-@celery_app.task(name="real estate gensdeconfianceScraper")
+@celery_app.task(base=Singleton,name="real estate gensdeconfianceScraper")
 def scrap_gensdeconfiance_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -170,7 +189,7 @@ def scrap_gensdeconfiance_task(payload):
     return data
 
 
-@celery_app.task(name="real estate leboncoin")
+@celery_app.task(base=Singleton,name="real estate leboncoin")
 def scrape_leboncoin_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -183,7 +202,7 @@ def scrape_leboncoin_task(payload):
 
     print("Task End ================> ")
 
-@celery_app.task(name="real estate fetch leboncoin latest ad")
+@celery_app.task(base=Singleton,name="real estate fetch leboncoin latest ad")
 def update_leboncoin_ads():
     print("Task start ================> ")
     try:leboncoinAdScraper({
@@ -193,7 +212,7 @@ def update_leboncoin_ads():
         traceback.print_exc()
         print("Exception ================> ",e)
     print("Task End ================> ")
-@celery_app.task(name="test task to")
+@celery_app.task(base=Singleton,name="test task to")
 def update_test_ads():
     print("Task start ================> ")
     try:
@@ -204,7 +223,7 @@ def update_test_ads():
         traceback.print_exc()
         print("Exception ================> ",e)
     print("Task End ================> ")
-@celery_app.task(name="real estate fetch paruvedu latest ad")
+@celery_app.task(base=Singleton,name="real estate fetch paruvedu latest ad")
 def update_paruvendu_ads():
     print("Task start ================> ")
     try:UpdateParuvendu()
@@ -213,7 +232,7 @@ def update_paruvendu_ads():
         print("Exception ================> ",e)
     print("Task End ================> ")
 
-@celery_app.task(name="real estate fetch pap latest ad")
+@celery_app.task(base=Singleton,name="real estate fetch pap latest ad")
 def update_pap_ads():
     print("Task start ================> ")
     try:UpdatePap()
@@ -221,7 +240,7 @@ def update_pap_ads():
         traceback.print_exc()
         print("Exception ================> ",e)
     print("Task End ================> ")
-@celery_app.task(name="real estate fetch Bienci latest ad")
+@celery_app.task(base=Singleton,name="real estate fetch Bienci latest ad")
 def update_Bienci_ads():
     print("Task start ================> ")
     try:
@@ -233,7 +252,7 @@ def update_Bienci_ads():
     print("Task End ================> ")
     print(data)
     return data
-@celery_app.task(name="real estate fetch logicImmo latest ad")
+@celery_app.task(base=Singleton,name="real estate fetch logicImmo latest ad")
 def update_logicImmo_ads():
     print("Task start ================> ")
     try:
@@ -245,7 +264,7 @@ def update_logicImmo_ads():
     print("Task End ================> ")
     print(data)
     return data
-@celery_app.task(name="real estate fetch lefigaro latest ad")
+@celery_app.task(base=Singleton,name="real estate fetch lefigaro latest ad")
 def update_lefigaro_ads():
     print("Task start ================> ")
     try:
@@ -257,7 +276,7 @@ def update_lefigaro_ads():
     print("Task End ================> ")
     print(data)
     return data
-@celery_app.task(name="real estate fetch avendrealouer latest ad")
+@celery_app.task(base=Singleton,name="real estate fetch avendrealouer latest ad")
 def update_avendrealouer_ads():
     print("Task start ================> ")
     try:
@@ -269,7 +288,7 @@ def update_avendrealouer_ads():
     print("Task End ================> ")
     print(data)
     return data
-@celery_app.task(name="real estate fetch seloger latest ad")
+@celery_app.task(base=Singleton,name="real estate fetch seloger latest ad")
 def update_seloger_ads():
     print("Task start ================> ")
     try:selogerScraper({},update=True)
@@ -279,7 +298,7 @@ def update_seloger_ads():
     print("Task End ================> ")
 
 
-@celery_app.task(name="real estate pap")
+@celery_app.task(base=Singleton,name="real estate pap")
 def scrape_pap_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -288,7 +307,7 @@ def scrape_pap_task(payload):
     # Scraping task obj start here
 
     print("Task End ================> ")
-@celery_app.task(name="real estate seloger")
+@celery_app.task(base=Singleton,name="real estate seloger")
 def scrape_seloger_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -300,7 +319,7 @@ def scrape_seloger_task(payload):
 
 
 
-@celery_app.task(name="real estate paruvendu")
+@celery_app.task(base=Singleton,name="real estate paruvendu")
 def scrape_paruvendu_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
@@ -312,7 +331,7 @@ def scrape_paruvendu_task(payload):
     # Scraping task obj start here
 
     print("Task End ================> ")
-@celery_app.task(name="real estate OuestFrance")
+@celery_app.task(base=Singleton,name="real estate OuestFrance")
 def update_OuestFranceScrapper_ads():
     print("Task start ================> ")
     try:OuestFranceScrapper({},update=True)
@@ -320,7 +339,7 @@ def update_OuestFranceScrapper_ads():
         traceback.print_exc()
         print("Exception ================> ",e)
     print("Task End ================> ")
-@celery_app.task(name="real estate gensdeconfiance")
+@celery_app.task(base=Singleton,name="real estate gensdeconfiance")
 def update_gensdeconfianceScrapper_ads():
     print("Task start ================> ")
     try:gensdeconfianceScraper({},update=True)
@@ -329,7 +348,7 @@ def update_gensdeconfianceScrapper_ads():
         print("Exception ================> ",e)
     print("Task End ================> ")
 
-@celery_app.task(name="real estate green-acres")
+@celery_app.task(base=Singleton,name="real estate green-acres")
 def scrap_greenacres_task(payload):
     print("Task start ================> ")
     print("payload : ", payload)
