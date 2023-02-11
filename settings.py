@@ -16,6 +16,6 @@ CRAWLER_SOCKS_PROXY_HOST = '127.0.0.1'
 # Rabbit MQ server setting
 
 TaskQueue = "tasks"
-CeleryBackend = "rpc://"
-CeleryBroker = f"pyamqp://guest:guest@localhost:5672"
+CeleryBackend = 'redis://localhost:6379/0'
+CeleryBroker = f'redis://localhost:6379/0'
 
