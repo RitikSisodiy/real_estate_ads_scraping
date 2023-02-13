@@ -406,7 +406,7 @@ def CheckId(id):
 def main_scraper(payload,update=False):
     adtype = payload.get("real_state_type")
     if adtype == "Updated/Latest Ads" or update:
-        data["searchParameters"]["limit"] = 500
+        data["searchParameters"]["limit"] = 100
         ob = LogicImmoScraper(data,asyncsize=1,timeout=10)
         print("updateing latedst ads")
         ob.updateLatestAd("rental")
