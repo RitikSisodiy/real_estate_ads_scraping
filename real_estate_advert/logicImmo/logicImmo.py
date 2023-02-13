@@ -23,77 +23,31 @@ resultcounturl = "https://api-logicimmo.svc.groupe-seloger.com/api/v1/listings/c
 session = requests.session()
 proxy = {'https': proxyurl, 'http': proxyurl}
 from HttpRequest.uploader import AsyncKafkaTopicProducer
+from HttpRequest.requestsModules import HttpRequest
 cpath =os.path.dirname(__file__) or "."
 kafkaTopicName = "logicImmo_data_v1"
 commonTopicName = "common-ads-data_v1"
 
-class LogicImmoScraper:
+class LogicImmoScraper(HttpRequest):
     def __init__(self,paremeter,asyncsize=20,timeout = 5,proxy = None) -> None:
+        cpath =os.path.dirname(__file__) or "."
         self.logfile = open(f"{cpath}/error.log",'a')
         self.timeout = timeout
-        
-        
         SELOGER_SECURITY_URL = "https://api-logicimmo.svc.groupe-seloger.com/api/security/register"
         headers = {
                     'User-Agent': 'okhttp/4.6.0',
                 }
         self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
         self.paremeter= paremeter
-        if not proxy:
-            try:
-                self.proxies = self.readProxy()
-                if not self.proxies:
-                    self.getProxyList()
-            except:
-                self.getProxyList()
-            self.proxyUpdateThread()
-        else:self.proxies = [proxy]
-        self.asyncsize=asyncsize
-        self.headers = {}
-        self.proxy = {}
-        self.session = {i:requests.Session() for i in range(0,asyncsize)}
-        self.headers = {}
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
-            futures = excuter.map(self.init_headers,[i for i in range(0,asyncsize)])
-            count = 0
-            for f in futures:
-                self.headers[count] = f
-                count+=1
-        self.producer = AsyncKafkaTopicProducer()
-    def getProxyList(self):
-        self.prox.FetchNGetProxy()
-        self.prox.save(cpath)
-        self.proxies = self.readProxy()
-    def updateProxyList(self,interval=300):
-        if self.readProxy():time.sleep(interval)
-        start = True
-        while start:
-            self.getProxyList()
-            time.sleep(interval) 
-            start = self.startThread 
-    def proxyUpdateThread(self):
-        print("proxy thread is started")
-        self.startThread = True
-        self.proc = threading.Thread(target=self.updateProxyList, args=())
-        self.proc.daemon = True
-        self.proc.start()
-    
+        super().__init__(True, SELOGER_SECURITY_URL,{}, headers, {}, False, cpath, asyncsize, 5)
     def __del__(self):
-        self.startThread = False
-        print("proxy thread is terminated")
-    def readProxy(self):
-        with open(f"{cpath}/working.txt","r") as file:
-            proxies = file.readlines()
-        return [json.loads(proxy) for proxy in proxies]
-    def getRandomProxy(self):
-        proxy = random.choice(self.proxies)
-        return proxy
+        return super().__del__()
     def __exit__(self):
         self.logfile.close()
-    def init_headers(self,sid=0):
+    def init_headers(self,sid=0,init= False):
         self.session[sid].close()
         self.session[sid] = requests.Session()
-        try:self.proxy[sid] = self.getRandomProxy()
+        try:self.proxy[sid] = (init and self.proxy.get(sid)) or self.getRandomProxy()
         except:
             self.getProxyList()
             self.init_headers()
