@@ -318,11 +318,13 @@ class LogicImmoScraper:
         return r.status_code
     def updateLatestAd(self,adtype):
         updates = self.getLastUpdate().get(adtype)
+        res = []
         if updates:
             param = self.paremeter
             if adtype=="sale":param["listingSearchCriterias"]["transactionTypesIds"]=[1]
             else:param["listingSearchCriterias"]["transactionTypesIds"] = [2] 
             param["searchParameters"]["sortBy"] =1
+            self.paremeter["searchParameters"]["limit"] = 100
             updated = False
             first = True
             page =1
@@ -347,13 +349,16 @@ class LogicImmoScraper:
                         updatedads.append(ad)
                         adcount+=1
                     else:
+                        res = f"{adcount} new {adtype} ads scraped "
                         print(f"{adcount} new ads scraped ")
                         updated = True
                         break
                 self.save(updatedads)
                 page+=1
         else:
-            print("there is no update available l")
+            res = f"there is no update available  {adtype}"
+            print(res)
+        return res
     def save(self,adslist):
         self.producer.PushDataList(kafkaTopicName,adslist)
         parseAdList = [ParseLogicImmo(ad) for ad in adslist]
@@ -409,8 +414,7 @@ def main_scraper(payload,update=False):
         data["searchParameters"]["limit"] = 100
         ob = LogicImmoScraper(data,asyncsize=1,timeout=10)
         print("updateing latedst ads")
-        ob.updateLatestAd("rental")
-        ob.updateLatestAd("sale")
+        return str(ob.updateLatestAd("rental")) +","+ str(ob.updateLatestAd("sale"))
     else:
         ob = LogicImmoScraper(data,asyncsize=1,timeout=30)
         ob.CrawlSeloger(adtype)

@@ -258,7 +258,7 @@ async def asyncUpdateParuvendu():
         if not updates:
             await CreatelastupdateLog(session,'rental')
             await CreatelastupdateLog(session,'sale')
-        updates = getLastUpdates()
+            updates = {}
         for key,val in updates.items():
             await CreatelastupdateLog(session,key)
             if key == "rental":
