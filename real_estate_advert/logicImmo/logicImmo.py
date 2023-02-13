@@ -37,6 +37,7 @@ class LogicImmoScraper(HttpRequest):
         headers = {
                     'User-Agent': 'okhttp/4.6.0',
                 }
+        self.producer = AsyncKafkaTopicProducer()
         self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
         self.paremeter= paremeter
         super().__init__(True, SELOGER_SECURITY_URL,{}, headers, {}, False, cpath, asyncsize, 5)
