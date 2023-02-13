@@ -73,6 +73,7 @@ class ProxyScraper:
             with open(f"{protocol}.txt",'r') as file:
                 proxies = file.readlines()
                 tasks = []
+                data = []
                 for proxy in proxies:
                     # curl = "https://google.com"
                     # curl = "https://www.cci.fr"

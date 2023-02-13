@@ -12,8 +12,9 @@ import json,os,time
 from  .parser import ParsePap
 from datetime import datetime
 # from .formater import formater
-try:from scrapProxy import ProxyScraper
-except:from .scrapProxy import ProxyScraper
+# try:from scrapProxy import ProxyScraper
+from HttpRequest.AsyncProxy import ProxyScraper
+# except:from .scrapProxy import ProxyScraper
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 from kafka_publisher import KafkaTopicProducer
 # producer = KafkaTopicProducer()

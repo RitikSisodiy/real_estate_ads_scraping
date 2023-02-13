@@ -10,7 +10,9 @@ import json
 import random
 import urllib
 import os
-from .scrapProxy import ProxyScraper
+# from .scrapProxy import ProxyScraper
+from HttpRequest.AsyncProxy import ProxyScraper
+
 from .parser import ParseLogicImmo
 import traceback
 proxyurl = "http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225"

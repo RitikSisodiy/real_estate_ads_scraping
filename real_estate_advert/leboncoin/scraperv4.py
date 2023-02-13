@@ -13,7 +13,8 @@ import os
 import gzip
 import requests
 
-from .scrapProxy import ProxyScraper
+# from .scrapProxy import ProxyScraper
+from HttpRequest.AioProxy import ProxyScraper
 from .parser import ParseLeboncoin
 # from aiohttp_socks import ProxyType, ProxyConnector, ChainProxyConnector
 from aiosocksy.connector import ProxyConnector, ProxyClientRequest
@@ -98,7 +99,7 @@ class LeboncoinScraper:
             t-=1
         return False
     def updateProxyList(self,interval=300):
-        if self.readProxy():time.sleep(interval)
+        if self.readProxy() and not self.threadsleep(interval):return
         while self.startThread:
             self.getProxyList()
             b = self.threadsleep(interval)
@@ -326,10 +327,11 @@ class LeboncoinScraper:
 async def updateLebonCoin():
     data = json.load(open(f'{cpath}/filter.json','r'))
     ob = LeboncoinScraper()
-    await ob.init(data,"newout1")
-    # ob.IntCrawling()
-    await ob.UpdataAds()
-    ob.__del__()
+    try:
+        await ob.init(data,"newout1")
+        # ob.IntCrawling()
+        await ob.UpdataAds()
+    finally:ob.__del__()
 async def CheckId(id):
     ob = LeboncoinScraper()
     await ob.init(proxyThread=False)
@@ -339,9 +341,10 @@ async def CheckId(id):
 async def ScrapLebonCoin():
     data = json.load(open(f'{cpath}/filter.json','r'))
     ob = LeboncoinScraper()
-    await ob.init(data,"newout1")
-    await ob.IntCrawling()
-    ob.__del__()
+    try:
+        await ob.init(data,"newout1")
+        await ob.IntCrawling()
+    finally:ob.__del__()
 def leboncoinAdScraper(payload):
     typ = payload.get("real_state_type")
     if not typ:
