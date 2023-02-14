@@ -216,6 +216,7 @@ def update_leboncoin_ads():
         print("Task End ================> ")
     except SoftTimeLimitExceeded:
         print("Task End ================> ")
+        return "revoked due to timeout"
 @celery_app.task(time_limit=60*120,base=Singleton,name="test task to")
 def update_test_ads():
     try:
@@ -230,6 +231,7 @@ def update_test_ads():
         print("Task End ================> ")
     except SoftTimeLimitExceeded:
         print("Task End ================> ")
+        return "revoked due to timeout"
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch paruvedu latest ad")
 def update_paruvendu_ads():
     try:
@@ -241,6 +243,7 @@ def update_paruvendu_ads():
         print("Task End ================> ")
     except SoftTimeLimitExceeded:
         print("Task End ================> ")
+        return "revoked due to timeout"
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch pap latest ad")
 def update_pap_ads():
     try:
@@ -252,6 +255,7 @@ def update_pap_ads():
         print("Task End ================> ")
     except SoftTimeLimitExceeded:
         print("Task End ================> ")
+        return "revoked due to timeout"
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch Bienci latest ad")
 def update_Bienci_ads():
     try:
@@ -267,6 +271,7 @@ def update_Bienci_ads():
         return data
     except SoftTimeLimitExceeded:
         print("Task End ================> ")
+        return "revoked due to timeout"
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch logicImmo latest ad")
 def update_logicImmo_ads():
     try:
@@ -282,6 +287,7 @@ def update_logicImmo_ads():
         return data
     except SoftTimeLimitExceeded:
         print("Task End ================> ")
+        return "revoked due to timeout"
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch lefigaro latest ad")
 def update_lefigaro_ads():
     try:
@@ -297,6 +303,7 @@ def update_lefigaro_ads():
         return data
     except SoftTimeLimitExceeded:
         print("Task End ================> ")
+        return "revoked due to timeout"
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch avendrealouer latest ad")
 def update_avendrealouer_ads():
     try:
@@ -312,6 +319,7 @@ def update_avendrealouer_ads():
         return data
     except SoftTimeLimitExceeded:
         print("Task End ================> ")
+        return "revoked due to timeout"
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch seloger latest ad")
 def update_seloger_ads():
     try:
@@ -323,6 +331,7 @@ def update_seloger_ads():
         print("Task End ================> ")
     except SoftTimeLimitExceeded:
         print("Task End ================> ")
+        return "revoked due to timeout"
 
 @celery_app.task(base=Singleton,name="real estate pap")
 def scrape_pap_task(payload):
@@ -368,6 +377,7 @@ def update_OuestFranceScrapper_ads():
         print("Task End ================> ")
     except SoftTimeLimitExceeded:
         print("Task End ================> ")
+        return "revoked due to timeout"
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate gensdeconfiance")
 def update_gensdeconfianceScrapper_ads():
     try:
@@ -379,6 +389,7 @@ def update_gensdeconfianceScrapper_ads():
         print("Task End ================> ")
     except SoftTimeLimitExceeded:
         print("Task End ================> ")
+        return "revoked due to timeout"
 
 @celery_app.task(base=Singleton,name="real estate green-acres")
 def scrap_greenacres_task(payload):
