@@ -23,6 +23,7 @@ import dotenv
 from celery.signals import worker_ready
 from celery_singleton import clear_locks
 from celery_singleton import Singleton
+from celery.exceptions import SoftTimeLimitExceeded
 dotenv.load_dotenv()
 celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
 celery_app.config_from_object(__name__)
@@ -204,99 +205,124 @@ def scrape_leboncoin_task(payload):
 
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch leboncoin latest ad")
 def update_leboncoin_ads():
-    print("Task start ================> ")
-    try:leboncoinAdScraper({
-        "real_state_type":"Updated/Latest Ads"
-    })
-    except Exception as e:
-        traceback.print_exc()
-        print("Exception ================> ",e)
-    print("Task End ================> ")
+    try:
+        print("Task start ================> ")
+        try:leboncoinAdScraper({
+            "real_state_type":"Updated/Latest Ads"
+        })
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception ================> ",e)
+        print("Task End ================> ")
+    except SoftTimeLimitExceeded:
+        print("Task End ================> ")
 @celery_app.task(time_limit=60*120,base=Singleton,name="test task to")
 def update_test_ads():
-    print("Task start ================> ")
     try:
-        print("sleeping...")
-        time.sleep(1000)
-        print("good morning")
-    except Exception as e:
-        traceback.print_exc()
-        print("Exception ================> ",e)
-    print("Task End ================> ")
+        print("Task start ================> ")
+        try:
+            print("sleeping...")
+            time.sleep(1000)
+            print("good morning")
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception ================> ",e)
+        print("Task End ================> ")
+    except SoftTimeLimitExceeded:
+        print("Task End ================> ")
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch paruvedu latest ad")
 def update_paruvendu_ads():
-    print("Task start ================> ")
-    try:UpdateParuvendu()
-    except Exception as e:
-        traceback.print_exc()
-        print("Exception ================> ",e)
-    print("Task End ================> ")
-
+    try:
+        print("Task start ================> ")
+        try:UpdateParuvendu()
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception ================> ",e)
+        print("Task End ================> ")
+    except SoftTimeLimitExceeded:
+        print("Task End ================> ")
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch pap latest ad")
 def update_pap_ads():
-    print("Task start ================> ")
-    try:UpdatePap()
-    except Exception as e:
-        traceback.print_exc()
-        print("Exception ================> ",e)
-    print("Task End ================> ")
+    try:
+        print("Task start ================> ")
+        try:UpdatePap()
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception ================> ",e)
+        print("Task End ================> ")
+    except SoftTimeLimitExceeded:
+        print("Task End ================> ")
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch Bienci latest ad")
 def update_Bienci_ads():
-    print("Task start ================> ")
     try:
-        data = UpdateBienci()
-    except Exception as e:
-        traceback.print_exc()
-        print("Exception ================> ",e)
-        data = "exeption"
-    print("Task End ================> ")
-    print(data)
-    return data
+        print("Task start ================> ")
+        try:
+            data = UpdateBienci()
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception ================> ",e)
+            data = "exeption"
+        print("Task End ================> ")
+        print(data)
+        return data
+    except SoftTimeLimitExceeded:
+        print("Task End ================> ")
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch logicImmo latest ad")
 def update_logicImmo_ads():
-    print("Task start ================> ")
     try:
-        data = LogicImmoScraper({},update=True)
-    except Exception as e:
-        traceback.print_exc()
-        print("Exception ================> ",e)
-        data = "exeption"
-    print("Task End ================> ")
-    print(data)
-    return data
+        print("Task start ================> ")
+        try:
+            data = LogicImmoScraper({},update=True)
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception ================> ",e)
+            data = "exeption"
+        print("Task End ================> ")
+        print(data)
+        return data
+    except SoftTimeLimitExceeded:
+        print("Task End ================> ")
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch lefigaro latest ad")
 def update_lefigaro_ads():
-    print("Task start ================> ")
     try:
-        data = LefigaroScrapper({"real_state_type":"Updated/Latest Ads"})
-    except Exception as e:
-        traceback.print_exc()
-        print("Exception ================> ",e)
-        data = "exeption"
-    print("Task End ================> ")
-    print(data)
-    return data
+        print("Task start ================> ")
+        try:
+            data = LefigaroScrapper({"real_state_type":"Updated/Latest Ads"})
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception ================> ",e)
+            data = "exeption"
+        print("Task End ================> ")
+        print(data)
+        return data
+    except SoftTimeLimitExceeded:
+        print("Task End ================> ")
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch avendrealouer latest ad")
 def update_avendrealouer_ads():
-    print("Task start ================> ")
     try:
-        data = avendrealouerScrapper({"real_state_type":"Updated/Latest Ads"})
-    except Exception as e:
-        traceback.print_exc()
-        print("Exception ================> ",e)
-        data = "exeption"
-    print("Task End ================> ")
-    print(data)
-    return data
+        print("Task start ================> ")
+        try:
+            data = avendrealouerScrapper({"real_state_type":"Updated/Latest Ads"})
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception ================> ",e)
+            data = "exeption"
+        print("Task End ================> ")
+        print(data)
+        return data
+    except SoftTimeLimitExceeded:
+        print("Task End ================> ")
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate fetch seloger latest ad")
 def update_seloger_ads():
-    print("Task start ================> ")
-    try:selogerScraper({},update=True)
-    except Exception as e:
-        traceback.print_exc()
-        print("Exception ================> ",e)
-    print("Task End ================> ")
-
+    try:
+        print("Task start ================> ")
+        try:selogerScraper({},update=True)
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception ================> ",e)
+        print("Task End ================> ")
+    except SoftTimeLimitExceeded:
+        print("Task End ================> ")
 
 @celery_app.task(base=Singleton,name="real estate pap")
 def scrape_pap_task(payload):
@@ -333,20 +359,26 @@ def scrape_paruvendu_task(payload):
     print("Task End ================> ")
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate OuestFrance")
 def update_OuestFranceScrapper_ads():
-    print("Task start ================> ")
-    try:OuestFranceScrapper({},update=True)
-    except Exception as e:
-        traceback.print_exc()
-        print("Exception ================> ",e)
-    print("Task End ================> ")
+    try:
+        print("Task start ================> ")
+        try:OuestFranceScrapper({},update=True)
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception ================> ",e)
+        print("Task End ================> ")
+    except SoftTimeLimitExceeded:
+        print("Task End ================> ")
 @celery_app.task(time_limit=60*120,base=Singleton,name="real estate gensdeconfiance")
 def update_gensdeconfianceScrapper_ads():
-    print("Task start ================> ")
-    try:gensdeconfianceScraper({},update=True)
-    except Exception as e:
-        traceback.print_exc()
-        print("Exception ================> ",e)
-    print("Task End ================> ")
+    try:
+        print("Task start ================> ")
+        try:gensdeconfianceScraper({},update=True)
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception ================> ",e)
+        print("Task End ================> ")
+    except SoftTimeLimitExceeded:
+        print("Task End ================> ")
 
 @celery_app.task(base=Singleton,name="real estate green-acres")
 def scrap_greenacres_task(payload):

@@ -35,7 +35,7 @@ async def uploadAdImages(ad,s3client):
 async def bulkuploadAdImages(ads,s3client):
     tasks = []
     result = []
-    maxlength = 20
+    maxlength = 50
     for ad in ads:
         tasks.append(asyncio.ensure_future(uploadAdImages(ad,s3client)))
         if len(tasks)>=maxlength:
