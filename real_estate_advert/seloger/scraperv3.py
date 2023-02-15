@@ -70,7 +70,9 @@ class SelogerScraper(HttpRequest):
         challenge_url = f"http://{seloger_token_host}:{seloger_token_port}/seloger-auth?{urllib.parse.urlencode(time_token, doseq=False)}"
         token = self.session[sid].get(challenge_url).text
         print(token,"self genrager troe")
-        final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid],timeout=self.timeout).text[1:-1]
+        res = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid],timeout=self.timeout)
+        assert res.status_code ==200
+        final_token = res.text[1:-1]
         SelogerScraper.token["token"]  = final_token
         SelogerScraper.token["expiry"] = time.time() + 300
         return final_token
