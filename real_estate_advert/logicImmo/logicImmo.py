@@ -29,6 +29,10 @@ kafkaTopicName = "logicImmo_data_v1"
 commonTopicName = "common-ads-data_v1"
 
 class LogicImmoScraper(HttpRequest):
+    token = {
+            "token":"",
+            "expiry":0
+        }
     def __init__(self,paremeter,asyncsize=20,timeout = 5,proxy = None) -> None:
         cpath =os.path.dirname(__file__) or "."
         self.logfile = open(f"{cpath}/error.log",'a')
@@ -67,6 +71,8 @@ class LogicImmoScraper(HttpRequest):
             traceback.print_exc(file=self.logfile)
             return self.init_headers(sid=sid)
     def getToken(self,sid):
+        if LogicImmoScraper.token and LogicImmoScraper.token.get("expiry") and LogicImmoScraper.token.get("expiry") - time.time()<300:
+            return LogicImmoScraper.token.get('token')
         headers = {
                 'user-agent': 'okhttp/4.6.0',
                 'User-Agent': 'okhttp/4.6.0',
@@ -80,6 +86,8 @@ class LogicImmoScraper(HttpRequest):
         token = self.session[sid].get(challenge_url).text
         print(token,"self genrager troe")
         final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid],timeout=5).text[1:-1]
+        LogicImmoScraper.token["token"]  = final_token
+        LogicImmoScraper.token["expiry"] = time.time() + 300
         return final_token
     def fetch(self,url,method = "get",sid=0,retry=0,**kwargs):
         kwargs['headers'] = self.headers[sid]

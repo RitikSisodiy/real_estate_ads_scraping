@@ -27,6 +27,10 @@ kafkaTopicName = "seloger_data_v1"
 commonTopicName = "common-ads-data_v1"
 
 class SelogerScraper(HttpRequest):
+    token = {
+            "token":"",
+            "expiry":0
+        }
     def __init__(self,paremeter,asyncsize=20,proxyThread=True,proxies = {}) -> None:
         cpath =os.path.dirname(__file__) or "."
         self.logfile = open(f"{cpath}/error.log",'a')
@@ -47,6 +51,29 @@ class SelogerScraper(HttpRequest):
     
     def __exit__(self):
         self.logfile.close()
+    def getToken(self,sid):
+        if SelogerScraper.token and SelogerScraper.token.get("expiry") and SelogerScraper.token.get("expiry") - time.time()<300:
+            return SelogerScraper.token.get('token')
+        headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "User-Agent": "SeLoger/6.8.5 Dalvik/2.1.0 (Linux; U; Android 8.1.0; ASUS_X00TD Build/OPM1)",
+                "Accept": "application/json",
+                "Host": "api-seloger.svc.groupe-seloger.com",
+                "Connection": "Keep-Alive",
+                "Accept-Encoding": "gzip",
+            }
+        seloger_token_host = os.environ.get('HS_SELOGER_TOKEN_HOST', 'localhost')
+        seloger_token_port = os.environ.get('HS_SELOGER_TOKEN_PORT', '8001')
+        SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security"
+        time_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=self.proxy[sid],timeout=self.timeout).json()
+        challenge_url = f"http://{seloger_token_host}:{seloger_token_port}/seloger-auth?{urllib.parse.urlencode(time_token, doseq=False)}"
+        token = self.session[sid].get(challenge_url).text
+        print(token,"self genrager troe")
+        final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid],timeout=self.timeout).text[1:-1]
+        SelogerScraper.token["token"]  = final_token
+        SelogerScraper.token["expiry"] = time.time() + 300
+        return final_token
     def init_headers(self,sid=0,init=False):
         self.session[sid].close()
         self.session[sid] = requests.Session()
@@ -64,16 +91,7 @@ class SelogerScraper(HttpRequest):
                 "Connection": "Keep-Alive",
                 "Accept-Encoding": "gzip",
             }
-            seloger_token_host = os.environ.get('HS_SELOGER_TOKEN_HOST', 'localhost')
-            seloger_token_port = os.environ.get('HS_SELOGER_TOKEN_PORT', '8001')
-
-            SELOGER_SECURITY_URL = "https://api-seloger.svc.groupe-seloger.com/api/security"
-            time_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/register", headers=headers,proxies=self.proxy[sid],timeout=self.timeout).json()
-            challenge_url = f"http://{seloger_token_host}:{seloger_token_port}/seloger-auth?{urllib.parse.urlencode(time_token, doseq=False)}"
-            token = self.session[sid].get(challenge_url).text
-            print(token,"self genrager troe")
-            final_token = self.session[sid].get(f"{SELOGER_SECURITY_URL}/challenge",headers={**headers, **{'authorization': f'Bearer {token}'}},proxies=self.proxy[sid],timeout=self.timeout).text[1:-1]
-
+            final_token = self.getToken(sid)
             self.headers[sid] = {
                 **headers,
                 'authorization': f'Bearer {final_token}'
