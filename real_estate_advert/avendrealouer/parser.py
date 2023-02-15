@@ -67,7 +67,7 @@ def ParseAvendrealouer(data):
         city_name = seller.get("pro").get("city_name") if seller.get("pro") else ""
         urld = data.get("realms")
         if urld:
-            url = data.get("aval").get("url") if data.get("aval") else ""
+            url = urld.get("aval").get("url") if urld.get("aval") else ""
             if "http" not in url:
                 url = "https://www.avendrealouer.fr" + url
     # try
