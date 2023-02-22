@@ -1,18 +1,9 @@
-from real_estate_advert.leboncoin.scraperv4 import CheckId as LebonCoinAdStatus
-from real_estate_advert.logicImmo.logicImmo import CheckId as LogicImmoAdStatus
-from real_estate_advert.lefigaro.scraper import CheckId as LefigaroAdStatus
-from real_estate_advert.paruvendu.scraperv2 import CheckId as ParuvenduAdStatus
-from real_estate_advert.pap.scraper2 import CheckId as PapAdStatus
-from real_estate_advert.seloger.scraperv3 import CheckId as SelogerAdStatus
-from real_estate_advert.bienci.scraper import CheckId as BienciAdStatus
-from real_estate_advert.ouestfrance.scraper import CheckId as OuestfranceAdStatus
-from real_estate_advert.avendrealouer.scraper import CheckId as AvendrealouerAdStatus
 from real_estate_advert.models import RealStateParameter, VendorType, RealStateType, PropertyType,RealStateAdId,RealPortals
 from typing import Optional
 from fastapi import APIRouter
 import tasks
 from fastapi import status
-
+from Status import Status
 """---------------------------------------- Router Object  for API endpoint ---------------------------------------- """
 
 router = APIRouter()
@@ -459,35 +450,18 @@ async def scrape_gensdeconfiance_immo_Scrapper(real_args: RealStateParameter, re
 
 
 @router.post("/real-estate/checkAdStatus", tags=["Real estate Advert"], status_code=status.HTTP_200_OK)
-async def scrape_checkAdStatus(real_args: RealStateAdId, Portals:RealPortals):
+async def scrape_checkAdStatus(real_args: RealStateAdId):
     payload = dict(real_args)
+    Statusob = Status()
     if not payload.get("id"):
         return {"message": "scraping request is failed",
                 "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "exception": "Ad id is required..."}
-    if not Portals:
-        return {"message": "scraping request is failed",
-                "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "exception": "Please Select Ads Portal"}
-    payload.update({"Portal": Portals})
     id = payload.get("id")
-    if payload['Portal']=="Leboncoin":
-        AdStatus = await LebonCoinAdStatus(id) 
-    if payload["Portal"] == "Logicimmo":
-        AdStatus = LogicImmoAdStatus(id) 
-    if payload['Portal'] == "Paruvendu":
-        AdStatus = await ParuvenduAdStatus(id)
-    if payload['Portal'] == "Seloger":
-        AdStatus = SelogerAdStatus(id)
-    if payload['Portal'] == "Bienci":
-        AdStatus = await BienciAdStatus(id)
-    if payload['Portal'] == "Lefigaro":
-        AdStatus = await LefigaroAdStatus(id)
-    if payload['Portal'] == "Ouestfrance":
-        AdStatus = await OuestfranceAdStatus(id)
-    if payload['Portal'] == "Avendrealouer":
-        AdStatus = await AvendrealouerAdStatus(id)
-    if payload['Portal'] == "Pap":
-        AdStatus =  PapAdStatus(id)
-    if AdStatus:return{"status":200,"found":True}
-    else:return {"status":410,"found":False}
+    urlinfo = {
+        "url":payload.get("url"),
+        "id":id,
+        "website":payload.get("website")
+    }
+    AdStatus = await Statusob.checkstatus(**urlinfo)
+    return AdStatus

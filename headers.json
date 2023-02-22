@@ -1,0 +1,94 @@
+{
+    "default": {
+        "headers": {
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-encoding": "gzip, deflate, br",
+            "accept-language": "en-US,en;q=0.9,hi;q=0.8",
+            "cache-control": "max-age=0",
+            "sec-ch-ua": "'Chromium';v='110', 'Not A(Brand';v='24', 'Google Chrome';v='110'",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "Windows",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "none",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+        },
+        "method": "requests"
+    },
+    "gensdeconfiance.com": {
+        "headers": {
+            "accept": "application/json",
+            "cache-control": "no-cache",
+            "appversion": "1.71.2.3200232",
+            "apporigin": "android",
+            "authorization": "undefined",
+            "accept-language": "en-US",
+            "Host": "gensdeconfiance.com",
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            "User-Agent": "okhttp/4.9.2",
+            "uniquedeviceid": "96501a88a72976E6",
+            "apptoken": "f9596bacf8e05070975e11df940a2084",
+            "appvanity": "636e82f86000d"
+        },
+        "method": "okhttp"
+    },
+    "pap.fr": {
+        "headers": {
+            "Accept": "*/*",
+            "X-App-Version": "4.0.10",
+            "X-App-Target": "android",
+            "X-App-Uuid": "b8c75b38-b638-4269-acaf-722f42936bec",
+            "User-Agent": "PAP/G-4.0.10 (Google sdk_gphone_x86 Android SDK 30) okhttp/5.0.0-alpha.2",
+            "Host": "api.pap.fr",
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip"
+        },
+        "method": "okhttp"
+    },
+    "seloger.com": {
+        "headers": {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": "SeLoger/6.8.5 Dalvik/2.1.0 (Linux; U; Android 8.1.0; ASUS_X00TD Build/OPM1)",
+            "Host": "api-seloger.svc.groupe-seloger.com",
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip"
+        },
+        "statusurl" : "https://api-seloger.svc.groupe-seloger.com/api/v1/listings/<id>"
+    },
+    "leboncoin.com": {
+        "headers": {
+            "X-LBC-CC": "7",
+            "Accept": "application/json,application/hal+json",
+            "User-Agent": "LBC;Android;8.1.0;Android SDK built for x86;phone;6dcaf32b2836c4f7;wifi;5.70.2;570200;0",
+            "Content-Type": "application/json; charset=UTF-8",
+            "Host": "api.leboncoin.fr",
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip"
+        },
+        "method": "requests",
+        "statusurl" : "https://api.leboncoin.fr/finder/classified/<id>"
+    },
+    "bienici.com": {
+        "headers": {
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-encoding": "gzip, deflate, br",
+            "accept-language": "en-US,en;q=0.9,hi;q=0.8",
+            "cache-control": "max-age=0",
+            "sec-ch-ua": "'Chromium';v='110', 'Not A(Brand';v='24', 'Google Chrome';v='110'",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "Windows",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "none",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+        },
+        "method": "requests",
+        "statusurl" : "https://www.bienici.com/realEstateAd.json?id=<id>"
+    }
+}

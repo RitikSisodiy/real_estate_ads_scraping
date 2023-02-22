@@ -12,6 +12,8 @@ class RealStateParameter(BaseModel):
 
 class RealStateAdId(BaseModel):
     id: Optional[str]=""
+    url: Optional[str]=""
+    website: Optional[str]=""
 class RealPortals(str,Enum):
     Seloger = "Seloger"
     Leboncoin = "Leboncoin"
