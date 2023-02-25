@@ -289,6 +289,7 @@ class SelogerScraper(HttpRequest):
                 updatetimestamp = updates["created"]
                 for ad in ads:
                     # ad = self.GetAdInfo(ad['id'])
+                    if not ad.get("created"):continue
                     adtimestamp = self.getTimeStamp(ad["created"])
                     print(f"   {adtimestamp}> {updatetimestamp}====>",adtimestamp>updatetimestamp)
                     if adtimestamp>updatetimestamp:
