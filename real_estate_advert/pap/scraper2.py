@@ -123,7 +123,9 @@ class PapScraper:
                 return 0
         except:
             return 0
-    def fetchJson(self,url,params=None):
+    def fetchJson(self,url,params=None,retry=0):
+        if retry>=20:return {}
+        retry+=1
         if params:
             qury = urlencode(params)
             url = f"{url}?{qury}"
@@ -141,7 +143,7 @@ class PapScraper:
                 cookie = self.GenCookie(self.proxy)
                 if not cookie: raise ValidationErr
                 else:self.cookie=cookie
-                return self.fetchJson(url,params)
+                return self.fetchJson(url,retry=retry)
             else:
                 raise ValidationErr
         except Exception as e:
@@ -149,17 +151,17 @@ class PapScraper:
             self.proxy = self.getRandomProxy()
             self.session.close()
             self.session = requests.session()
-            return self.fetchJson(url)
+            return self.fetchJson(url,retry=retry)
         return parsed_json
     def save(self,data,getdata=False):
-        ads = data["annonces"]
+        ads = data.get("annonces") or []
         # tasks = [ad['_links']['self']['href'] for ad in ads]
         adlist = []
         for ad in ads:
             adid = ad["id"]
             adurl = f"{self.apiurl}/detail?id={adid}"
             adinfo = self.fetchJson(adurl)
-            adlist.append(adinfo)
+            if adinfo:adlist.append(adinfo)
         self.saveAdList(adlist)
     def getLastUpdate(self):
         try:
