@@ -46,7 +46,8 @@
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip"
         },
-        "method": "okhttp"
+        "method": "okhttp",
+        "statusurl":"https://api.pap.fr/app/annonces/detail?id=<id>"
     },
     "seloger.com": {
         "headers": {
