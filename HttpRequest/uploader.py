@@ -4,8 +4,8 @@ import json
 from aiokafka import AIOKafkaProducer
 import asyncio
 import traceback    
-import sys,os
-from .s3Client import S3
+# import sys,os
+# from .s3Client import S3
 # filename=sys.argv[1]
 async def send_one(topic,data,producer):
     # Get cluster layout and initial topic/partition leadership information
@@ -100,14 +100,14 @@ class AsyncKafkaTopicProducer:
     async def TriggerPushDataList(self,topic,data):
         tasks = []
         await self.statProducer()
-        s3client = S3(os.getenv("BUCKET_NAME"))
-        data = await bulkuploadAdImages(data,s3client)
+        # s3client = S3(os.getenv("BUCKET_NAME"))
+        # data = await bulkuploadAdImages(data,s3client)
         for da in data:
             da = json.dumps(da)
             tasks.append(asyncio.ensure_future(self.send_one(topic,da)))
         await asyncio.gather(*tasks)
         await self.stopProducer()
-        await s3client.close()
+        # await s3client.close()
     def PushDataList(self,topic,data):
         asyncio.run(self.TriggerPushDataList(topic,data))
 # asyncio.run(main())
