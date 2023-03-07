@@ -46,7 +46,7 @@ class ProxyServer:
             t-=1
         return False
     def updateProxyList(self):
-        if self.readProxy() and not self.threadsleep(self.interval):return
+        if self.readProxy() and self.threadsleep(self.interval):return
         while self.startThread:
             self.getProxyList()
             b = self.threadsleep(self.interval)
