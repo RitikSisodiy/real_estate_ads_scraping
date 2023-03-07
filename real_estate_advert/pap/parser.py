@@ -41,15 +41,15 @@ def ParsePap(data):
         caracteristiquesdic[key[1]] = key[0]
     try:price = re.search(r"[0-9.]+",unidecode(data.get("prix"))).group()
     except:price = 0
-
+    area = caracteristiquesdic.get("mA2") or caracteristiquesdic.get("m2") or ""
     sdata = {
       "id":data.get("id"),
       "ads_type": adtype,
       "price": float(price),
       "original_price": float(price),
-      "area":  caracteristiquesdic.get("mA2") or "",
+      "area":  area,
       "city": re.search(cityRe,data.get("titre")).group(),
-      "declared_habitable_surface":  caracteristiquesdic.get("mA2"),
+      "declared_habitable_surface":  area,
       "declared_land_surface": caracteristiquesdic.get("Terrain"),
       "land_surface": caracteristiquesdic.get("Terrain"),
       "declared_rooms":data.get("nb_pieces"),
