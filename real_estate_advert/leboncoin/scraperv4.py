@@ -99,7 +99,7 @@ class LeboncoinScraper:
             t-=1
         return False
     def updateProxyList(self,interval=300):
-        if self.readProxy() and not self.threadsleep(interval):return
+        if self.readProxy() and self.threadsleep(interval):return
         while self.startThread:
             self.getProxyList()
             b = self.threadsleep(interval)
