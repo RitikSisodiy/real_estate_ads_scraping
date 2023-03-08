@@ -1,17 +1,10 @@
-import concurrent.futures
 from datetime import datetime
-import imp
-from socket import timeout
-from fastapi import FastAPI
 from pytest import param
-import threading
 import requests
 import json
-import random
 import urllib
 import os
 # from .scrapProxy import ProxyScraper
-from HttpRequest.AsyncProxy import ProxyScraper
 
 from .parser import ParseLogicImmo
 import traceback
@@ -42,7 +35,6 @@ class LogicImmoScraper(HttpRequest):
                     'User-Agent': 'okhttp/4.6.0',
                 }
         self.producer = AsyncKafkaTopicProducer()
-        self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
         self.paremeter= paremeter
         super().__init__(True, SELOGER_SECURITY_URL,{}, headers, {}, False, cpath, asyncsize, 5)
     def __del__(self):
