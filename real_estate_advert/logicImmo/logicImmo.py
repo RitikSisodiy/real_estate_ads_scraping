@@ -366,13 +366,15 @@ def CheckId(id):
     else:found = False
     return found
 def main_scraper(payload,update=False):
-    adtype = payload.get("real_state_type")
-    if adtype == "Updated/Latest Ads" or update:
-        data["searchParameters"]["limit"] = 100
-        ob = LogicImmoScraper(data,asyncsize=1,timeout=10)
-        print("updateing latedst ads")
-        return str(ob.updateLatestAd("rental")) +","+ str(ob.updateLatestAd("sale"))
-    else:
-        ob = LogicImmoScraper(data,asyncsize=1,timeout=30)
-        ob.CrawlSeloger(adtype)
-    ob.__del__()
+    try:
+        adtype = payload.get("real_state_type")
+        if adtype == "Updated/Latest Ads" or update:
+            data["searchParameters"]["limit"] = 100
+            ob = LogicImmoScraper(data,asyncsize=1,timeout=10)
+            print("updateing latedst ads")
+            return str(ob.updateLatestAd("rental")) +","+ str(ob.updateLatestAd("sale"))
+        else:
+            ob = LogicImmoScraper(data,asyncsize=1,timeout=30)
+            ob.CrawlSeloger(adtype)
+    finally:
+        ob.__del__()

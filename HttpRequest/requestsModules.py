@@ -61,10 +61,10 @@ class ProxyServer:
             return d
         except: return {}
     def __del__(self):
+        self.startThread = False
         with open(f"{self.cpath}/lastworking.json","w") as file:
             file.write(json.dumps(self.proxy))
         print("class destroyed")
-        self.startThread = False
         print("proxy thread is terminated")
     def readProxy(self):
         filepath = f"{self.cpath}/working.txt"
