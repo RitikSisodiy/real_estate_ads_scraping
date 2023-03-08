@@ -42,6 +42,7 @@ def ParsePap(data):
     try:price = re.search(r"[0-9.]+",unidecode(data.get("prix"))).group()
     except:price = 0
     area = caracteristiquesdic.get("mA2") or caracteristiquesdic.get("m2") or ""
+    if area: area = str(area).replace(",",'.')
     sdata = {
       "id":data.get("id"),
       "ads_type": adtype,
