@@ -58,7 +58,7 @@ def ParseBienici(data):
           "elevator": data.get("hasElevator") or any(word in data.get("description").lower() for word in ["elevator","ascenseur"]),
           "pool": bool(data.get("hasPool")) or any(word in data.get("description").lower() for word in ["piscine","piscina"]),
           "floor": data.get("floorQuantity"),
-          "balcony": data.get("balconyQuantity") or any(word in data.get("description").lower() for word in ["balcon","balcons","balcony"]),
+          "balcony": bool(data.get("balconyQuantity") and int(data.get("balconyQuantity"))) or any(word in data.get("description").lower() for word in ["balcon","balcons","balcony"]),
           "terrace": bool(data.get("terracesQuantity")) or any(word in data.get("description").lower() for word in ["terrace","terrasse",]),
           "insee_code": data.get("district").get("insee_code"),
           "parking": bool(data.get("parkingPlacesQuantity")) or any(word in data.get("description").lower() for word in ["parking","garage","stationnement","parcage",]),
