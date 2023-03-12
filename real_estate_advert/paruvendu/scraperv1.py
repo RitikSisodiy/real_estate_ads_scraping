@@ -1,22 +1,14 @@
 import json
-from string import ascii_lowercase
-from urllib import response
-import aiohttp
 import asyncio
-import fake_useragent
 from urllib.parse import unquote
-from requests import head, session
-from requests_html import HTML,AsyncHTMLSession
+from requests_html import AsyncHTMLSession
 try:
     from .GetFilter import getFilter
 except:
     from GetFilter import getFilter
 import ast
-ua = fake_useragent.UserAgent(fallback='Your favorite Browser')
 from kafka_publisher import KafkaTopicProducer
 producer = KafkaTopicProducer()
-def getHeaders():
-    return ua.random
 async def fetch(session,url,proxy=None):
     # session = AsyncHTMLSession()
     # print(vars(session))

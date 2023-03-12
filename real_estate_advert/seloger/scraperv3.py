@@ -217,7 +217,7 @@ class SelogerScraper(HttpRequest):
                 elif maxresult-totalresult> 200:
                     print("elif 1")
                     last = 10
-                    iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
+                    iniinterval[1] = iniinterval[1] + (int(iniinterval[1]/last)+1)
                 elif totalresult>maxresult:
                     print("elif 2")
                     last = -10

@@ -1,20 +1,12 @@
-from asyncio import tasks
-import imp
-from json import tool
 import json
 import aiohttp
 import asyncio
-import fake_useragent
 from requests import session
 from requests_html import HTML
 import ast
-ua = fake_useragent.UserAgent(fallback='Your favorite Browser')
-
-def getHeaders():
-    return ua.random
 async def fetch(session,url):
     headers = {
-        'user-agent':getHeaders()
+        'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
     }
     async with session.get(url,headers=headers) as responce:
         print(responce.status, url)

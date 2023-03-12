@@ -4,11 +4,7 @@ import json
 import asyncio
 from requests_html import AsyncHTMLSession
 import time
-import fake_useragent
 restext = []
-ua = fake_useragent.UserAgent(fallback='Your favorite Browser')
-def getUserAgent():
-    return ua.random
 
 
 class ProxyScraper:

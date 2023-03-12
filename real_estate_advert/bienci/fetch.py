@@ -1,20 +1,16 @@
 import asyncio
 import time
-import fake_useragent
 import datetime
 import traceback
 import aiofiles
 import os
 cpath =os.path.dirname(__file__) or "." 
 
-ua = fake_useragent.UserAgent(fallback='Your favorite Browser')
-def getUserAgent():
-    return ua.random
 def fetch(url,session,Json=False,file=False,retry=0,**kwargs):
     print(url)
     if not kwargs.get('headers'):
         kwargs["headers"] = {
-                "user-agent":getUserAgent(),
+                "user-agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
                 }
     if retry>=3:return
     retry +=1

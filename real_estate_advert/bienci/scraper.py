@@ -13,9 +13,9 @@ from requests_html import AsyncHTMLSession,HTMLSession
 import random
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 try:
-    from fetch import fetch,getUserAgent
+    from fetch import fetch
 except:
-    from .fetch import fetch,getUserAgent
+    from .fetch import fetch
 pageSize = 499
 kafkaTopicName = "bienici_data_v1"
 commanTopicName = "common-ads-data_v1"
@@ -49,7 +49,7 @@ def getFirst(val):
         return None
 def syncfetch(session,url,Json=False,**kwargs):
     kwargs['headers'] = {
-                "user-agent":getUserAgent(),
+                "user-agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
                 }
     res = session.get(url,**kwargs)
     if res.status_code == 200:
@@ -217,7 +217,7 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
 def FetchFilter(filters):
     filters['size'] = 400
     headers  = {
-                "user-agent":getUserAgent(),
+                "user-agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
     }
     session = HttpRequest(True,'https://www.bienici.com/realEstateAds.json?filters={"size":"1"}',{},headers,{},False,cpath,1,10)
     try:
@@ -285,7 +285,7 @@ def CreatelastupdateLog(session,typ):
         file.write(json.dumps(updates))
 def asyncUpdateBienci():
     headers  = {
-                "user-agent":getUserAgent(),
+                "user-agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
     }
     session = HttpRequest(True,'https://www.bienici.com/realEstateAds.json?filters={"size":"1"}',{},headers,{},False,cpath,1,10)
     res = ""
