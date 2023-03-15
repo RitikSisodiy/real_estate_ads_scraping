@@ -9,6 +9,7 @@ headers = {
 class Fetch:
     def __init__(self) -> None:
         self.proxies = []
+        self.addresurl = "https://api-adresse.data.gouv.fr/search/"
         self.lastproxycheck = time.time()-301
     def getProxy(self):
         if self.lastproxycheck and time.time()-self.lastproxycheck>300:
@@ -29,10 +30,25 @@ class Fetch:
             #     return await self.getGeo(res)
             text =r.html.find("script")[-1].text
             pattern = r"(?<=myLngLat = \[)(?:.*?)(?=\];)"
+            addresspattern = r'(?<=adresse = ")(?:.*?)(?=";)'
             result = re.search(pattern,text)
             if result:
                 res["latitude"], res["longitude"] = result.group(0).strip().split(", ")[::-1]
                 res["location"] = f'{res["latitude"]}, {res["longitude"]}'
+            else:
+                address = re.search(addresspattern,text)
+                address =address and address.group(0).strip()
+                if address:
+                    qry = {"q":address}
+                    r = await self.fetch(self.addresurl+"?"+"&".join([key +"="+value for key, value in qry.items()]))
+                    data = r.json()
+                    resp  = data.get("features")
+                    if resp and len(resp)>=1:
+                        geo = resp[0].get("geometry") and resp[0].get("geometry").get("coordinates") 
+                        if geo:
+                            lon,lat = geo
+                            res["latitude"], res["longitude"] = lat,lon
+                            res["location"] = f'{res["latitude"]}, {res["longitude"]}'
             return res
         except:
             return res
