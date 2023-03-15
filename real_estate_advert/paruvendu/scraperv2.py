@@ -4,10 +4,11 @@ import asyncio
 import os,time
 from requests_html import HTML
 import json,requests
-
+from . getGeolocation import Fetch
 from HttpRequest.requestsModules import HttpRequest
 from .parser import ParseParuvendu
 from HttpRequest.uploader import AsyncKafkaTopicProducer
+geoob = Fetch()
 headers = {
         "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36"
     }
@@ -150,6 +151,7 @@ def savedata(resjson,**kwargs):
     producer = kwargs["producer"]
     producer.PushDataList('paruvendu-data_v1',ads)
     ads = [ParseParuvendu(ad) for ad in ads]
+    ads = asyncio.run(geoob.getAllgeo(ads))
     producer.PushDataList('common-ads-data_v1',ads)
     # for ad in ads:
     #     resstr += json.dumps(ad)+"\n"
