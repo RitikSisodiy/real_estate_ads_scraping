@@ -182,7 +182,7 @@ asyncpage = 10
 def saveRealstateAds(ads,**kwargs):
     producer = kwargs.get("producer")
     if kwargs.get("onlyid"):
-        producer.PushDataList(commonIdUpdate,ads)
+        producer.PushDataList_v1(commonIdUpdate,ads)
     else:
         producer.PushDataList(kafkaTopicName,ads)
         ads = [ParseBienici(ad) for ad in ads]

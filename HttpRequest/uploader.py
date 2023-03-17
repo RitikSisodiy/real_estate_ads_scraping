@@ -97,6 +97,23 @@ class AsyncKafkaTopicProducer:
         finally:
             # Wait for all pending messages to be delivered or expire.
             pass
+    async def send_one_v1(self,producer,topic,data,retry=0):
+    # Get cluster layout and initial topic/partition leadership information
+        try:
+            # Produce message
+            # data = json.dumps(data)
+            # msg = str().encode('utf-8')
+            msg = bytes(data, 'utf-8')
+            await producer.send_and_wait(topic, msg)
+            print("uploaded")
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            retry+=1
+            if retry<10:await self.send_one_v1(producer,topic,data,retry)
+        finally:
+            # Wait for all pending messages to be delivered or expire.
+            pass
     async def TriggerPushDataList(self,topic,data):
         tasks = []
         await self.statProducer()
@@ -108,8 +125,22 @@ class AsyncKafkaTopicProducer:
         await asyncio.gather(*tasks)
         await self.stopProducer()
         # await s3client.close()
+    async def TriggerPushDataList_v1(self,topic,data):
+        tasks = []
+        producer = AIOKafkaProducer(bootstrap_servers=[f"10.8.0.27:9091",f"10.8.0.27:9092", f"10.8.0.27:9093"])
+        await producer.start()
+        # s3client = S3(os.getenv("BUCKET_NAME"))
+        # data = await bulkuploadAdImages(data,s3client)
+        for da in data:
+            da = json.dumps(da)
+            tasks.append(asyncio.ensure_future(self.send_one_v1(producer,topic,da)))
+        await asyncio.gather(*tasks)
+        await producer.stop()
+        # await s3client.close()
     def PushDataList(self,topic,data):
         asyncio.run(self.TriggerPushDataList(topic,data))
+    def PushDataList_v1(self,topic,data):
+        asyncio.run(self.TriggerPushDataList_v1(topic,data))
 # asyncio.run(main())
 
 # def PushDataOnKafka(data):
