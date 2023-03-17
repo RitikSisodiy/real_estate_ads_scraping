@@ -216,8 +216,7 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
             print(totalpage,r['total'],Filter['size'])
             # input("chekd the pages")
             with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-                for i in range(1,totalpage):
-                    baseurl = [ getFilterUrl(Filter,page=i) for i in range(1,totalpage) ]
+                baseurl = [ getFilterUrl(Filter,page=i) for i in range(1,totalpage) ]
                     # GetAllPages(baseurl,session,first=False,Filter=Filter, kwargs)
                 futures = [excuter.submit(GetAllPages, baseurl[i],session,False,**kwargs) for i in range(0,len(baseurl))]
                 for f in futures:
