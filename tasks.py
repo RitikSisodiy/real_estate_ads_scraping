@@ -414,9 +414,6 @@ def rescrap_bienciActiveId_task():
         traceback.print_exc()
         print("Exception ==============>", e)
 
-rescrap_bienciActiveId_task.apply_async()
-# 4 website 1 Core = 4 Core CPU
-
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
@@ -442,3 +439,5 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(20*60, update_OuestFranceScrapper_ads.s(), name='update OuestFranceScrapper ads every 20 minuts')
     # Calls update_logicImmo_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_gensdeconfianceScrapper_ads.s(), name='update gensdeconfiance ads every 20 minuts')
+    # Calls check bienci active add every week
+    sender.add_periodic_task(24*60*7, rescrap_bienciActiveId_task.s(), name='check bienci active add every week')
