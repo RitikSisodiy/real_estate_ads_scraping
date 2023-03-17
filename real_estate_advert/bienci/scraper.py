@@ -84,14 +84,14 @@ def writeGenFilter(key,value):
     prev[key]=value
     with open("generatedPrizeFilter.json",'w') as file:
         file.write(json.dumps(prev))
-def genFilter(parameter,typ,onlyid=False):
+def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
     parameter["filterType"] = typ
     session = requests.session()
     dic = parameter
     totalresult = getTotalResult(session,dic)
     acres = totalresult
     # dic['recherche[produit]']=typ
-    iniinterval = [0,37761]
+    iniinterval = [0,100]
     maxprize = getMaxPrize(session,dic)
     maxresult = 2400
     filterurllist = ""
@@ -99,7 +99,7 @@ def genFilter(parameter,typ,onlyid=False):
     nooffilter = 0
     retrydic = {iniinterval[0]:0}
     while iniinterval[1]<=maxprize:
-        dic['minPrice'],dic['maxPrice'] = iniinterval
+        dic[low],dic[max] = iniinterval
         totalresult = getTotalResult(session,dic)
         if (totalresult!=0 and maxresult-totalresult<=1400 and maxresult-totalresult>=0) or (retrydic[iniinterval[0]]>10 and totalresult>0 and totalresult<maxresult):
             # print("condition is stisfy going to next interval",totalresult)
@@ -112,6 +112,8 @@ def genFilter(parameter,typ,onlyid=False):
             finalresult +=totalresult
             retrydic = {iniinterval[0]:0}
             nooffilter +=1
+        elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="minPrice":
+            genFilter(dic,typ,onlyid,"minArea","maxArea")
         elif maxresult-totalresult> pageSize:
             # print("elif 1")
             last = 10
