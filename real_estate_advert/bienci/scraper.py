@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime,timedelta
 import json
 import os
 import urllib.parse
@@ -362,7 +362,7 @@ from concurrent.futures import ThreadPoolExecutor
 from saveLastChaeck import saveLastCheck
 def rescrapActiveId():
     nowtime = datetime.now()
-    
+    nowtime = nowtime - timedelta(hours=1)
     website = "bienici.com"
     param  = {
     "size":pageSize,
