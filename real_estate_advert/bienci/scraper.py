@@ -2,11 +2,11 @@ import asyncio
 from datetime import datetime
 import json
 import os
-import urllib
+import urllib.parse
 import sys
 import traceback
 import requests
-
+import concurrent.futures
 from HttpRequest.requestsModules import HttpRequest
 from .parser import ParseBienici
 from requests_html import AsyncHTMLSession,HTMLSession
@@ -19,7 +19,7 @@ except:
 pageSize = 499
 kafkaTopicName = "bienici_data_v1"
 commanTopicName = "common-ads-data_v1"
-
+commonIdUpdate = "common-ads-data_updataid_v1"
 # define your filter here
 cpath =os.path.dirname(__file__) or "." 
 citys = open(f"{cpath}/finalcitys.json",'r').readlines()
@@ -84,7 +84,7 @@ def writeGenFilter(key,value):
     prev[key]=value
     with open("generatedPrizeFilter.json",'w') as file:
         file.write(json.dumps(prev))
-def genFilter(parameter,typ):
+def genFilter(parameter,typ,onlyid=False):
     parameter["filterType"] = typ
     session = requests.session()
     dic = parameter
@@ -105,7 +105,7 @@ def genFilter(parameter,typ):
             # print("condition is stisfy going to next interval",totalresult)
             # print(iniinterval,">apending")
             filterurllist += json.dumps(iniinterval) + "/n/:"
-            FetchFilter(dic)
+            FetchFilter(dic,onlyid)
             print("going to next")
             iniinterval[0] = iniinterval[1]+1
             iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
@@ -181,9 +181,12 @@ asyncpage = 10
 
 def saveRealstateAds(ads,**kwargs):
     producer = kwargs.get("producer")
-    producer.PushDataList(kafkaTopicName,ads)
-    ads = [ParseBienici(ad) for ad in ads]
-    producer.PushDataList(commanTopicName,ads)
+    if kwargs.get("onlyid"):
+        producer.PushDataList(commonIdUpdate,ads)
+    else:
+        producer.PushDataList(kafkaTopicName,ads)
+        ads = [ParseBienici(ad) for ad in ads]
+        producer.PushDataList(commanTopicName,ads)
 
     # allads = ''
     # for ad in ads:
@@ -198,7 +201,11 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
         # print(baseurl,"-200")
         print(f"from===========>{r['from']}")
         if save:
-            saveRealstateAds(r['realEstateAds'],**kwargs)
+            ads = r['realEstateAds']
+            if kwargs.get("onlyid"):
+                now = datetime.now()
+                ads = [{"id":ad.get("id"), "last_checked": now.isoformat()} for ad in ads]
+            saveRealstateAds(ads,**kwargs)
         else:
             return r["realEstateAds"]
         if first:
@@ -208,13 +215,20 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
             tasks =[]
             print(totalpage,r['total'],Filter['size'])
             # input("chekd the pages")
-            for i in range(1,totalpage):
-                Filter['from'] += Filter['size']
-                baseurl = getFilterUrl(Filter,page=i)
-                GetAllPages(baseurl,session,first=False,Filter=Filter,**kwargs)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+                for i in range(1,totalpage):
+                    baseurl = [ getFilterUrl(Filter,page=i) for i in range(1,totalpage) ]
+                    # GetAllPages(baseurl,session,first=False,Filter=Filter, kwargs)
+                futures = [excuter.submit(GetAllPages, baseurl[i],session,False,**kwargs) for i in range(0,len(baseurl))]
+                for f in futures:
+                    print(f)
+            # for i in range(1,totalpage):
+            #     Filter['from'] += Filter['size']
+            #     baseurl = getFilterUrl(Filter,page=i)
+            #     GetAllPages(baseurl,session,first=False,Filter=Filter,**kwargs)
             # await asyncio.gather(*tasks)
 
-def FetchFilter(filters):
+def FetchFilter(filters,onlyid=False):
     filters['size'] = 400
     headers  = {
                 "user-agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
@@ -224,7 +238,7 @@ def FetchFilter(filters):
         baseurl = getFilterUrl(filters)
         producer = AsyncKafkaTopicProducer()
         # await producer.statProducer()
-        GetAllPages(baseurl,session,first=True,Filter=filters,producer=producer)
+        GetAllPages(baseurl,session,first=True,Filter=filters,producer=producer,onlyid=onlyid)
     finally:
         session.__del__()
     # await producer.stopProducer()
@@ -345,7 +359,34 @@ def CheckId(id):
     return bool(res)
 def UpdateBienci():
     return asyncUpdateBienci()
-
+from concurrent.futures import ThreadPoolExecutor
+from saveLastChaeck import saveLastCheck
+def rescrapActiveId():
+    nowtime = datetime.now()
+    
+    website = "bienici.com"
+    param  = {
+    "size":pageSize,
+    "from":0,
+    "showAllModels":False,
+    "filterType":"buy",
+    "propertyType":["house","flat"],
+    "newProperty":False,
+    "page":1,
+    "sortBy":"relevance",
+    "sortOrder":"desc",
+    "onTheMarket":[True],
+    }
+    # genFilter(param,typ="buy")
+    # genFilter(param,typ="rent")  
+    # with ThreadPoolExecutor(max_workers=10) as executor:
+    #     futures = executor.map(genFilter, [param,param],["buy","rent"],[True,True])
+    #     for f in futures:
+    #         print("done",f)
+    # genFilter(param,"buy",True)
+    genFilter(param,"rent",True)
+    print("complited")
+    saveLastCheck(website,nowtime.isoformat())
 def main_scraper(payload):
     # asyncio.run(main())
     if payload.get("real_state_type") == "Updated/Latest Ads":

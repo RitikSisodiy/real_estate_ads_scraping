@@ -8,7 +8,7 @@ from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
 from real_estate_advert.pap.scraper2 import pap_scraper as PapScraper
 from real_estate_advert.pap.scraper2 import UpdatePap
 from real_estate_advert.bienci.scraper import main_scraper as bienciScraper
-from real_estate_advert.bienci.scraper import UpdateBienci
+from real_estate_advert.bienci.scraper import UpdateBienci,rescrapActiveId
 from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
 from real_estate_advert.logicImmo.logicImmo import main_scraper as LogicImmoScraper
 from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
@@ -405,7 +405,16 @@ def scrap_greenacres_task(payload):
     print("Task End ================> ")
 
 
+# recscrap active ad id
+@celery_app.task(base=Singleton,name="rescrap bienci activeid")
+def rescrap_bienciActiveId_task():
+    try:
+        rescrapActiveId()
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ==============>", e)
 
+rescrap_bienciActiveId_task.apply_async()
 # 4 website 1 Core = 4 Core CPU
 
 
