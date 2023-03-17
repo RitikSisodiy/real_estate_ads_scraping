@@ -19,7 +19,7 @@ except:
 pageSize = 499
 kafkaTopicName = "bienici_data_v1"
 commanTopicName = "common-ads-data_v1"
-commonIdUpdate = "bienici.com-activeid"
+commonIdUpdate = "activeid-bienici.com"
 # define your filter here
 cpath =os.path.dirname(__file__) or "." 
 citys = open(f"{cpath}/finalcitys.json",'r').readlines()
