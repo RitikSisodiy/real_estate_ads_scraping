@@ -101,7 +101,7 @@ def genFilter(parameter,typ,onlyid=False):
     while iniinterval[1]<=maxprize:
         dic['minPrice'],dic['maxPrice'] = iniinterval
         totalresult = getTotalResult(session,dic)
-        if (totalresult!=0 and maxresult-totalresult<=1400 and maxresult-totalresult>0) or (retrydic[iniinterval[0]]>10 and totalresult>0 and totalresult<maxresult):
+        if (totalresult!=0 and maxresult-totalresult<=1400 and maxresult-totalresult>=0) or (retrydic[iniinterval[0]]>10 and totalresult>0 and totalresult<maxresult):
             # print("condition is stisfy going to next interval",totalresult)
             # print(iniinterval,">apending")
             filterurllist += json.dumps(iniinterval) + "/n/:"
