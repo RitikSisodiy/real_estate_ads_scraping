@@ -382,8 +382,11 @@ def rescrapActiveId():
     #     futures = executor.map(genFilter, [param,param],["buy","rent"],[True,True])
     #     for f in futures:
     #         print("done",f)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+        futures = [excuter.submit(genFilter, param,i,True) for i in ["buy","rent"]]
+        for f in futures:print(f)
     # genFilter(param,"buy",True)
-    genFilter(param,"rent",True)
+    # genFilter(param,"rent",True)
     print("complited")
     saveLastCheck(website,nowtime.isoformat())
 def main_scraper(payload):
