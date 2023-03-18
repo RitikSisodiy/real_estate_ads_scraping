@@ -247,7 +247,7 @@ def main(adsType = "",onlyid=False):
             for f in flist:
                 params.update({"typeIds":f})
                 paramscopy = params.copy()
-                futures.append(getFilter,session,paramscopy,producer,onlyid=onlyid)
+                futures.append(excuter.submit(getFilter,session,paramscopy,producer,onlyid=onlyid))
             for f in futures:print(f)
     finally:
         session.__del__()
