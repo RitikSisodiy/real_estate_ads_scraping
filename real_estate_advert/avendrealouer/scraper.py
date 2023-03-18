@@ -1,7 +1,7 @@
 from datetime import datetime
 from email import header
 from socket import timeout
-import traceback
+import traceback,sys
 import aiohttp
 import concurrent.futures
 import asyncio,requests
@@ -147,7 +147,7 @@ def getMaxPrize(session,params,url):
         prize = r["items"][0]["price"]
     except:prize = 0
     return float(prize)
-def getFilter(session,params,producer,onlyid=False):
+def getFilter(session,params,producer,onlyid=False,low='price.gte',max='price.lte'):
     dic,baseurl = params , "https://ws-web.avendrealouer.fr/realestate/properties/"
     print("genrating filters")
     # url = getUrl(baseurl,dic)
@@ -166,8 +166,6 @@ def getFilter(session,params,producer,onlyid=False):
     if totalresult>=maxresult:
         while iniinterval[1]<=maxprice:
             print(iniinterval)
-            dic['price.gte'],dic['price.lte'] = iniinterval
-            totalresult = getTotalResult(session,dic,baseurl)
             if totalresult <= 1400 and totalresult>0:
                 print("condition is stisfy going to next interval")
                 print(iniinterval,">apending")
@@ -187,9 +185,41 @@ def getFilter(session,params,producer,onlyid=False):
                 last = -50
                 iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
             print(totalresult,"-",maxresult)
-        print(iniinterval,">apending")
-        startCrawling(session,dic,producer=producer)
-        finalresult +=totalresult
+        while iniinterval[1]<=maxprice:
+            dic[low],dic[max] = iniinterval
+            totalresult = getTotalResult(session,dic,baseurl)
+            if (totalresult!=0 and maxresult-totalresult<=400 and maxresult-totalresult>=0) or (retrydic[iniinterval[0]]>10 and totalresult>0 and totalresult<maxresult):
+                # print("condition is stisfy going to next interval",totalresult)
+                # print(iniinterval,">apending")
+                filterurllist += json.dumps(iniinterval) + "/n/:"
+                startCrawling(session,dic,producer=producer,onlyid= onlyid)
+                print("going to next")
+                iniinterval[0] = iniinterval[1]+1
+                iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
+                finalresult +=totalresult
+                retrydic = {iniinterval[0]:0}
+                nooffilter +=1
+            elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="minPrice":
+                getFilter(session,dic.copy(),producer,onlyid,"minArea","maxArea")
+            elif totalresult == 0:
+                # print("elif 1",iniinterval)
+                last = 10
+                iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
+            elif totalresult>maxresult:
+                # print("elif 2",iniinterval)
+                last = -5
+                dif = iniinterval[1]-iniinterval[0]
+                iniinterval[1] = iniinterval[1] + int(dif/-2) 
+                if iniinterval[0]>iniinterval[1]:
+                    iniinterval[1] = iniinterval[0]+10
+            retrydic[iniinterval[0]] +=1
+            sys.stdout.write(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} no of filter {nooffilter}")
+            sys.stdout.flush()
+            # print(totalresult,"-",maxresult,"::::",acres ," of ", finalresult,"==>",iniinterval)
+        
+            print(iniinterval,">apending")
+            startCrawling(session,dic,producer=producer)
+            finalresult +=totalresult
     # finallsit = [json.loads(d) for d in filterurllist.split(":\n")]
     # print(finallsit)
     # paramslist = []
