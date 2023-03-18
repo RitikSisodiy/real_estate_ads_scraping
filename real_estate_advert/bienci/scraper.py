@@ -134,6 +134,7 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
         sys.stdout.flush()
         # print(totalresult,"-",maxresult,"::::",acres ," of ", finalresult,"==>",iniinterval)
     filterurllist+=json.dumps(iniinterval)
+    FetchFilter(dic,onlyid)
     finalresult +=totalresult
     print(finalresult,acres)
     filterurllist = [json.loads(query) for query in filterurllist.split("/n/:")]
@@ -232,7 +233,13 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
                         r['total']-=2400
                         totalpage = getPage(r["total"],Filter["size"])
                         futures +=[ excuter.submit(GetAllPages, url,session,False,**kwargs) for url in [getFilterUrl(Filter,page=i) for i in range(0,totalpage) ]]
-                concurrent.futures.wait(futures)
+                for future in concurrent.futures.as_completed(futures):
+                    try:
+                        result = future.result()
+                        print(f'Task {result} completed successfully')
+                    except Exception as e:
+                        print(f'Error: {e}')
+                        break
             # for i in range(1,totalpage):
             #     Filter['from'] += Filter['size']
             #     baseurl = getFilterUrl(Filter,page=i)
@@ -396,7 +403,13 @@ def rescrapActiveId():
     #         print("done",f)
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
         futures = [excuter.submit(genFilter, param,i,True) for i in ["buy","rent"]]
-        concurrent.futures.wait(futures)
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                result = future.result()
+                print(f'Task {result} completed successfully')
+            except Exception as e:
+                print(f'Error: {e}')
+                break
     # genFilter(param,"buy",True)
     # genFilter(param,"rent",True)
     print("complited")
