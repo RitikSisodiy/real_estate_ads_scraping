@@ -3,7 +3,6 @@ from email import header
 from socket import timeout
 import traceback
 import aiohttp
-import concurrent.futures
 import asyncio,requests
 import os,sys
 from requests_html import HTMLSession
@@ -13,7 +12,6 @@ from HttpRequest.requestsModules import HttpRequest
 from .parser import ParseAvendrealouer
 kafkaTopicName = "avendrealouer-data_v1"
 commonTopicName = "common-ads-data_v1"
-commonIdUpdate = "activeid-avendrealouer.fr"
 s= HTMLSession()
 pagesize  = 100 # maxsize is 100
 cpath =os.path.dirname(__file__) or "."
@@ -64,15 +62,10 @@ def savedata(resjson,**kwargs):
     resstr = ''
     ads = resjson["items"]
     producer = kwargs["producer"]
-    if kwargs.get("onlyid"):
-        now = datetime.now()
-        ads = [{"id":"aven"+str(ad.get("id")), "last_checked": now.isoformat(),"available":True} for ad in ads]
-        producer.PushDataList_v1(commonIdUpdate,ads)
-    else:
-        producer.PushDataList(kafkaTopicName,ads)
-        ads = [ParseAvendrealouer(ad) for ad in ads]
-        producer.PushDataList(commonTopicName,ads)
-        print("saved")
+    producer.PushDataList(kafkaTopicName,ads)
+    ads = [ParseAvendrealouer(ad) for ad in ads]
+    producer.PushDataList(commonTopicName,ads)
+    print("saved")
     # for ad in ads:
     #     resstr += json.dumps(ad)+"\n"
     # with open("output.json",'a') as file:
@@ -98,23 +91,17 @@ def startCrawling(session,param,**kwargs):
         else:
             filterlist.append((totalpage,param))
         start = 2
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-            futures = []
-            for totalpage,param in filterlist:
+        for totalpage,param in filterlist:
+            # print(param)
+            # await asyncio.sleep(5)
+            tasks = []
+            for i in range(start,totalpage+1):
+                param['currentPage'] = i
                 # print(param)
-                # await asyncio.sleep(5)
-                for i in range(start,totalpage+1):
-                    Fparam = {
-                        **param,
-                        "currentPage":i
-                    }
-                    # print(param)
-                    futures.append(excuter.submit(parstItems,session,Fparam,page=i,**kwargs))
-                    # tasks.append(asyncio.ensure_future(parstItems(session,param,page=i,**kwargs)))
-                # await asyncio.gather(*tasks)
-                start=1  
-            for f in futures:
-                print(f)
+                parstItems(session,param,page=i,**kwargs)
+                # tasks.append(asyncio.ensure_future(parstItems(session,param,page=i,**kwargs)))
+            # await asyncio.gather(*tasks)
+            start=1  
         # totaldata = 0
         # for d in data:
         #     results = len(d['feed']["row"])
@@ -147,12 +134,12 @@ def getMaxPrize(session,params,url):
         prize = r["items"][0]["price"]
     except:prize = 0
     return float(prize)
-def getFilter(session,params,producer,onlyid=False,low='price.gte',max='price.lte'):
+def getFilter(session,params,producer):
     dic,baseurl = params , "https://ws-web.avendrealouer.fr/realestate/properties/"
     print("genrating filters")
     # url = getUrl(baseurl,dic)
     # url = baseurl
-    maxresult = 1400
+    maxresult = 700
     try:
         del dic['price.gte']
         del dic['price.lte']
@@ -165,20 +152,20 @@ def getFilter(session,params,producer,onlyid=False,low='price.gte',max='price.lt
     maxprice = getMaxPrize(session,params,baseurl)
     if totalresult>=maxresult:
         while iniinterval[1]<=maxprice:
-            dic[low],dic[max] = iniinterval
-            totalresult = getTotalResult(session,dic)
-            if (totalresult!=0 and maxresult-totalresult<=400 and maxresult-totalresult>=0) or (retrydic[iniinterval[0]]>10 and totalresult>0 and totalresult<maxresult):
-                # print("condition is stisfy going to next interval",totalresult)
-                # print(iniinterval,">apending")
-                filterurllist += json.dumps(iniinterval) + "/n/:"
-                startCrawling(session,dic,producer=producer,onlyid= onlyid)
-                print("going to next")
+            print(iniinterval)
+            dic['price.gte'],dic['price.lte'] = iniinterval
+            totalresult = getTotalResult(session,dic,baseurl)
+            if totalresult <= 1400 and totalresult>0:
+                print("condition is stisfy going to next interval")
+                print(iniinterval,">apending")
+                # filterurllist.append(iniinterval)
+                # filterurllist+=json.dumps(dic)+":\n"
+                startCrawling(session,dic,producer=producer)
+                # print(filterurllist)
                 iniinterval[0] = iniinterval[1]+1
                 iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
                 finalresult +=totalresult
-                retrydic = {iniinterval[0]:0}
-                nooffilter +=1
-            elif maxresult-totalresult> 100:
+            elif maxresult-totalresult> 1400:
                 # print("elif 1")
                 last = 10
                 iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
@@ -193,15 +180,13 @@ def getFilter(session,params,producer,onlyid=False,low='price.gte',max='price.lt
                 iniinterval[1] = iniinterval[1] + int(dif/-2) 
                 if iniinterval[0]>iniinterval[1]:
                     iniinterval[1] = iniinterval[0]+10
-            retrydic[iniinterval[0]] +=1
-        sys.stdout.write(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} no of filter {nooffilter}")
-        sys.stdout.flush()
-        # print(totalresult,"-",maxresult,"::::",acres ," of ", finalresult,"==>",iniinterval)
-    
+
+            sys.stdout.write(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} no of filter")
+            sys.stdout.flush()
         print(iniinterval,">apending")
         startCrawling(session,dic,producer=producer)
         finalresult +=totalresult
-        # finallsit = [json.loads(d) for d in filterurllist.split(":\n")]
+    # finallsit = [json.loads(d) for d in filterurllist.split(":\n")]
     # print(finallsit)
     # paramslist = []
     # for par in finallsit:
@@ -213,7 +198,7 @@ def getFilter(session,params,producer,onlyid=False,low='price.gte',max='price.lt
     return 0
 def parstItems(session,param,page=None,save=True,**kwargs):
     if page:
-        param.update({"from":((page-1)*pagesize),})
+        param.update({"from":((page-1)*pagesize)})
     data = fetch(session,url,param)
     # print(param['p'])
     # data = json.load(res)
@@ -230,8 +215,8 @@ def CheckId(id):
             return True
         else:return False
     except:return False
-def main(adsType = "",onlyid=False):
-    params = gparams.copy()
+def main(adsType = ""):
+    params = gparams
     try:
         session = HttpRequest(True,'https://ws-web.avendrealouer.fr/',headers,{},{},False,cpath,1,10)
         # catid info
@@ -247,24 +232,11 @@ def main(adsType = "",onlyid=False):
         CreatelastupdateLog(session,adsType)
         producer = AsyncKafkaTopicProducer()
         flist = [2,3,6,7,19]
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-            futures = []
-            for f in flist:
-                Fparams = {
-                    **params,
-                    **{"typeIds":f}
-                }
-                futures.append(excuter.submit(getFilter,session,Fparams,producer,onlyid=onlyid))
-            for f in futures:
-                print(f)
-    except Exception as e:
-        traceback.print_exc()
-        print(e)
+        for f in flist:
+            params.update({"typeIds":f})
+            getFilter(session,params,producer)
     finally:
         session.__del__()
-def rescrapActiveId():
-    main("rental",True)
-    main("sale",True)
     # await startCrawling(session,filterParamList,producer=producer)
     # await producer.stopProducer()
 def main_scraper(payload):
