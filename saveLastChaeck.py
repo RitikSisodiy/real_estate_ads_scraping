@@ -25,20 +25,23 @@ def saveLastCheck(website,nowtime):
             "lang": "painless"
         },
         "query":{
-            "bool":[
-                {
-                    "match": {
-                        "website": website
-                    }
-                },
-                {
-                    "range": {
-                        "last_checked": {
-                            "lte": nowtime
+            "bool":{
+                "must":[
+                    {
+                        "match": {
+                            "website": website
+                        }
+                    },
+                    {
+                        "range": {
+                            "last_checked": {
+                                "lte": nowtime
+                            }
                         }
                     }
-                }
-            ]
+                ]
+                
+            }
         }
     }
     while True:
