@@ -177,7 +177,7 @@ def getFilter(session,params,producer,onlyid=False,low="price.gte",max='price.lt
                 iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
                 finalresult +=totalresult
             elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="price.gte":
-                getFilter(session,dic.copy(),producer,onlyid,"area.gte","area.lte")
+                getFilter(session,dic.copy(),producer,onlyid,"surface.gte","surface.lte")
             elif maxresult-totalresult> 1400:
                 # print("elif 1")
                 last = 10
