@@ -232,8 +232,7 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
                         r['total']-=2400
                         totalpage = getPage(r["total"],Filter["size"])
                         futures +=[ excuter.submit(GetAllPages, url,session,False,**kwargs) for url in [getFilterUrl(Filter,page=i) for i in range(0,totalpage) ]]
-                for f in futures:
-                    print(f)
+                concurrent.futures.wait(futures)
             # for i in range(1,totalpage):
             #     Filter['from'] += Filter['size']
             #     baseurl = getFilterUrl(Filter,page=i)
@@ -397,7 +396,7 @@ def rescrapActiveId():
     #         print("done",f)
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
         futures = [excuter.submit(genFilter, param,i,True) for i in ["buy","rent"]]
-        for f in futures:print(f)
+        concurrent.futures.wait(futures)
     # genFilter(param,"buy",True)
     # genFilter(param,"rent",True)
     print("complited")
