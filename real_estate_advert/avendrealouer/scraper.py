@@ -152,8 +152,8 @@ def getFilter(session,params,producer,onlyid=False,low="price.gte",max='price.lt
     # url = baseurl
     maxresult = 1400
     try:
-        del dic['price.gte']
-        del dic['price.lte']
+        del dic[low]
+        del dic[max]
     except:pass
     totalresult =getTotalResult(session,dic,baseurl)
     acres = totalresult
