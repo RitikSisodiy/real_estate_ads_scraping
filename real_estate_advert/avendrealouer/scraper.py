@@ -352,9 +352,11 @@ def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
     website = "avendrealouer.fr"
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-        futures = excuter.map(main,["rental","sale"],[True,True])
-        for f in futures:print(f)
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+    #     futures = excuter.map(main,["rental","sale"],[True,True])
+    #     for f in futures:print(f)
+    main("sale",True)
+    main("rental",True)
     saveLastCheck(website,nowtime.isoformat())
     # main("rental",True)
     # main("sale",True)
