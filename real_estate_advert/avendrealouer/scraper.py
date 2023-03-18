@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime,timedelta
+from saveLastChaeck import saveLastCheck
 from email import header
 from socket import timeout
 import traceback,concurrent.futures
@@ -346,9 +347,13 @@ def asyncUpdateParuvendu():
     finally:
         session.__del__()
 def rescrapActiveId():
+    nowtime = datetime.now()
+    nowtime = nowtime - timedelta(hours=1)
+    website = "bienici.com"
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
         futures = excuter.map(main,["rental","sale"],[True,True])
         for f in futures:print(f)
+    saveLastCheck(website,nowtime.isoformat())
     # main("rental",True)
     # main("sale",True)
     # await startCrawling(session,filterParamList,producer=producer)
