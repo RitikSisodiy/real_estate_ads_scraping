@@ -134,7 +134,6 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
         sys.stdout.flush()
         # print(totalresult,"-",maxresult,"::::",acres ," of ", finalresult,"==>",iniinterval)
     filterurllist+=json.dumps(iniinterval)
-    FetchFilter(dic,onlyid)
     finalresult +=totalresult
     print(finalresult,acres)
     filterurllist = [json.loads(query) for query in filterurllist.split("/n/:")]
@@ -211,7 +210,7 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
             ads = r['realEstateAds']
             if kwargs.get("onlyid"):
                 now = datetime.now()
-                ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
+                ads = [{"id":ad.get("id"), "last_checked": now.isoformat()} for ad in ads]
             saveRealstateAds(ads,**kwargs)
         else:
             return r["realEstateAds"]
@@ -233,13 +232,8 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
                         r['total']-=2400
                         totalpage = getPage(r["total"],Filter["size"])
                         futures +=[ excuter.submit(GetAllPages, url,session,False,**kwargs) for url in [getFilterUrl(Filter,page=i) for i in range(0,totalpage) ]]
-                for future in concurrent.futures.as_completed(futures):
-                    try:
-                        result = future.result()
-                        print(f'Task {result} completed successfully')
-                    except Exception as e:
-                        print(f'Error: {e}')
-                        break
+                for f in futures:
+                    print(f)
             # for i in range(1,totalpage):
             #     Filter['from'] += Filter['size']
             #     baseurl = getFilterUrl(Filter,page=i)
@@ -402,14 +396,9 @@ def rescrapActiveId():
     #     for f in futures:
     #         print("done",f)
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-        futures = [excuter.submit(genFilter, param,i,True) for i in ["buy","rent"]]
-        for future in concurrent.futures.as_completed(futures):
-            try:
-                result = future.result()
-                print(f'Task {result} completed successfully')
-            except Exception as e:
-                print(f'Error: {e}')
-                break
+        # futures = [excuter.submit(genFilter, param,i,True) for i in ["buy","rent"]]
+        futures = excuter.map(genFilter, [param]*2,["buy","rent"],[True]*2)
+        for f in futures:print(f)
     # genFilter(param,"buy",True)
     # genFilter(param,"rent",True)
     print("complited")
