@@ -165,27 +165,6 @@ def getFilter(session,params,producer,onlyid=False,low='price.gte',max='price.lt
     maxprice = getMaxPrize(session,params,baseurl)
     if totalresult>=maxresult:
         while iniinterval[1]<=maxprice:
-            print(iniinterval)
-            if totalresult <= 1400 and totalresult>0:
-                print("condition is stisfy going to next interval")
-                print(iniinterval,">apending")
-                # filterurllist.append(iniinterval)
-                # filterurllist+=json.dumps(dic)+":\n"
-                startCrawling(session,dic,producer=producer,onlyid= onlyid)
-                # print(filterurllist)
-                iniinterval[0] = iniinterval[1]+1
-                iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
-                finalresult +=totalresult
-            elif maxresult-totalresult> 200:
-                print("elif 1")
-                last = 10
-                iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
-            elif totalresult>maxresult:
-                print("elif 2")
-                last = -50
-                iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
-            print(totalresult,"-",maxresult)
-        while iniinterval[1]<=maxprice:
             dic[low],dic[max] = iniinterval
             totalresult = getTotalResult(session,dic,baseurl)
             if (totalresult!=0 and maxresult-totalresult<=400 and maxresult-totalresult>=0) or (retrydic[iniinterval[0]]>10 and totalresult>0 and totalresult<maxresult):
