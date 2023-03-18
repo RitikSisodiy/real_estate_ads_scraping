@@ -113,7 +113,7 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
             retrydic = {iniinterval[0]:0}
             nooffilter +=1
         elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="minPrice":
-            genFilter(dic,typ,onlyid,"minArea","maxArea")
+            genFilter(dic.copy(),typ,onlyid,"minArea","maxArea")
         elif maxresult-totalresult> pageSize:
             # print("elif 1")
             last = 10
@@ -373,10 +373,7 @@ def UpdateBienci():
     return asyncUpdateBienci()
 from concurrent.futures import ThreadPoolExecutor
 from saveLastChaeck import saveLastCheck
-def rescrapActiveId():
-    nowtime = datetime.now()
-    nowtime = nowtime - timedelta(hours=1)
-    website = "bienici.com"
+def rescrapActiveIdbyType(Type):
     param  = {
     "size":pageSize,
     "from":0,
@@ -399,8 +396,15 @@ def rescrapActiveId():
         # futures = [excuter.submit(genFilter, param,i,True) for i in ["buy","rent"]]
         # futures = excuter.map(genFilter, [param]*2,["buy","rent"],[True]*2)
         # for f in futures:print(f)
-    genFilter(param,"buy",True)
-    genFilter(param,"rent",True)
+    genFilter(param,Type,True)
+    # genFilter(param,"rent",True)
+def rescrapActiveId():
+    nowtime = datetime.now()
+    nowtime = nowtime - timedelta(hours=1)
+    website = "bienici.com"
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+        futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["buy","rent"]]
+        for f in futures:print(f)
     print("complited")
     saveLastCheck(website,nowtime.isoformat())
 def main_scraper(payload):
