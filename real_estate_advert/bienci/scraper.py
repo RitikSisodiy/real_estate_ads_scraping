@@ -93,22 +93,15 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
     # dic['recherche[produit]']=typ
     iniinterval = [0,100]
     maxprize = getMaxPrize(session,dic)
-    maxresult = 2400
+    maxresult = 4800
     filterurllist = ""
     finalresult = 0
     nooffilter = 0
     retrydic = {iniinterval[0]:0}
-    lastinterval = []
-    samecount = 0
     while iniinterval[1]<=maxprize:
         dic[low],dic[max] = iniinterval
-        if iniinterval == lastinterval:
-            samecount +=1
-        else:
-            lastinterval = iniinterval
-            samecount = 0
         totalresult = getTotalResult(session,dic)
-        if (totalresult!=0 and maxresult-totalresult<=1400 and maxresult-totalresult>=0) or (retrydic[iniinterval[0]]>10 and totalresult>0 and totalresult<maxresult) or samecount>=5:
+        if (totalresult!=0 and maxresult-totalresult<=1400 and maxresult-totalresult>=0) or (retrydic[iniinterval[0]]>10 and totalresult>0 and totalresult<maxresult):
             # print("condition is stisfy going to next interval",totalresult)
             # print(iniinterval,">apending")
             filterurllist += json.dumps(iniinterval) + "/n/:"
@@ -403,7 +396,7 @@ def rescrapActiveId():
     #     for f in futures:
     #         print("done",f)
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-        futures = [excuter.submit(genFilter, param,i,True) for i in ["buy","rent"]]
+        futures = [excuter.submit(genFilter, param,i,True) for i in ["buy"]]
         for f in futures:print(f)
     # genFilter(param,"buy",True)
     # genFilter(param,"rent",True)
