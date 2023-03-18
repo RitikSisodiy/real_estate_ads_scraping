@@ -229,7 +229,7 @@ def CheckId(id):
         else:return False
     except:return False
 def main(adsType = "",onlyid=False):
-    params = gparams
+    params = gparams.copy()
     try:
         session = HttpRequest(True,'https://ws-web.avendrealouer.fr/',headers,{},{},False,cpath,1,10)
         # catid info
@@ -282,7 +282,7 @@ def GetAdUpdate(ad):
     return updates
 
 def CreatelastupdateLog(session,typ):
-    params = gparams
+    params = gparams.copy()
     updates = getLastUpdates()
     if typ == "rental":
         catid = "2"
@@ -309,7 +309,7 @@ def CreatelastupdateLog(session,typ):
         file.write(json.dumps(updates))
 
 def asyncUpdateParuvendu():
-    params= gparams
+    params= gparams.copy()
     updates = getLastUpdates()
     # print(updates)
     try:
