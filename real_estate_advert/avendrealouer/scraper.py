@@ -145,12 +145,12 @@ def getMaxPrize(session,params,url):
         prize = r["items"][0]["price"]
     except:prize = 0
     return float(prize)
-def getFilter(session,params,producer,onlyid=False):
+def getFilter(session,params,producer,onlyid=False,low="price.gte",max='price.lte'):
     dic,baseurl = params , "https://ws-web.avendrealouer.fr/realestate/properties/"
     print("genrating filters")
     # url = getUrl(baseurl,dic)
     # url = baseurl
-    maxresult = 700
+    maxresult = 1400
     try:
         del dic['price.gte']
         del dic['price.lte']
@@ -164,7 +164,7 @@ def getFilter(session,params,producer,onlyid=False):
     if totalresult>=maxresult:
         while iniinterval[1]<=maxprice:
             print(iniinterval)
-            dic['price.gte'],dic['price.lte'] = iniinterval
+            dic[low],dic[max] = iniinterval
             totalresult = getTotalResult(session,dic,baseurl)
             if totalresult <= 1400 and totalresult>0:
                 print("condition is stisfy going to next interval")
@@ -176,6 +176,8 @@ def getFilter(session,params,producer,onlyid=False):
                 iniinterval[0] = iniinterval[1]+1
                 iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
                 finalresult +=totalresult
+            elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="price.gte":
+                getFilter(session,dic.copy(),producer,onlyid,"area.gte","area.lte")
             elif maxresult-totalresult> 1400:
                 # print("elif 1")
                 last = 10
