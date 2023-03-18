@@ -349,7 +349,7 @@ def asyncUpdateParuvendu():
 def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
-    website = "bienici.com"
+    website = "avendrealouer.fr"
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
         futures = excuter.map(main,["rental","sale"],[True,True])
         for f in futures:print(f)

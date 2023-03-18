@@ -423,6 +423,7 @@ def rescrap_AvendrealouerbienciActiveId_task():
         print("Exception ==============>", e)
 
 rescrap_AvendrealouerbienciActiveId_task.apply_async()
+rescrap_bienciActiveId_task.apply_async()
 # 4 website 1 Core = 4 Core CPU
 
 
