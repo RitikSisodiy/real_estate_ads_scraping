@@ -98,10 +98,17 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
     finalresult = 0
     nooffilter = 0
     retrydic = {iniinterval[0]:0}
+    lastinterval = []
+    samecount = 0
     while iniinterval[1]<=maxprize:
         dic[low],dic[max] = iniinterval
+        if iniinterval == lastinterval:
+            samecount +=1
+        else:
+            lastinterval = iniinterval
+            samecount = 0
         totalresult = getTotalResult(session,dic)
-        if (totalresult!=0 and maxresult-totalresult<=1400 and maxresult-totalresult>=0) or (retrydic[iniinterval[0]]>10 and totalresult>0 and totalresult<maxresult):
+        if (totalresult!=0 and maxresult-totalresult<=1400 and maxresult-totalresult>=0) or (retrydic[iniinterval[0]]>10 and totalresult>0 and totalresult<maxresult) or samecount>=5:
             # print("condition is stisfy going to next interval",totalresult)
             # print(iniinterval,">apending")
             filterurllist += json.dumps(iniinterval) + "/n/:"
@@ -195,7 +202,11 @@ def saveRealstateAds(ads,**kwargs):
     #     allads+= json.dumps(ad)+"\n"
     # with open("output/output.json",'a') as file:
     #     file.write(allads)
-
+def getPage(total,size):
+    totalpage = total/size
+    totalpage = int(totalpage)+1 if totalpage>int(totalpage) else int(totalpage)
+    totalpage = 6 if totalpage>6 else totalpage
+    return totalpage
 def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
     print(Filter)
     r= fetch(baseurl,session,Json=True)
@@ -211,16 +222,23 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
         else:
             return r["realEstateAds"]
         if first:
-            totalpage = r['total']/Filter['size']
-            totalpage = int(totalpage)+1 if totalpage>int(totalpage) else int(totalpage)
+            totalpage = getPage(r['total'],Filter['size'])
             # print(len(r["realEstateAds"]),r['total'],"tis is ")
             tasks =[]
             print(totalpage,r['total'],Filter['size'])
             # input("chekd the pages")
             with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
                 baseurl = [ getFilterUrl(Filter,page=i) for i in range(1,totalpage) ]
+                futures = []
                     # GetAllPages(baseurl,session,first=False,Filter=Filter, kwargs)
-                futures = [excuter.submit(GetAllPages, baseurl[i],session,False,**kwargs) for i in range(0,len(baseurl))]
+                for i in range(0,len(baseurl)):
+                    futures.append(excuter.submit(GetAllPages, baseurl[i],session,False,**kwargs))
+                if r['total']>2400 and Filter["sortOrder"] =="desc":
+                    Filter["sortOrder"] = "asc"
+                    if Filter["sortOrder"] =="asc":
+                        r['total']-=2400
+                        totalpage = getPage(r["total"],Filter["size"])
+                        futures +=[ excuter.submit(GetAllPages, url,session,False,**kwargs) for url in [getFilterUrl(Filter,page=i) for i in range(0,totalpage) ]]
                 for f in futures:
                     print(f)
             # for i in range(1,totalpage):
