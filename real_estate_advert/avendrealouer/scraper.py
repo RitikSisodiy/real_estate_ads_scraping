@@ -65,7 +65,7 @@ def savedata(resjson,**kwargs):
     producer = kwargs["producer"]
     if kwargs.get("onlyid"):
         now = datetime.now()
-        ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
+        ads = [{"id":"aven"+str(ad.get("id")), "last_checked": now.isoformat(),"available":True} for ad in ads]
         producer.PushDataList_v1(commonIdUpdate,ads)
     else:
         producer.PushDataList(kafkaTopicName,ads)
@@ -242,9 +242,13 @@ def main(adsType = "",onlyid=False):
         CreatelastupdateLog(session,adsType)
         producer = AsyncKafkaTopicProducer()
         flist = [2,3,6,7,19]
-        for f in flist:
-            params.update({"typeIds":f})
-            getFilter(session,params,producer,onlyid=onlyid)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+            futures = []
+            for f in flist:
+                params.update({"typeIds":f})
+                paramscopy = params.copy()
+                futures.append(getFilter,session,paramscopy,producer,onlyid=onlyid)
+            for f in futures:print(f)
     finally:
         session.__del__()
     # await startCrawling(session,filterParamList,producer=producer)
@@ -342,8 +346,11 @@ def asyncUpdateParuvendu():
     finally:
         session.__del__()
 def rescrapActiveId():
-    main("rental",True)
-    main("sale",True)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+        futures = excuter.map(main,["rental","sale"],[True,True])
+        for f in futures:print(f)
+    # main("rental",True)
+    # main("sale",True)
     # await startCrawling(session,filterParamList,producer=producer)
     # await producer.stopProducer()
 def UpdateParuvendu():
