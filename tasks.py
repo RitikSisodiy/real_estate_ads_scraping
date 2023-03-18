@@ -14,6 +14,7 @@ from real_estate_advert.logicImmo.logicImmo import main_scraper as LogicImmoScra
 from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
 from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceScrapper
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
+from real_estate_advert.avendrealouer.scraper import rescrapActiveId as rescrapAvendrealouerActiveId
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
 from celery import Celery
 from celery.signals import task_received,task_prerun,task_postrun
@@ -413,6 +414,16 @@ def rescrap_bienciActiveId_task():
     except Exception as e:
         traceback.print_exc()
         print("Exception ==============>", e)
+@celery_app.task(base=Singleton,name="rescrap Avendrealouer activeid")
+def rescrap_AvendrealouerbienciActiveId_task():
+    try:
+        rescrapAvendrealouerActiveId()
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ==============>", e)
+
+rescrap_AvendrealouerbienciActiveId_task.apply_async()
+# 4 website 1 Core = 4 Core CPU
 
 
 @celery_app.on_after_configure.connect
