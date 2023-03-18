@@ -210,7 +210,7 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
             ads = r['realEstateAds']
             if kwargs.get("onlyid"):
                 now = datetime.now()
-                ads = [{"id":ad.get("id"), "last_checked": now.isoformat()} for ad in ads]
+                ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
             saveRealstateAds(ads,**kwargs)
         else:
             return r["realEstateAds"]
@@ -396,7 +396,7 @@ def rescrapActiveId():
     #     for f in futures:
     #         print("done",f)
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-        futures = [excuter.submit(genFilter, param,i,True) for i in ["buy"]]
+        futures = [excuter.submit(genFilter, param,i,True) for i in ["buy","rent"]]
         for f in futures:print(f)
     # genFilter(param,"buy",True)
     # genFilter(param,"rent",True)
