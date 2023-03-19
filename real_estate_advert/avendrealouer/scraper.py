@@ -251,7 +251,7 @@ def getFilter(session,params,producer,onlyid=False,low="price.gte",max='price.lt
             iniinterval[0] = iniinterval[1]+1
             iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
             finalresult +=totalresult
-        elif acres-finalresult<700:
+        elif acres-finalresult<700 and acres-finalresult>0:
             print(maxresult, acres , maxresult-acres)
             # input()
             # print("elif 1")
