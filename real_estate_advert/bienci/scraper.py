@@ -91,7 +91,7 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
     totalresult = getTotalResult(session,dic)
     acres = totalresult
     # dic['recherche[produit]']=typ
-    if low=="price.gte":
+    if low=="minPrice":
         # iniinterval =[98976, 98989]
         iniinterval = [0,1000]
         maxprize = getMax(session,dic.copy())
@@ -143,8 +143,8 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
             iniinterval[1] = iniinterval[1] + int(dif/-2) 
             if iniinterval[0]>iniinterval[1]:
                 iniinterval[1] = iniinterval[0]+1
-        retrydic[iniinterval[0]] +=1
-        print(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} {maxprice} {low} no of filter",end="")
+        # retrydic[iniinterval[0]] +=1
+        print(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} {maxprize} {low} no of filter",end="")
         # print(totalresult,"-",maxresult,"::::",acres ," of ", finalresult,"==>",iniinterval)
     filterurllist+=json.dumps(iniinterval)
     finalresult +=totalresult
@@ -415,9 +415,10 @@ def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
     website = "bienici.com"
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-        futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["buy","rent"]]
-        for f in futures:print(f)
+    rescrapActiveIdbyType("buy")
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+    #     futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["buy","rent"]]
+    #     for f in futures:print(f)
     print("complited")
     saveLastCheck(website,nowtime.isoformat())
 def main_scraper(payload):
