@@ -261,7 +261,7 @@ def getFilter(session,params,producer,onlyid=False,low="price.gte",max='price.lt
             # print("elif 1",iniinterval)
             last = 10
             iniinterval[0] = iniinterval[1]
-            iniinterval[1] = iniinterval[0] + int(iniinterval[1]/last)
+            iniinterval[1] = iniinterval[0] + (int(iniinterval[1]/last) or 1)
             # iniinterval[0] = iniinterval[1] 
             # iniinterval[1] +=1
         elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="price.gte":
