@@ -84,8 +84,12 @@ def writeGenFilter(key,value):
     prev[key]=value
     with open("generatedPrizeFilter.json",'w') as file:
         file.write(json.dumps(prev))
-def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
+def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice",session=None):
     parameter["filterType"] = typ
+    headers  = {
+                "user-agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
+    }
+    session2 = HttpRequest(True,'https://www.bienici.com/realEstateAds.json?filters={"size":"1"}',{},headers,{},False,cpath,1,10)
     session = requests.session()
     dic = parameter.copy()
     totalresult = getTotalResult(session,dic)
@@ -103,7 +107,6 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
     filterurllist = ""
     finalresult = 0
     nooffilter = 0
-    retrydic = {iniinterval[0]:0}
     while iniinterval[1]<=maxprize:
         dic[low],dic[max] = iniinterval
         totalresult = getTotalResult(session,dic)
@@ -111,14 +114,13 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
             # print("condition is stisfy going to next interval",totalresult)
             # print(iniinterval,">apending")
             filterurllist += json.dumps(iniinterval) + "/n/:"
-            FetchFilter(dic,onlyid)
+            FetchFilter(dic,onlyid,session2)
             print("going to next")
             iniinterval[0] = iniinterval[1]+1
             iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
             finalresult +=totalresult
-            retrydic = {iniinterval[0]:0}
             nooffilter +=1
-        elif acres-finalresult<700 and acres-finalresult>0:
+        elif acres-finalresult<4800 and acres-finalresult>0:
             print(maxresult, acres , maxresult-acres)
             # input()
             # print("elif 1")
@@ -133,7 +135,7 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
             # iniinterval[1] +=1
         elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="minPrice":
             finalresult +=totalresult
-            genFilter(dic.copy(),typ,onlyid,"minArea","maxArea")
+            genFilter(dic.copy(),typ,onlyid,"minArea","maxArea",session)
             iniinterval[0] = iniinterval[1] 
             iniinterval[1]+=1 
         elif totalresult>maxresult:
@@ -253,12 +255,13 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
             #     GetAllPages(baseurl,session,first=False,Filter=Filter,**kwargs)
             # await asyncio.gather(*tasks)
 
-def FetchFilter(filters,onlyid=False):
+def FetchFilter(filters,onlyid=False,session = None):
     filters['size'] = 400
-    headers  = {
-                "user-agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
-    }
-    session = HttpRequest(True,'https://www.bienici.com/realEstateAds.json?filters={"size":"1"}',{},headers,{},False,cpath,1,10)
+    if not session:
+        headers  = {
+                    "user-agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
+        }
+        session = HttpRequest(True,'https://www.bienici.com/realEstateAds.json?filters={"size":"1"}',{},headers,{},False,cpath,1,10)
     try:
         baseurl = getFilterUrl(filters)
         producer = AsyncKafkaTopicProducer()
@@ -415,10 +418,10 @@ def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
     website = "bienici.com"
-    rescrapActiveIdbyType("buy")
-    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-    #     futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["buy","rent"]]
-    #     for f in futures:print(f)
+    # rescrapActiveIdbyType("buy")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+        futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["buy","rent"]]
+        for f in futures:print(f)
     print("complited")
     saveLastCheck(website,nowtime.isoformat())
 def main_scraper(payload):
