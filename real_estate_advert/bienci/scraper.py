@@ -96,7 +96,7 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
         iniinterval = [0,1000]
         maxprize = getMax(session,dic.copy())
     else:
-        maxprize = getMax(session,dic.copy(),max="area")
+        maxprize = getMax(session,dic.copy(),max="surfaceArea")
         iniinterval =[0,1]
     # maxprize = getMaxPrize(session,dic)
     maxresult = 4800
