@@ -127,13 +127,13 @@ def getTotalResult(session,params,url):
     params.update(totalres)
     r = fetch(session,url,params=params)
     return int(r.get("count") or 0)
-def getMaxPrize(session,params,url):
+def getMax(session,params,url,max="price"):
     # dic,burl = GetUrlFilterdDict(url)
     # dic["ajaxAffinage"] = 0
     # dic["ddlTri"] = "prix_seul"
     # dic["ddlOrd"] = "desc"
     prizefilter = {
-        "sorts[0].Name":"price",
+        "sorts[0].Name":max,
         "size":1,
         "from":0,
         "sorts[0].Order":"desc"
@@ -142,73 +142,149 @@ def getMaxPrize(session,params,url):
     r = fetch(session,url,params=params)
     print(params)
     try:
-        prize = r["items"][0]["price"]
+        prize = r["items"][0][max]
     except:prize = 0
     return float(prize)
+
+
+# def getFilter(session,params,producer,onlyid=False,low="price.gte",max='price.lte'):
+#     dic,baseurl = params , "https://ws-web.avendrealouer.fr/realestate/properties/"
+#     print("genrating filters")
+#     # url = getUrl(baseurl,dic)
+#     # url = baseurl
+#     maxresult = 1400
+#     try:
+#         del dic[low]
+#         del dic[max]
+#     except:pass
+#     totalresult =getTotalResult(session,dic,baseurl)
+#     acres = totalresult
+#     fetchedresult = 0
+#     iniinterval = [0,1000]
+#     finalresult = 0
+#     filterurllist = []
+#     maxprice = getMaxPrize(session,params,baseurl)
+#     if totalresult>=maxresult:
+#         while iniinterval[1]<=maxprice:
+#             print(iniinterval)
+#             dic[low],dic[max] = iniinterval
+#             totalresult = getTotalResult(session,dic,baseurl)
+#             if totalresult <= 1400 and totalresult>0:
+#                 print("condition is stisfy going to next interval")
+#                 print(iniinterval,">apending")
+#                 filterurllist.append(dic.copy())
+#                 # filterurllist+=json.dumps(dic)+":\n"
+#                 # startCrawling(session,dic,producer=producer,onlyid=onlyid)
+#                 # print(filterurllist)
+#                 iniinterval[0] = iniinterval[1]+1
+#                 iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
+#                 finalresult +=totalresult
+#             elif(acres<=finalresult):break
+#             elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="price.gte":
+#                 finalresult +=totalresult
+#                 getFilter(session,dic.copy(),producer,onlyid,"surface.gte","surface.lte")
+#             elif maxresult-totalresult> 1400:
+#                 # print("elif 1")
+#                 last = 10
+#                 iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
+#             elif totalresult == 0:
+#                 # print("elif 1",iniinterval)
+#                 last = 10
+#                 iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
+#             elif totalresult>maxresult:
+#                 # print("elif 2",iniinterval)
+#                 last = -5
+#                 dif = iniinterval[1]-iniinterval[0]
+#                 iniinterval[1] = iniinterval[1] + int(dif/-2) 
+#                 if iniinterval[0]>iniinterval[1]:
+#                     iniinterval[1] = iniinterval[0]+10
+#             sys.stdout.write(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} no of filter")
+#             sys.stdout.flush()
+#         print(iniinterval,">apending")
+#         startCrawling(session,dic,producer=producer,onlyid=onlyid)
+#         finalresult +=totalresult
+#     # finallsit = [json.loads(d) for d in filterurllist.split(":\n")]
+#     # print(finallsit)
+#     # paramslist = []
+#     # for par in finallsit:
+#     #     params['filters[P5M0]'],params['filters[P5M1]'] = par
+#     #     paramslist.append(params)
+#     print(f"total result is : {acres} filtered result is: {finalresult}")
+#     # print(filterurllist)
+#     # time.sleep(10)
+#     return 0
 def getFilter(session,params,producer,onlyid=False,low="price.gte",max='price.lte'):
-    dic,baseurl = params , "https://ws-web.avendrealouer.fr/realestate/properties/"
-    print("genrating filters")
+    dic,baseurl = params.copy() , "https://ws-web.avendrealouer.fr/realestate/properties/"
+    # print("genrating filters")
     # url = getUrl(baseurl,dic)
     # url = baseurl
     maxresult = 1400
     try:
-        del dic[low]
-        del dic[max]
+        # del dic[low]
+        # del dic[max]
+        if low is not"price.gte":dic[low] = 0
     except:pass
+    print("fidc",dic)
     totalresult =getTotalResult(session,dic,baseurl)
     acres = totalresult
     fetchedresult = 0
-    iniinterval = [0,1000]
+    if low=="price.gte":
+        # iniinterval =[98976, 98989]
+        iniinterval = [0,1000]
+        maxprice = getMax(session,params,baseurl)
+    else:
+        maxprice = getMax(session,params,baseurl,max="surface")
+        iniinterval =[0,1]
+    # iniinterval = [0,1000]
     finalresult = 0
-    maxprice = getMaxPrize(session,params,baseurl)
-    if totalresult>=maxresult:
-        while iniinterval[1]<=maxprice:
-            print(iniinterval)
-            dic[low],dic[max] = iniinterval
-            totalresult = getTotalResult(session,dic,baseurl)
-            if totalresult <= 1400 and totalresult>0:
-                print("condition is stisfy going to next interval")
-                print(iniinterval,">apending")
-                # filterurllist.append(iniinterval)
-                # filterurllist+=json.dumps(dic)+":\n"
-                startCrawling(session,dic,producer=producer,onlyid=onlyid)
-                # print(filterurllist)
-                iniinterval[0] = iniinterval[1]+1
-                iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
-                finalresult +=totalresult
-            elif(acres<=finalresult):break
-            elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="price.gte":
-                getFilter(session,dic.copy(),producer,onlyid,"surface.gte","surface.lte")
-            elif maxresult-totalresult> 1400:
-                # print("elif 1")
-                last = 10
-                iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
-            elif totalresult == 0:
-                # print("elif 1",iniinterval)
-                last = 10
-                iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
-            elif totalresult>maxresult:
-                # print("elif 2",iniinterval)
-                last = -5
-                dif = iniinterval[1]-iniinterval[0]
-                iniinterval[1] = iniinterval[1] + int(dif/-2) 
-                if iniinterval[0]>iniinterval[1]:
-                    iniinterval[1] = iniinterval[0]+10
-            sys.stdout.write(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} no of filter")
-            sys.stdout.flush()
-        print(iniinterval,">apending")
-        startCrawling(session,dic,producer=producer,onlyid=onlyid)
-        finalresult +=totalresult
-    # finallsit = [json.loads(d) for d in filterurllist.split(":\n")]
-    # print(finallsit)
-    # paramslist = []
-    # for par in finallsit:
-    #     params['filters[P5M0]'],params['filters[P5M1]'] = par
-    #     paramslist.append(params)
-    print(f"total result is : {acres} filtered result is: {finalresult}")
-    # print(filterurllist)
-    # time.sleep(10)
-    return 0
+    filterurllist = []
+    
+    while iniinterval[1]<=maxprice:
+        # print(iniinterval)
+        dic[low],dic[max] = iniinterval
+        totalresult = getTotalResult(session,dic,baseurl)
+        if totalresult <= 1400 and totalresult>0:
+            filterurllist.append(dic.copy())
+            startCrawling(session,dic,producer,onlyid=onlyid)
+            # filterurllist+=json.dumps(dic)+":\n"
+            # print(filterurllist)
+            iniinterval[0] = iniinterval[1]+1
+            iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
+            finalresult +=totalresult
+        elif acres-finalresult<700:
+            print(maxresult, acres , maxresult-acres)
+            # input()
+            # print("elif 1")
+            last = 10
+            iniinterval[1] = maxprice
+        elif totalresult == 0:
+            # print("elif 1",iniinterval)
+            last = 10
+            iniinterval[0]+=1
+            iniinterval[1] = iniinterval[0] + int(iniinterval[1]/last)
+            # iniinterval[0] = iniinterval[1] 
+            # iniinterval[1] +=1
+        elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="price.gte":
+            finalresult +=totalresult
+            getFilter(session,dic.copy(),producer,onlyid,"surface.gte","surface.lte")
+            iniinterval[0] = iniinterval[1] 
+            iniinterval[1]+=1 
+        elif totalresult>maxresult:
+            # print("elif 2",iniinterval)
+            last = -5
+            dif = iniinterval[1]-iniinterval[0]
+            iniinterval[1] = iniinterval[1] + int(dif/-2) 
+            if iniinterval[0]>iniinterval[1]:
+                iniinterval[1] = iniinterval[0]+1
+        # retrydic[iniinterval[0]] +=1
+        print(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} {maxprice} {low} no of filter",end="")
+        # sys.stdout.flush()
+    # print(iniinterval,">apending")
+    filterurllist.append(dic.copy())
+    # finalresult +=totalresult
+    print(filterurllist)
+    return filterurllist
+
 def parstItems(session,param,page=None,save=True,**kwargs):
     if page:
         param.update({"from":((page-1)*pagesize)})
