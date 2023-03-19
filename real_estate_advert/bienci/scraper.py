@@ -66,8 +66,8 @@ def getTotalResult(session,parameter):
     totalres = res.get("total")
     if totalres:return totalres
     else:return 0
-def getMaxPrize(session,parameter):
-    parameter['sortBy'],parameter['sortOrder'],parameter["size"] = "price","desc",1
+def getMax(session,parameter,max="price"):
+    parameter['sortBy'],parameter['sortOrder'],parameter["size"] = max,"desc",1
     url = getFilterUrl(parameter)
     res = syncfetch(session,url,Json=True)
     totalres = res.get("realEstateAds")[0].get("price")
@@ -87,12 +87,18 @@ def writeGenFilter(key,value):
 def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
     parameter["filterType"] = typ
     session = requests.session()
-    dic = parameter
+    dic = parameter.copy()
     totalresult = getTotalResult(session,dic)
     acres = totalresult
     # dic['recherche[produit]']=typ
-    iniinterval = [0,100]
-    maxprize = getMaxPrize(session,dic)
+    if low=="price.gte":
+        # iniinterval =[98976, 98989]
+        iniinterval = [0,1000]
+        maxprize = getMax(session,dic.copy())
+    else:
+        maxprize = getMax(session,dic.copy(),max="area")
+        iniinterval =[0,1]
+    # maxprize = getMaxPrize(session,dic)
     maxresult = 4800
     filterurllist = ""
     finalresult = 0
@@ -101,7 +107,7 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
     while iniinterval[1]<=maxprize:
         dic[low],dic[max] = iniinterval
         totalresult = getTotalResult(session,dic)
-        if (totalresult!=0 and maxresult-totalresult<=1400 and maxresult-totalresult>=0) or (retrydic[iniinterval[0]]>10 and totalresult>0 and totalresult<maxresult):
+        if totalresult <= 4800 and totalresult>0:
             # print("condition is stisfy going to next interval",totalresult)
             # print(iniinterval,">apending")
             filterurllist += json.dumps(iniinterval) + "/n/:"
@@ -112,26 +118,33 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice"):
             finalresult +=totalresult
             retrydic = {iniinterval[0]:0}
             nooffilter +=1
-        elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="minPrice":
-            genFilter(dic.copy(),typ,onlyid,"minArea","maxArea")
-        elif maxresult-totalresult> pageSize:
+        elif acres-finalresult<700 and acres-finalresult>0:
+            print(maxresult, acres , maxresult-acres)
+            # input()
             # print("elif 1")
             last = 10
-            iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
+            iniinterval[1] = maxprize
         elif totalresult == 0:
             # print("elif 1",iniinterval)
             last = 10
-            iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
+            iniinterval[0] = iniinterval[1]
+            iniinterval[1] = iniinterval[0] + (int(iniinterval[1]/last) or 1)
+            # iniinterval[0] = iniinterval[1] 
+            # iniinterval[1] +=1
+        elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="minPrice":
+            finalresult +=totalresult
+            genFilter(dic.copy(),typ,onlyid,"minArea","maxArea")
+            iniinterval[0] = iniinterval[1] 
+            iniinterval[1]+=1 
         elif totalresult>maxresult:
             # print("elif 2",iniinterval)
             last = -5
             dif = iniinterval[1]-iniinterval[0]
             iniinterval[1] = iniinterval[1] + int(dif/-2) 
             if iniinterval[0]>iniinterval[1]:
-                iniinterval[1] = iniinterval[0]+10
+                iniinterval[1] = iniinterval[0]+1
         retrydic[iniinterval[0]] +=1
-        sys.stdout.write(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} no of filter {nooffilter}")
-        sys.stdout.flush()
+        print(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} {maxprice} {low} no of filter",end="")
         # print(totalresult,"-",maxresult,"::::",acres ," of ", finalresult,"==>",iniinterval)
     filterurllist+=json.dumps(iniinterval)
     finalresult +=totalresult
