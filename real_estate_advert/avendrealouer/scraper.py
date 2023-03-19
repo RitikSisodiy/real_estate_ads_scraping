@@ -176,6 +176,7 @@ def getFilter(session,params,producer,onlyid=False,low="price.gte",max='price.lt
                 iniinterval[0] = iniinterval[1]+1
                 iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
                 finalresult +=totalresult
+            elif(acres<=finalresult):break
             elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="price.gte":
                 getFilter(session,dic.copy(),producer,onlyid,"surface.gte","surface.lte")
             elif maxresult-totalresult> 1400:
@@ -193,7 +194,6 @@ def getFilter(session,params,producer,onlyid=False,low="price.gte",max='price.lt
                 iniinterval[1] = iniinterval[1] + int(dif/-2) 
                 if iniinterval[0]>iniinterval[1]:
                     iniinterval[1] = iniinterval[0]+10
-            elif(acres<=finalresult):break
             sys.stdout.write(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} no of filter")
             sys.stdout.flush()
         print(iniinterval,">apending")
