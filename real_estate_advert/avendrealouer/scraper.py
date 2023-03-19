@@ -245,7 +245,7 @@ def getFilter(session,params,producer,onlyid=False,low="price.gte",max='price.lt
         totalresult = getTotalResult(session,dic,baseurl)
         if totalresult <= 1400 and totalresult>0:
             filterurllist.append(dic.copy())
-            startCrawling(session,dic,producer,onlyid=onlyid)
+            startCrawling(session,dic,producer=producer,onlyid=onlyid)
             # filterurllist+=json.dumps(dic)+":\n"
             # print(filterurllist)
             iniinterval[0] = iniinterval[1]+1
