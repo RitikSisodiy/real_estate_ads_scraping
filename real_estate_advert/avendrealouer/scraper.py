@@ -260,7 +260,7 @@ def getFilter(session,params,producer,onlyid=False,low="price.gte",max='price.lt
         elif totalresult == 0:
             # print("elif 1",iniinterval)
             last = 10
-            iniinterval[0]+=1
+            iniinterval[0] = iniinterval[1]
             iniinterval[1] = iniinterval[0] + int(iniinterval[1]/last)
             # iniinterval[0] = iniinterval[1] 
             # iniinterval[1] +=1
