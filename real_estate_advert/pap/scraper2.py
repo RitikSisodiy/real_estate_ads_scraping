@@ -31,7 +31,7 @@ class PapScraper:
         self.parameter = parameter
         self.apiurl = "https://api.pap.fr/app/annonces"
         self.proxy = proxy
-        SELOGER_SECURITY_URL = "https://www.pap.fr/robots.txt"
+        SELOGER_SECURITY_URL = "https://www.pap.fr/"
         
         self.cookie = ""
         headers = {
