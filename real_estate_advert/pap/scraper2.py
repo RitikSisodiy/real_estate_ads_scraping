@@ -172,11 +172,14 @@ class PapScraper:
         return parsed_json
     def save(self,data,onlyid=False):
         ads = data.get("annonces") or []
+        # print(ads)
+        
         # tasks = [ad['_links']['self']['href'] for ad in ads]
         now = datetime.now()
         if onlyid:
             adlist = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
             producer.PushDataList_v1(commonIdUpdate,adlist)
+            return 
         else:
             adlist = []
             for ad in ads:
@@ -184,7 +187,7 @@ class PapScraper:
                 adurl = f"{self.apiurl}/detail?id={adid}"
                 adinfo = self.fetchJson(adurl)
                 if adinfo:adlist.append(adinfo)
-        self.saveAdList(adlist)
+        self.saveAdList(adlist,onlyid)
     def getLastUpdate(self):
         try:
             with open(f"{cpath}/lastUpdate.json",'r') as file:
@@ -242,7 +245,7 @@ class PapScraper:
     def saveAdList(self,adsdata,onlyid=False):
             # for data in adsdata:
             #     producer.kafka_producer_sync(kafkaTopicName,data)
-        if not onlyid:
+        if onlyid:
             producer.PushDataList_v1(commonIdUpdate,adsdata)
             return
         adlist = []
@@ -336,15 +339,15 @@ def rescrapActiveIdbyType(typ):
     if typ=="rental":typ="location"
     else: typ = "vente"
     ob= PapScraper(param,proxy=False)
-    ob.Crawl(typ)
+    ob.Crawl(typ,True)
     ob.__del__()
 def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
-    # rescrapActiveIdbyType("location")
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-        futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["location","vente"]]
-        for f in futures:print(f)
+    rescrapActiveIdbyType("location")
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+    #     futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["location","vente"]]
+    #     for f in futures:print(f)
     print("complited")
     saveLastCheck(website,nowtime.isoformat())
 if __name__== "__main__":
