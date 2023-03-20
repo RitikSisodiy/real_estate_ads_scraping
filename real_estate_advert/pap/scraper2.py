@@ -22,9 +22,10 @@ from HttpRequest.uploader import AsyncKafkaTopicProducer
 from kafka_publisher import KafkaTopicProducer
 # producer = KafkaTopicProducer()
 producer = AsyncKafkaTopicProducer()
+website = "pap.fr"
 kafkaTopicName = "pap_data_v1"
 commanPattern ="common-ads-data_v1"
-commonIdUpdate = "activeid-pap.fr"
+commonIdUpdate = f"activeid-{website}"
 cpath =os.path.dirname(__file__) or "."
 chrome = getChromePath()
 class PapScraper:
@@ -173,7 +174,9 @@ class PapScraper:
         ads = data.get("annonces") or []
         # tasks = [ad['_links']['self']['href'] for ad in ads]
         now = datetime.now()
-        if onlyid:adlist = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
+        if onlyid:
+            adlist = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
+            producer.PushDataList_v1(commonIdUpdate,adlist)
         else:
             adlist = []
             for ad in ads:
@@ -338,7 +341,6 @@ def rescrapActiveIdbyType(typ):
 def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
-    website = "pap.fr"
     # rescrapActiveIdbyType("location")
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
         futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["location","vente"]]
