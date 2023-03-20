@@ -344,10 +344,10 @@ def rescrapActiveIdbyType(typ):
 def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
-    rescrapActiveIdbyType("location")
-    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-    #     futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["location","vente"]]
-    #     for f in futures:print(f)
+    # rescrapActiveIdbyType("location")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+        futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["location","vente"]]
+        for f in futures:print(f)
     print("complited")
     saveLastCheck(website,nowtime.isoformat())
 if __name__== "__main__":
