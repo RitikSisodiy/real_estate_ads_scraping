@@ -9,7 +9,8 @@ from selenium.webdriver.chrome.options import Options
 from getChrome import getChromePath
 from urllib.parse import urlencode
 import json,os,time,concurrent.futures
-
+import warnings
+warnings.filterwarnings("ignore", message="Unverified HTTPS request")
 from saveLastChaeck import saveLastCheck
 from  .parser import ParsePap
 from datetime import datetime,timedelta
@@ -31,21 +32,27 @@ class PapScraper:
         self.parameter = parameter
         self.apiurl = "https://api.pap.fr/app/annonces"
         self.proxy = proxy
-        SELOGER_SECURITY_URL = "https://www.pap.fr/"
+        SELOGER_SECURITY_URL = "https://api.pap.fr/app/annonces?type=recherche&produit=vente&geo[ids][]=25&prix[min]=250000000"
         
         self.cookie = ""
         headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
-                }
-        self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers)
+            "Accept": "*/*",
+            "X-App-Version": "4.0.10",
+            "X-App-Target": "android",
+            "X-App-Uuid": "b8c75b38-b638-4269-acaf-722f42936bec",
+            "User-Agent": "PAP/G-4.0.10 (Google sdk_gphone_x86 Android SDK 30) okhttp/5.0.0-alpha.2",
+            "Host": "api.pap.fr",
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            }
+        self.prox = ProxyScraper(SELOGER_SECURITY_URL,headers,cookies=True)
         try:
             self.proxies = self.readProxy()
         except:
             self.getProxyList()
         self.proxyUpdateThread()
         # self.sesson  = self.getDriver()
-        self.session = requests.session()
-        self.proxy = self.getRandomProxy()
+        self.restartSession()
         # self.driver.proxy = self.getRandomProxy()
         # self.driver.set_page_load_timeout(5)
         self.headers = {
@@ -60,6 +67,12 @@ class PapScraper:
             }
         # self.driver.request_interceptor = self.interceptor
         pass
+    def restartSession(self):
+        self.proxy = self.getRandomProxy()
+        try:self.session.close()
+        except:pass
+        self.session = requests.session()
+        
     def GenCookie(self,proxy=None):
         import subprocess
         if proxy:proc = subprocess.check_output(f'java -jar "{cpath}/scrap.jar" {proxy["http"]} 10' ,stderr=subprocess.STDOUT,shell=True)
@@ -88,7 +101,7 @@ class PapScraper:
     def updateProxyList(self,interval=300):
         if self.readProxy():time.sleep(interval)
         while self.startThread:
-            self.cookie = self.GenCookie()
+            # self.cookie = self.GenCookie()
             self.getProxyList()
             b = self.threadsleep(interval)
             if b:
@@ -126,6 +139,7 @@ class PapScraper:
                 return 0
         except:
             return 0
+    
     def fetchJson(self,url,params=None,retry=0):
         if retry>=20:return {}
         retry+=1
@@ -135,7 +149,7 @@ class PapScraper:
         try:
             if self.cookie:self.headers["cookie"] = self.cookie
             print(self.proxy)
-            r= self.session.get(url,headers=self.headers,proxies=self.proxy,timeout=5)
+            r= self.session.get(url,headers=self.headers,proxies=self.proxy,verify=False,timeout=15)
             print(r)
             # self.driver.get(url)
             # content = self.driver.page_source
@@ -143,17 +157,16 @@ class PapScraper:
             if r.status_code==200:
                 parsed_json = r.json()
             elif r.status_code == 403:
-                cookie = self.GenCookie(self.proxy)
+                # cookie = self.GenCookie(self.proxy)
+                cookie = (self.proxy.get["cookies"] and self.proxy.get["cookies"].strip()) or ""
                 if not cookie: raise ValidationErr
                 else:self.cookie=cookie
                 return self.fetchJson(url,retry=retry)
             else:
                 raise ValidationErr
         except Exception as e:
-            print("exeptin", self.cookie)
-            self.proxy = self.getRandomProxy()
-            self.session.close()
-            self.session = requests.session()
+            print("exeptin", e,self.cookie)
+            self.restartSession()
             return self.fetchJson(url,retry=retry)
         return parsed_json
     def save(self,data,onlyid=False):
@@ -326,10 +339,10 @@ def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
     website = "pap.fr"
-    rescrapActiveIdbyType("location")
-    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-    #     futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["location","vente"]]
-    #     for f in futures:print(f)
+    # rescrapActiveIdbyType("location")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+        futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["location","vente"]]
+        for f in futures:print(f)
     print("complited")
     saveLastCheck(website,nowtime.isoformat())
 if __name__== "__main__":

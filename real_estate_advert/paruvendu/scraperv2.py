@@ -1,9 +1,11 @@
-from datetime import datetime
+from datetime import datetime,timedelta
 import traceback
 import asyncio
-import os,time
+import os,time,concurrent.futures
 from requests_html import HTML
 import json,requests
+
+from saveLastChaeck import saveLastCheck
 from . getGeolocation import Fetch
 from HttpRequest.requestsModules import HttpRequest
 from .parser import ParseParuvendu
@@ -15,6 +17,10 @@ headers = {
 pagesize  = 100 # maxsize is 100
 import json
 import time
+website = "paruvendu.fr"
+kafkaTopicName = 'paruvendu-data_v1'
+commanTopicName = "common-ads-data_v1"
+commonIdUpdate = f"activeid-{website}"
 def GetUrlFilterdDict(url):
     sdata = url.split("?")
     data = sdata[1].split("&")
@@ -61,7 +67,8 @@ def getMaxPrize(params,url):
     if maxprice:return int(maxprice)
 from requests_html import HTMLSession 
 s= HTMLSession()
-maxresult = 12500 # we can only get 12500 result by one filter url
+s.headers ={"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"}
+ 
 # filterurl = "https://www.paruvendu.fr/immobilier/annonceimmofo/liste/listeAnnonces?nbp=0&tt=1&tbApp=1&tbDup=1&tbChb=1&tbLof=1&tbAtl=1&tbPla=1&tbMai=1&tbVil=1&tbCha=1&tbPro=1&tbHot=1&tbMou=1&tbFer=1&at=1&nbp0=99&pa=FR&ddlFiltres=nofilter"
 # filterurl = "https://www.paruvendu.fr/immobilier/annonceimmofo/liste/listeAnnonces?nbp=0&tt=5&tbApp=1&tbDup=1&tbChb=1&tbLof=1&tbAtl=1&tbPla=1&tbMai=1&tbVil=1&tbCha=1&tbPro=1&tbHot=1&tbMou=1&tbFer=1&at=1&nbp0=99&pa=FR&ddlFiltres=nofilter"
 # filterurl = "https://www.paruvendu.fr/immobilier/annonceimmofo/liste/listeAnnonces?tt=5&at=1&nbp0=99&pa=FR&lo=&codeINSEE="
@@ -76,6 +83,7 @@ def getFilter(session,params,**kwargs):
     iniinterval = [0,1000]
     filterurllist = ''
     finalresult = 0
+    maxresult = 12500 # we can only get 12500 result by one filter url
     maxprice = getMaxPrize(params,baseurl)
     if totalresult>=maxresult:
         while iniinterval[1]<=maxprice:
@@ -149,10 +157,15 @@ def savedata(resjson,**kwargs):
     resstr = ''
     ads = resjson['feed']["row"]
     producer = kwargs["producer"]
-    producer.PushDataList('paruvendu-data_v1',ads)
-    ads = [ParseParuvendu(ad) for ad in ads]
-    ads = asyncio.run(geoob.getAllgeo(ads))
-    producer.PushDataList('common-ads-data_v1',ads)
+    if kwargs.get("onlyid"):
+        now = datetime.now()
+        ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
+        producer.PushDataList_v1(commonIdUpdate,ads)
+    else:
+        producer.PushDataList(kafkaTopicName,ads)
+        ads = [ParseParuvendu(ad) for ad in ads]
+        ads = asyncio.run(geoob.getAllgeo(ads))
+        producer.PushDataList(commanTopicName,ads)
     # for ad in ads:
     #     resstr += json.dumps(ad)+"\n"
     # with open("output.json",'a') as file:
@@ -160,7 +173,8 @@ def savedata(resjson,**kwargs):
     # print('saved data')s
 def startCrawling(session,filterParamList,**kwargs):
     for param in filterParamList:
-        param['showdetail'] = 1
+        if kwargs.get("onlyid"):param['showdetail'] = 0
+        else:param['showdetail'] = 1
         param["itemsPerPage"] = pagesize
         data = fetch(session,url,param)
         # data= json.load(res)
@@ -175,7 +189,7 @@ def startCrawling(session,filterParamList,**kwargs):
         for i in range(2,totalpage+1):
             param['p'] = i
             # print(param)
-            parstItems(session,param,page=i,**kwargs)
+            parstItems(session,param.copy(),page=i,**kwargs)
         # data = asyncio.gather(*tasks)  
         totaldata = 0
         for d in data:
@@ -201,7 +215,7 @@ def CheckId(id):
     if data and len(data["feed"]["row"])==1:
         return True
     else:return False
-def main(adsType = ""):
+def main(adsType = "",onlyid= False):
     # catid info
     # IVH00000 is for  Vente immobilier 
     # ILH00000 is for Location immobilier
@@ -213,10 +227,10 @@ def main(adsType = ""):
     params["filters[_R1]"] = catid
     # filterParamList = [*getFilter(param) for param in params
     session = HttpRequest(True,'https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list?itemsPerPage=1',headers,{},{},False,cpath,1,10)
-    CreatelastupdateLog(session,adsType)
+    if not onlyid:CreatelastupdateLog(session,adsType)
     producer = AsyncKafkaTopicProducer()
     try:
-        filterParamList = getFilter(session,params,producer=producer)
+        filterParamList = getFilter(session,params,producer=producer,onlyid=onlyid)
     finally:
         session.__del__()
     # startCrawling(session,filterParamList,producer=producer)
@@ -323,6 +337,16 @@ def asyncUpdateParuvendu():
                 p+=1
     finally:
         session.__del__()
+def rescrapActiveId():
+    nowtime = datetime.now()
+    nowtime = nowtime - timedelta(hours=1)
+    website = "paruvendu.fr"
+    # rescrapActiveIdbyType("buy")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+        futures = [excuter.submit(main, i,True) for i in ["buy","sale"]]
+        for f in futures:print(f)
+    print("complited")
+    saveLastCheck(website,nowtime.isoformat())
 def UpdateParuvendu():
     asyncUpdateParuvendu()
 if __name__=="__main__":

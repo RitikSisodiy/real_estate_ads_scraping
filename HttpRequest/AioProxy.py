@@ -8,9 +8,10 @@ restext = []
 
 
 class ProxyScraper:
-    def __init__(self,url=None,headers=None) -> None:
+    def __init__(self,url=None,headers=None,cookies=False) -> None:
         self.protocols = ['http','socks4','socks5']
         self.urls = []
+        self.cookies= cookies
         self.url = url
         self.headers = headers
         self.proxylist = []
@@ -27,6 +28,12 @@ class ProxyScraper:
             d =  res.status
             print(d)
             if kwargs.get("proxy"):
+                if self.cookies and d==200:
+                    cookies = res.cookies.output(header='', sep=';').strip()
+                    if cookies and "__cf_bm=" in cookies:
+                        d = d,cookies
+                    else:
+                        d = 403,""
                 pass
             else:
                 d = await res.read()
@@ -106,7 +113,11 @@ class ProxyScraper:
             # async with session.get(,) as r:
             #     return r
             print(proxies)
-            r= await self.fetch(url, proxy=proxies["http"], headers=self.headers,timeout=10)
+            if self.cookies:
+                r,cookies= await self.fetch(url, proxy=proxies["http"], headers=self.headers,timeout=10)
+                proxies["cookies"] = cookies
+            else:
+                r= await self.fetch(url, proxy=proxies["http"], headers=self.headers,timeout=10)
             print(r)
             return r,proxies
         except:
