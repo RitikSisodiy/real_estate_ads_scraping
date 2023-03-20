@@ -8,12 +8,14 @@ from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
 from getChrome import getChromePath
 from urllib.parse import urlencode
-import json,os,time
+import json,os,time,concurrent.futures
+
+from saveLastChaeck import saveLastCheck
 from  .parser import ParsePap
-from datetime import datetime
+from datetime import datetime,timedelta
 # from .formater import formater
 # try:from scrapProxy import ProxyScraper
-from HttpRequest.AsyncProxy import ProxyScraper
+from HttpRequest.AioProxy import ProxyScraper
 # except:from .scrapProxy import ProxyScraper
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 from kafka_publisher import KafkaTopicProducer
@@ -21,6 +23,7 @@ from kafka_publisher import KafkaTopicProducer
 producer = AsyncKafkaTopicProducer()
 kafkaTopicName = "pap_data_v1"
 commanPattern ="common-ads-data_v1"
+commonIdUpdate = "activeid-pap.fr"
 cpath =os.path.dirname(__file__) or "."
 chrome = getChromePath()
 class PapScraper:
@@ -28,7 +31,7 @@ class PapScraper:
         self.parameter = parameter
         self.apiurl = "https://api.pap.fr/app/annonces"
         self.proxy = proxy
-        SELOGER_SECURITY_URL = "https://www.google.com"
+        SELOGER_SECURITY_URL = "https://www.pap.fr/robots.txt"
         
         self.cookie = ""
         headers = {
@@ -153,15 +156,18 @@ class PapScraper:
             self.session = requests.session()
             return self.fetchJson(url,retry=retry)
         return parsed_json
-    def save(self,data,getdata=False):
+    def save(self,data,onlyid=False):
         ads = data.get("annonces") or []
         # tasks = [ad['_links']['self']['href'] for ad in ads]
-        adlist = []
-        for ad in ads:
-            adid = ad["id"]
-            adurl = f"{self.apiurl}/detail?id={adid}"
-            adinfo = self.fetchJson(adurl)
-            if adinfo:adlist.append(adinfo)
+        now = datetime.now()
+        if onlyid:adlist = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
+        else:
+            adlist = []
+            for ad in ads:
+                adid = ad["id"]
+                adurl = f"{self.apiurl}/detail?id={adid}"
+                adinfo = self.fetchJson(adurl)
+                if adinfo:adlist.append(adinfo)
         self.saveAdList(adlist)
     def getLastUpdate(self):
         try:
@@ -217,56 +223,60 @@ class PapScraper:
         param.update({"produit":typ})
         response = self.fetchJson(self.apiurl, params=param)
         self.save(response)
-    def saveAdList(self,adsdata):
+    def saveAdList(self,adsdata,onlyid=False):
             # for data in adsdata:
             #     producer.kafka_producer_sync(kafkaTopicName,data)
-            adlist = []
-            for ad in adsdata:
-                ad = ad.get("annonce")
-                if ad:adlist.append(ad)
-            producer.PushDataList(kafkaTopicName,adlist)
-            ads  = [ParsePap(ad) for ad in adlist]
-            producer.PushDataList(commanPattern,ads)
+        if not onlyid:
+            producer.PushDataList_v1(commonIdUpdate,adsdata)
+            return
+        adlist = []
+        for ad in adsdata:
+            ad = ad.get("annonce")
+            if ad:adlist.append(ad)
+        producer.PushDataList(kafkaTopicName,adlist)
+        ads  = [ParsePap(ad) for ad in adlist]
+        producer.PushDataList(commanPattern,ads)
 
-            final = ""
-            # for da in adsdata:
-            #     final+=json.dumps(da)+"\n"
-            # with open(f"outputfilenamethis.json" , "a") as file:
-            #     file.write(final)
-    def Crawl(self,typ):
+        final = ""
+        # for da in adsdata:
+        #     final+=json.dumps(da)+"\n"
+        # with open(f"outputfilenamethis.json" , "a") as file:
+        #     file.write(final)
+    def Crawl(self,typ,onlyid=False):
+        if not onlyid:
             latestad = self.GetLatestad(self.parameter)
             self.createNewUpdate(typ,latestad)
-            dic = self.parameter
-            dic['produit']=typ
-            iniinterval = [0,432]
-            maxprize = 250000000
-            finalresult = 0
-            while iniinterval[1]<=maxprize:
-                dic['prix[min]'],dic['prix[max]'] = iniinterval
-                response = self.fetchJson(self.apiurl, params=dic)
-                totalresult = self.getTotalResult(response)
-                # self.driver.get("https://httpbin.org/ip")
-                if totalresult!=0 and totalresult<200:
-                    print("condition is stisfy going to next interval",totalresult)
-                    self.save(response)
-                    print(iniinterval,">apending")
-                    # filterurllist.append(iniinterval)
-                    iniinterval[0] = iniinterval[1]+1
-                    iniinterval[1] = iniinterval[0]+int(iniinterval[0]/10)
-                    finalresult +=totalresult
-                elif totalresult == 0:
-                    print("elif 1",iniinterval)
-                    last = 10
-                    iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
-                else:
-                    print("elif 2",iniinterval)
-                    last = -5
-                    dif = iniinterval[1]-iniinterval[0]
-                    iniinterval[1] = iniinterval[1] + int(dif/-2) 
-                    if iniinterval[0]>iniinterval[1]:
-                        iniinterval[1] = iniinterval[0]+10
-            print(f"total {finalresult} ads fetched")
-            return True
+        dic = self.parameter
+        dic['produit']=typ
+        iniinterval = [0,432]
+        maxprize = 250000000
+        finalresult = 0
+        while iniinterval[1]<=maxprize:
+            dic['prix[min]'],dic['prix[max]'] = iniinterval
+            response = self.fetchJson(self.apiurl, params=dic)
+            totalresult = self.getTotalResult(response)
+            # self.driver.get("https://httpbin.org/ip")
+            if totalresult!=0 and totalresult<200:
+                print("condition is stisfy going to next interval",totalresult)
+                self.save(response,onlyid)
+                print(iniinterval,">apending")
+                # filterurllist.append(iniinterval)
+                iniinterval[0] = iniinterval[1]+1
+                iniinterval[1] = iniinterval[0]+int(iniinterval[0]/10)
+                finalresult +=totalresult
+            elif totalresult == 0:
+                print("elif 1",iniinterval)
+                last = 10
+                iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
+            else:
+                print("elif 2",iniinterval)
+                last = -5
+                dif = iniinterval[1]-iniinterval[0]
+                iniinterval[1] = iniinterval[1] + int(dif/-2) 
+                if iniinterval[0]>iniinterval[1]:
+                    iniinterval[1] = iniinterval[0]+10
+        print(f"total {finalresult} ads fetched")
+        return True
     def close(self):
         self.__del__()
     def __del__(self):
@@ -305,7 +315,23 @@ def UpdatePap():
     for typ in types:
         ob.CrawlLatestV2(typ)
     ob.__del__()
-
+def rescrapActiveIdbyType(typ):
+    param = dic.copy()
+    if typ=="rental":typ="location"
+    else: typ = "vente"
+    ob= PapScraper(param,proxy=False)
+    ob.Crawl(typ)
+    ob.__del__()
+def rescrapActiveId():
+    nowtime = datetime.now()
+    nowtime = nowtime - timedelta(hours=1)
+    website = "pap.fr"
+    rescrapActiveIdbyType("location")
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+    #     futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["location","vente"]]
+    #     for f in futures:print(f)
+    print("complited")
+    saveLastCheck(website,nowtime.isoformat())
 if __name__== "__main__":
     typ ="rental"
     if typ=="rental":typ="location"

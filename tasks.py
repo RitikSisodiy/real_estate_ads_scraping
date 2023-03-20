@@ -7,6 +7,7 @@ from real_estate_advert.gensdeconfiance.scraper import main_scraper as gensdecon
 from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
 from real_estate_advert.pap.scraper2 import pap_scraper as PapScraper
 from real_estate_advert.pap.scraper2 import UpdatePap
+from real_estate_advert.pap.scraper2 import rescrapActiveId as rescrapPapActiveId
 from real_estate_advert.bienci.scraper import main_scraper as bienciScraper
 from real_estate_advert.bienci.scraper import UpdateBienci,rescrapActiveId
 from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
@@ -421,9 +422,17 @@ def rescrap_AvendrealouerbienciActiveId_task():
     except Exception as e:
         traceback.print_exc()
         print("Exception ==============>", e)
+@celery_app.task(base=Singleton,name="rescrap Pap activeid")
+def rescrap_papActiveId_task():
+    try:
+        rescrapPapActiveId()
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ==============>", e)
 
-rescrap_AvendrealouerbienciActiveId_task.apply_async()
-rescrap_bienciActiveId_task.apply_async()
+# rescrap_AvendrealouerbienciActiveId_task.apply_async()
+# rescrap_bienciActiveId_task.apply_async()
+rescrap_papActiveId_task.apply_async()
 # 4 website 1 Core = 4 Core CPU
 
 
