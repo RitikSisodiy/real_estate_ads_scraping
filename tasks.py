@@ -3,6 +3,7 @@ import time
 from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
 from real_estate_advert.leboncoin.scraperv4 import updateLebonCoin,leboncoinAdScraper
 from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
+from real_estate_advert.paruvendu.scraperv2 import rescrapActiveId as rescrapParuvenduActiveId
 from real_estate_advert.gensdeconfiance.scraper import main_scraper as gensdeconfianceScraper
 from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
 from real_estate_advert.pap.scraper2 import pap_scraper as PapScraper
@@ -429,10 +430,18 @@ def rescrap_papActiveId_task():
     except Exception as e:
         traceback.print_exc()
         print("Exception ==============>", e)
+@celery_app.task(base=Singleton,name="rescrap paruvendu activeid")
+def rescrap_paruvenduActiveId_task():
+    try:
+        rescrapParuvenduActiveId()
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ==============>", e)
 
 # rescrap_AvendrealouerbienciActiveId_task.apply_async()
 # rescrap_bienciActiveId_task.apply_async()
-rescrap_papActiveId_task.apply_async()
+# rescrap_papActiveId_task.apply_async()
+rescrap_paruvenduActiveId_task.apply_async()
 # 4 website 1 Core = 4 Core CPU
 
 
