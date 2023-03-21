@@ -1,5 +1,5 @@
 import concurrent.futures
-from datetime import datetime
+from datetime import datetime,timedelta
 import imp
 from fastapi import FastAPI
 from pytest import param
@@ -9,6 +9,8 @@ import json
 import random
 import urllib
 import os
+
+from saveLastChaeck import saveLastCheck
 from .scrapProxy import ProxyScraper
 from .parser import ParseSeloger
 import traceback
@@ -25,7 +27,8 @@ from HttpRequest.uploader import AsyncKafkaTopicProducer
 from HttpRequest.requestsModules import HttpRequest
 kafkaTopicName = "seloger_data_v1"
 commonTopicName = "common-ads-data_v1"
-
+website= "seloger.com"
+commonIdUpdate = f"activeid-{website}"
 class SelogerScraper(HttpRequest):
     token = {
             "token":"",
@@ -170,7 +173,10 @@ class SelogerScraper(HttpRequest):
             item = li[interval*i:interval*(i+1)]
             flist.append(item)
         return flist
-    def genFilter(self,adtype):
+    def genFilter(self,adtype,onlyid=False):
+        for arg,kwargs in self.FilterGenrator(adtype,onlyid):
+            self.Crawlparam(*arg,**kwargs)
+    def FilterGenrator(self,adtype,onlyid=False):
         dic = self.paremeter
         page = 1
         if adtype=="sale":dic["query"]["transactionType"]=2
@@ -197,41 +203,48 @@ class SelogerScraper(HttpRequest):
             minprice = self.getMinPrize(dic)
             iniinterval[0]=minprice
             iniinterval[1]=minprice+1
-        print(maxprice)
+        print(maxprice,iniinterval)
+        # input()
         print(totalresult>=maxresult)
+        asyncsize= self.asyncsize if onlyid else 1
+        count = 0
         if totalresult>=maxresult:
             while iniinterval[1]<=maxprice:
                 dic["query"]['minimumPrice'],dic["query"]['maximumPrice'] = iniinterval
                 totalresult = self.getTotalResult(dic)
                 if totalresult < maxresult and maxresult-totalresult<=3000:
-                    print(f"condition is stisfy going to next interval {totalresult}")
                     last = 1
                     dic.update({"pageIndex":page})
                     print(page,dic)
-                    self.Crawlparam(dic,page=page)
+                    if onlyid:sid = count%asyncsize
+                    else:sid=0
+                    # self.Crawlparam(dic,page=page,onlyid=onlyid,sid = sid)
+                    yield [dic],{"onlyid":onlyid,"page":page,"sid":sid}
+                    count+=1
                     page=1
                     # filterurllist += json.dumps(dic) + "/n/:"
                     iniinterval[0] = iniinterval[1]+1
                     iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
                     finalresult +=totalresult
                 elif maxresult-totalresult> 200:
-                    print("elif 1")
                     last = 10
                     iniinterval[1] = iniinterval[1] + (int(iniinterval[1]/last)+1)
                 elif totalresult>maxresult:
-                    print("elif 2")
                     last = -10
                     iniinterval[1] = iniinterval[1] + int(iniinterval[1]/last)
-                print(totalresult,"-",maxresult)
-                print(iniinterval)
-            self.Crawlparam(dic)
+                print(f"\r{totalresult}-{maxresult}::::{acres} of  {finalresult}==>{iniinterval} {maxprice}  no of filter",end="")
+                
+                # print(totalresult,"-",maxresult)
+                # print(iniinterval)
+            # yield self.Crawlparam(dic)
+            yield [dic],{"onlyid":onlyid,"page":page,"sid":sid}
             if os.path.isfile(f'{cpath}prev{dic["query"]["transactionType"]}.json','w'):
                 os.remove(f'{cpath}prev{dic["query"]["transactionType"]}.json','w')
             # filterurllist+=json.dumps(dic)
             finalresult +=totalresult
         print(f"{finalresult},{acres}")
-        # filterurllist = [json.loads(query) for query in filterurllist.split("/n/:")]
-        # return filterurllist
+            # filterurllist = [json.loads(query) for query in filterurllist.split("/n/:")]
+            # return filterurllist
     def getLastUpdate(self):
         try:
             with open(f"{cpath}/lastUpdate.json",'r') as file:
@@ -308,15 +321,19 @@ class SelogerScraper(HttpRequest):
             print("there is no update available l")
     def __del__(self):
         return super().__del__()
-    def save(self,adslist):
-        self.producer.PushDataList(kafkaTopicName,adslist)
-        parseAdList = [ParseSeloger(ad) for ad in adslist]
-        self.producer.PushDataList(commonTopicName,parseAdList)
-    def Crawlparam(self,param,allPage = True,first=False,save=True,page=1):
-        print(param)
+    def save(self,adslist,onlyid=False):
+        if onlyid:
+            now = datetime.now()
+            ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in adslist]
+            self.producer.PushDataList_v1(commonIdUpdate,ads)
+        else:
+            self.producer.PushDataList(kafkaTopicName,adslist)
+            parseAdList = [ParseSeloger(ad) for ad in adslist]
+            self.producer.PushDataList(commonTopicName,parseAdList)
+    def Crawlparam(self,param,allPage = True,first=False,save=True,page=1,sid=0,onlyid=False):
         if allPage:param['pageIndex'] = page
         # input()
-        response = self.fetch(searchurl, method = "post", json=param,)
+        response = self.fetch(searchurl, method = "post", json=param,sid=sid)
         if not response:
             return 0
         print(response.status_code,"+++++++++")
@@ -341,28 +358,42 @@ class SelogerScraper(HttpRequest):
         except Exception as e:
             print("exception=========>",e) 
             pass
-        adlist = self.splitListInNpairs(ads,self.asyncsize)
-        fetchedads = []
-        for ads in adlist:
-            # time.sleep(2)
-            with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
-                adsidlist = [ad["id"] for ad in ads]
-                futures = excuter.map(self.GetAdInfo,adsidlist,[i for i in range(0,len(adsidlist))])
-                for f in futures:
-                    fetchedads.append(f)
-                # excuter.shutdown(wait=True)
-                # adInfo = self.GetAdInfo(ad["id"])
-                # adlist.append(adInfo)
-            # with open("sampleout4.json",'a') as file:
-            #     file.write(json.dumps(adInfo)+"\n")
+        if onlyid:
+            fetchedads = ads
+        else:
+            adlist = self.splitListInNpairs(ads,self.asyncsize)
+            fetchedads = []
+            for ads in adlist:
+                # time.sleep(2)
+                with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
+                    adsidlist = [ad["id"] for ad in ads]
+                    futures = excuter.map(self.GetAdInfo,adsidlist,[i for i in range(0,len(adsidlist))])
+                    for f in futures:
+                        fetchedads.append(f)
+                    # excuter.shutdown(wait=True)
+                    # adInfo = self.GetAdInfo(ad["id"])
+                    # adlist.append(adInfo)
+                # with open("sampleout4.json",'a') as file:
+                #     file.write(json.dumps(adInfo)+"\n")
         if first:
             return fetchedads[0]
-        if save:self.save(fetchedads)
+        if save:self.save(fetchedads,onlyid)
         if allPage:
             totalpage = 200 if totalpage>200 else totalpage
-            for i in range(int(param["pageIndex"])+1,totalpage+1):
-                param["pageIndex"] = i
-                self.Crawlparam(param,allPage=False)
+            pages = [i for i in range(int(param["pageIndex"])+1,totalpage+1)]
+            pageslist = self.splitListInNpairs(pages,self.asyncsize)
+            futures = []
+            for pages in pageslist:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
+                    for i in pages:
+                        param["pageIndex"] = i
+                        ssid = i%self.asyncsize
+                        futures.append(excuter.submit(self.Crawlparam,param.copy(),allPage=False,sid=ssid,onlyid=onlyid))
+                        for f in futures:
+                            fetchedads.append(f)
+            # for i in range(int(param["pageIndex"])+1,totalpage+1):
+            #     param["pageIndex"] = i
+            #     self.Crawlparam(param.copy(),allPage=False,onlyid=onlyid)
         else:
             return fetchedads
     def CrawlSeloger(self,adtype):
@@ -378,6 +409,23 @@ def CheckId(id):
     if r.status_code == 200:
         return True
     return False
+def rescrapActiveIdbyType(Type):
+    try:
+        data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
+        ob = SelogerScraper(data,asyncsize=10)
+        ob.genFilter(Type,onlyid =True)
+    finally:
+        ob.__del__()
+def rescrapActiveId():
+    nowtime = datetime.now()
+    nowtime = nowtime - timedelta(hours=1)
+    # main("buy",True)
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+    #     futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["rental","sale"]]
+    #     for f in futures:print(f)
+    rescrapActiveIdbyType("rental")
+    print("complited")
+    saveLastCheck(website,nowtime.isoformat())
 def main_scraper(payload,update=False):
     data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
     try:
