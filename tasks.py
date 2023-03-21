@@ -12,6 +12,7 @@ from real_estate_advert.pap.scraper2 import rescrapActiveId as rescrapPapActiveI
 from real_estate_advert.bienci.scraper import main_scraper as bienciScraper
 from real_estate_advert.bienci.scraper import UpdateBienci,rescrapActiveId
 from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
+from real_estate_advert.seloger.scraperv3 import rescrapActiveId as rescrapSelogerActiveId
 from real_estate_advert.logicImmo.logicImmo import main_scraper as LogicImmoScraper
 from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
 from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceScrapper
@@ -437,11 +438,19 @@ def rescrap_paruvenduActiveId_task():
     except Exception as e:
         traceback.print_exc()
         print("Exception ==============>", e)
+@celery_app.task(base=Singleton,name="rescrap Seloger activeid")
+def rescrap_SelogerActiveId_task():
+    try:
+        rescrapSelogerActiveId()
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ==============>", e)
 
 # rescrap_AvendrealouerbienciActiveId_task.apply_async()
 # rescrap_bienciActiveId_task.apply_async()
 # rescrap_papActiveId_task.apply_async()
-rescrap_paruvenduActiveId_task.apply_async()
+# rescrap_paruvenduActiveId_task.apply_async()
+rescrap_SelogerActiveId_task.apply_async()
 # 4 website 1 Core = 4 Core CPU
 
 
