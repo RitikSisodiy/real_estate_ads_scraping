@@ -346,7 +346,7 @@ def rescrapActiveId():
     nowtime = nowtime - timedelta(hours=1)
     # rescrapActiveIdbyType("location")
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-        futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["location","vente"]]
+        futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["rental","vente"]]
         for f in futures:print(f)
     print("complited")
     saveLastCheck(website,nowtime.isoformat())
