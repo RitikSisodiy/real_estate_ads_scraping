@@ -10,16 +10,21 @@ import time
 import concurrent.futures
 import os,json
 import asyncio,requests
+import warnings
+warnings.filterwarnings("ignore", message="Unverified HTTPS request")
+from saveLastChaeck import saveLastCheck
 from .parser import ParseGensdeconfiance
 kafkaTopicName = "gensdeconfiance_data_v1"
 commonTopicName = "common-ads-data_v1"
+website= "gensdeconfiance.com"
+commonIdUpdate = f"activeid-{website}"
 class gensdeconfiance(okHTTpClient):
-    def __init__(self, proxyThread=True, proxies={}, aio=True,params={},asyncsize=1) -> None:
+    def __init__(self, proxyThread=True, proxies={}, aio=True,params={},asyncsize=1,cookies=True) -> None:
         self.apiurl = "https://gensdeconfiance.com/api/v2/ads"
         self.createurl = "https://gensdeconfiance.com/api/v2/members"
         self.loginurl = "https://gensdeconfiance.com/api/v2/members/login"
         cpath = os.path.dirname(__file__)
-        URL = "https://www.google.com/"
+        URL = "https://gensdeconfiance.com/api/v2/ads?itemsPerPage=1"
         self.params = params
         proxyheaders = {}
         self.producer = AsyncKafkaTopicProducer()
@@ -39,7 +44,7 @@ class gensdeconfiance(okHTTpClient):
             "appvanity":"636e82f86000d"
 
         }
-        super().__init__(proxyThread, URL, self.unchagedheaders, proxyheaders, proxies, aio, cpath,asyncsize)
+        super().__init__(proxyThread, URL, self.unchagedheaders, proxyheaders, proxies, aio, cpath,asyncsize,cookies)
         # self.login()
         # self.VerifyLogin()
     # async def getAdDetails(self,ad):
@@ -95,10 +100,12 @@ class gensdeconfiance(okHTTpClient):
         header = copy.deepcopy(self.unchagedheaders)
         self.session[sid].close()
         self.session[sid] = requests.Session()
+        self.session[sid].verify = False
         try:
             self.proxy[sid] = (init and self.proxy.get(sid)) or self.getRandomProxy()
-            r = self.get(self.apiurl,params={"itemsPerPage":1},sid=sid)
-            cookie = r.headers.get("Set-cookie")
+            # r = self.get(self.apiurl,params={"itemsPerPage":1},sid=sid)
+            # cookie = r.headers.get("Set-cookie")
+            cookie = self.proxy[sid]["cookies"]
             header["Cookie"] =  cookie
             self.headers[sid] = header
         except Exception as e:
@@ -121,28 +128,36 @@ class gensdeconfiance(okHTTpClient):
             item = li[interval*i:interval*(i+1)]
             flist.append(item)
         return flist
-    def saveAdList(self,adsdata):
+    def saveAdList(self,adsdata,onlyid=False):
         # producer.PushDataList(kafkaTopicName,adsdata)
-        self.producer.PushDataList(kafkaTopicName,adsdata)
-        parseAdList = [ParseGensdeconfiance(ad) for ad in adsdata]
-        self.producer.PushDataList(commonTopicName,parseAdList)
+        if onlyid:
+            now = datetime.now()
+            ads = [{"id":ad.get("uuid"), "last_checked": now.isoformat(),"available":True} for ad in adsdata]
+            self.producer.PushDataList_v1(commonIdUpdate,ads)
+        else:
+            self.producer.PushDataList(kafkaTopicName,adsdata)
+            parseAdList = [ParseGensdeconfiance(ad) for ad in adsdata]
+            self.producer.PushDataList(commonTopicName,parseAdList)
         # final = ""
         # for da in adsdata:
         #     final+=json.dumps(da)+"\n"
         # with open(f"out.json" , "a") as file:
         #     file.write(final)
-    def  save(self,data,getdata=False):
+    def  save(self,data,getdata=False,onlyid=False):
         # self.initAsycSession()
         newads = []
-        fetchedads = []
-        adlist = self.splitListInNpairs(data,self.asyncsize)
-        for ads in adlist:
-            # time.sleep(2)
-            with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
-                # adsidlist = [ad["id"] for ad in ads]
-                futures = excuter.map(self.getAdDetails,ads,[i for i in range(0,len(ads))])
-                for f in futures:
-                    fetchedads.append(f)
+        if onlyid:
+            fetchedads = data
+        else:
+            fetchedads = []
+            adlist = self.splitListInNpairs(data,self.asyncsize)
+            for ads in adlist:
+                # time.sleep(2)
+                with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
+                    # adsidlist = [ad["id"] for ad in ads]
+                    futures = excuter.map(self.getAdDetails,ads,[i for i in range(0,len(ads))])
+                    for f in futures:
+                        fetchedads.append(f)
         # for ad in data:
         #     addetails = self.getAdDetails(ad)
         #     # tasks.append(asyncio.ensure_future(self.getAdDetails(ad)))
@@ -151,17 +166,17 @@ class gensdeconfiance(okHTTpClient):
         #         **addetails
         #     })
         # newads = await asyncio.gather(*tasks)
-        self.saveAdList(fetchedads)
+        self.saveAdList(fetchedads,onlyid=onlyid)
         # self.killAsycSession(self)
-    def crawl(self,param={},first = False):
+    def crawl(self,param={},first = False,onlyid=False):
         if not param:
             param = self.params
         response = self.fetch(self.apiurl, params=param)
         if first:
             return response[0]
-        self.createNewUpdate(latestad=response[0])
+        if not onlyid:self.createNewUpdate(latestad=response[0])
         while response: 
-            self.save(response)
+            self.save(response,onlyid=onlyid)
             self.params["page"]+=1
             print(f"getting {self.params['page']}")
             response = self.fetch(self.apiurl, params=self.params)
@@ -299,6 +314,24 @@ def main_scraper(payload,update=False):
         pass
     finally:
         ob.__del__()
+def rescrapActiveIdbyType():
+    data = params.copy()
+    try:
+        ob = gensdeconfiance(True,{},True,data)
+        ob.crawl(onlyid=True)
+    finally:
+        ob.__del__()
+def rescrapActiveId():
+    nowtime = datetime.now()
+    nowtime = nowtime - timedelta(hours=1)
+    rescrapActiveIdbyType()
+    # main("buy",True)
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+    #     futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["rental","sale"]]
+    #     for f in futures:print(f)
+    # rescrapActiveIdbyType("rental")
+    # print("complited")
+    saveLastCheck(website,nowtime.isoformat())
 # try:
 #     ob = gensdeconfiance(True,aio=False,params=params,asyncsize=1)
 #     # ob.crawl()

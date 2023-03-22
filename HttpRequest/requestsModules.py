@@ -5,7 +5,7 @@ from requests_html import AsyncHTMLSession
 from urllib.parse import urlencode
 from datetime import datetime
 class ProxyServer:
-    def __init__(self,proxyThread, URL, headers, proxies, aio, cpath,interval) -> None:
+    def __init__(self,proxyThread, URL, headers, proxies, aio, cpath,interval,cookies) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
         self.proxy = self.getLastProxy()
         print(aio,"this is aio")
@@ -15,7 +15,7 @@ class ProxyServer:
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
                 }
-        if aio:self.prox = AioScraper(URL,headers)
+        if aio:self.prox = AioScraper(URL,headers,cookies)
         else:self.prox = AsyncScraper(URL,headers) 
         if not proxies:
             try:
@@ -134,8 +134,8 @@ class HttpRequest(ProxyServer):
         return r
 
 class okHTTpClient(ProxyServer):
-    def __init__(self, proxyThread=True, URL="https://www.google.com", headers={},proxyheaders={}, proxies={}, aio=True, cpath="",asyncsize = 1,interval=300) -> None:
-        super().__init__(proxyThread, URL, proxyheaders, proxies, aio, cpath,interval)
+    def __init__(self, proxyThread=True, URL="https://www.google.com", headers={},proxyheaders={}, proxies={}, aio=True, cpath="",asyncsize = 1,interval=300,cookies=False) -> None:
+        super().__init__(proxyThread, URL, proxyheaders, proxies, aio, cpath,interval,cookies)
         self.headers = headers or {
             "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
         }
