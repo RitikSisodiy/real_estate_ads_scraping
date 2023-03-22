@@ -1,9 +1,10 @@
-from datetime import datetime
-from pytest import param
+from datetime import datetime,timedelta
 import requests
 import json
 import urllib
-import os
+import os,concurrent.futures
+
+from saveLastChaeck import saveLastCheck
 # from .scrapProxy import ProxyScraper
 
 from .parser import ParseLogicImmo
@@ -20,7 +21,8 @@ from HttpRequest.requestsModules import HttpRequest
 cpath =os.path.dirname(__file__) or "."
 kafkaTopicName = "logicImmo_data_v1"
 commonTopicName = "common-ads-data_v1"
-
+website= "logic-immo.com"
+commonIdUpdate = f"activeid-{website}"
 class LogicImmoScraper(HttpRequest):
     token = {
             "token":"",
@@ -316,12 +318,17 @@ class LogicImmoScraper(HttpRequest):
             res = f"there is no update available  {adtype}"
             print(res)
         return res
-    def save(self,adslist):
-        self.producer.PushDataList(kafkaTopicName,adslist)
-        parseAdList = [ParseLogicImmo(ad) for ad in adslist]
-        self.producer.PushDataList(commonTopicName,parseAdList)
+    def save(self,adslist,onlyid=False):
+        if onlyid:
+            now = datetime.now()
+            ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in adslist]
+            self.producer.PushDataList_v1(commonIdUpdate,ads)
+        else:
+            self.producer.PushDataList(kafkaTopicName,adslist)
+            parseAdList = [ParseLogicImmo(ad) for ad in adslist]
+            self.producer.PushDataList(commonTopicName,parseAdList)
 
-    def Crawlparam(self,param,allPage = True,first=False,save=True):
+    def Crawlparam(self,param,allPage = True,first=False,save=True,onlyid=False):
         print(param)
         if allPage:param["searchParameters"]["offset"] = 1
         # input()
@@ -343,17 +350,17 @@ class LogicImmoScraper(HttpRequest):
         totalpage = int(totalpage/pagesize)+1
         if first:
             return fetchedads[0]
-        if save:self.save(fetchedads)
+        if save:self.save(fetchedads,onlyid=onlyid)
         if allPage:
             for i in range(1,totalpage):
                 param["searchParameters"]["offset"] = (i*pagesize) or 1
-                self.Crawlparam(param,allPage=False)
+                self.Crawlparam(param,allPage=False,onlyid=onlyid)
         else:
             return fetchedads
-    def CrawlSeloger(self,adtype):
+    def CrawlSeloger(self,adtype,onlyid=False):
         param = self.paremeter
-        self.createNewUpdate(adtype,latestad=None)
-        self.Crawlparam(param)
+        if not onlyid :self.createNewUpdate(adtype.copy(),latestad=None)
+        self.Crawlparam(param,onlyid=onlyid)
         # filterlist= self.genFilter(adtype)
         # for Filter in filterlist:
         #     self.Crawlparam(Filter)
@@ -365,6 +372,22 @@ def CheckId(id):
     if r==200:found = True
     else:found = False
     return found
+def rescrapActiveIdbyType(typ):
+    try:
+        ob = LogicImmoScraper(data,asyncsize=1,timeout=10)
+        ob.CrawlSeloger(typ,onlyid=True)
+    finally:
+        ob.__del__()
+def rescrapActiveId():
+    nowtime = datetime.now()
+    nowtime = nowtime - timedelta(hours=1)
+    # main("buy",True)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+        futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["rental","sale"]]
+        for f in futures:print(f)
+    # rescrapActiveIdbyType("rental")
+    # print("complited")
+    saveLastCheck(website,nowtime.isoformat())
 def main_scraper(payload,update=False):
     try:
         adtype = payload.get("real_state_type")

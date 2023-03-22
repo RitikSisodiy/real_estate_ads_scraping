@@ -475,8 +475,8 @@ def rescrap_GensdeconfianceActiveId_task():
 # rescrap_papActiveId_task.apply_async()
 # rescrap_paruvenduActiveId_task.apply_async()
 # rescrap_SelogerActiveId_task.apply_async()
-# rescrap_LefigaroActiveId_task.apply_async()
-# rescrap_logicImmoActiveId_task.apply_async()
+rescrap_LefigaroActiveId_task.apply_async()
+rescrap_logicImmoActiveId_task.apply_async()
 rescrap_GensdeconfianceActiveId_task.apply_async()
 # 4 website 1 Core = 4 Core CPU
 

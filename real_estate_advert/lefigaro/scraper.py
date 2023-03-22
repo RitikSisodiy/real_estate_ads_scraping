@@ -1,16 +1,19 @@
-from datetime import datetime
+from datetime import datetime,timedelta
 from email import header
-import traceback
+import traceback,concurrent.futures
 import aiohttp
 import asyncio
 import os
 from requests_html import HTMLSession
 import json,re
+
+from saveLastChaeck import saveLastCheck
 from .parser import ParseLefigaro
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 kafkaTopicName = "lefigaro-data_v1"
 commonTopicName = "common-ads-data_v1"
-
+website= "immobilier.lefigaro.fr"
+commonIdUpdate = f"activeid-{website}"
 s= HTMLSession()
 pagesize  = 1000 # maxsize is 100
 cpath =os.path.dirname(__file__) or "."
@@ -28,12 +31,11 @@ headers = {
     "x-api-key": "AIzaSyDb4PeV9gi5UY_Z3-27ygjOm8PV950j9Us",
     "Referer": "http://figaroImmo-Android/",
     "source": "FigaroImmo appli mobile",
-    "User-Agent": "FigaroImmo 5.1.9 (sdk_gphone_x86; Android 11; en_US)",
+    "User-Agent": "FigaroImmo  (sdk_gphone_x86; Android 11; en_US)",
     "device-token": "cK4ASmJ1T4KVS8gzo0six1:APA91bHp76JTgTJKAyr5M_NWuuNUvS9Lrl6Q10GYaNvJna7gmNvhcCaqrfvBLd0HzIMlZyZaK0pEknEBzGq8queVKHHi4i6btx9kUZfJSh_5ss1Xxax6b66L0KCxsBN9z5jD7_Caeosf",
     "Host": "fi-classified-search-api.immo.fcms.io",
     "Connection": "Keep-Alive",
     "Accept-Encoding": "gzip"
-
 }
 async def fetch(session,url,params = None,method="get",**kwargs):
     # if params:
@@ -55,9 +57,14 @@ async def savedata(resjson,**kwargs):
     resstr = ''
     ads = resjson["classifieds"]
     producer = kwargs["producer"]
-    await producer.TriggerPushDataList(kafkaTopicName,ads)
-    ads = [ParseLefigaro(ad) for ad in ads]
-    await producer.TriggerPushDataList('common-ads-data_v1',ads)
+    if kwargs.get("onlyid"):
+        now = datetime.now()
+        ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
+        await producer.TriggerPushDataList(commonIdUpdate,ads)
+    else:
+        await producer.TriggerPushDataList(kafkaTopicName,ads)
+        ads = [ParseLefigaro(ad) for ad in ads]
+        await producer.TriggerPushDataList('common-ads-data_v1',ads)
 
     # for ad in ads:
     #     resstr += json.dumps(ad)+"\n"
@@ -112,7 +119,7 @@ async def getMaxPrize(session,params,url):
     prize = r["classifieds"][0]["priceLabel"]
     prize = float(re.search("[0-9.]+",prize).group())
     return prize
-async def getFilter(session,params,producer):
+async def getFilter(session,params,producer,onlyid=False):
     dic,baseurl = params , "https://fi-classified-search-api.immo.fcms.io/apps/classifieds"
     # url = getUrl(baseurl,dic)
     # url = baseurl
@@ -132,7 +139,7 @@ async def getFilter(session,params,producer):
                 print(iniinterval,">apending")
                 # filterurllist.append(iniinterval)
                 # filterurllist+=json.dumps(dic)+":\n"
-                await startCrawling(session,dic,producer=producer)
+                await startCrawling(session,dic,producer=producer,onlyid=onlyid)
                 # print(filterurllist)
                 iniinterval[0] = iniinterval[1]+1
                 iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
@@ -182,7 +189,8 @@ async def CheckId(id):
         if data and len(data["feed"]["row"])==1:
             return True
         else:return False
-async def main(adsType = ""):
+async def main(adsType = "",onlyid=False):
+    param = params.copy()
     # catid info
     # vente is for  Vente immobilier 
     # location is for Location immobilier
@@ -190,12 +198,12 @@ async def main(adsType = ""):
         catid = "vente"
     else:
         catid = "location"
-    params["transaction"] = catid
+    param["transaction"] = catid
     # filterParamList = [*getFilter(param) for param in params
     async with aiohttp.ClientSession() as session:
-        await CreatelastupdateLog(session,adsType)
+        if not onlyid : await CreatelastupdateLog(session,adsType)
         producer = AsyncKafkaTopicProducer()
-        filterParamList = await getFilter(session,params,producer)
+        filterParamList = await getFilter(session,param,producer,onlyid=onlyid)
         # await startCrawling(session,filterParamList,producer=producer)
         await producer.stopProducer()
 def main_scraper(payload):
@@ -287,7 +295,18 @@ async def asyncUpdateParuvendu():
                     updated = True
                 p+=1
             await producer.stopProducer()
-
+def rescrapActiveIdbyType(typ):
+    asyncio.run(main(typ,True))
+def rescrapActiveId():
+    nowtime = datetime.now()
+    nowtime = nowtime - timedelta(hours=1)
+    # main("buy",True)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+        futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["rental","sale"]]
+        for f in futures:print(f)
+    # rescrapActiveIdbyType("rental")
+    # print("complited")
+    saveLastCheck(website,nowtime.isoformat())
 def UpdateParuvendu():
     asyncio.run(asyncUpdateParuvendu())
 if __name__=="__main__":
