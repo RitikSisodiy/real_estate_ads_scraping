@@ -44,7 +44,7 @@ class gensdeconfiance(okHTTpClient):
             "appvanity":"636e82f86000d"
 
         }
-        super().__init__(proxyThread, URL, self.unchagedheaders, proxyheaders, proxies, aio, cpath,asyncsize,cookies)
+        super().__init__(proxyThread, URL, self.unchagedheaders, proxyheaders, proxies, aio, cpath,asyncsize,cookies=cookies)
         # self.login()
         # self.VerifyLogin()
     # async def getAdDetails(self,ad):
