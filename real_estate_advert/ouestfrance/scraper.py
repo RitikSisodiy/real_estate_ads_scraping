@@ -1,13 +1,16 @@
 from operator import imod
 import os,traceback,requests,time,json
-from datetime import datetime
+from datetime import datetime,timedelta
 from tqdm import tqdm
+
+from saveLastChaeck import saveLastCheck
 from .parser import ParseOuestfrance
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 cpath =os.path.dirname(__file__) or "."
 kafkaTopicName = "ouestfrance-immo-v1"
 commanPattern ="common-ads-data_v1"
-
+website= "ouestfrance-immo.com"
+commonIdUpdate = f"activeid-{website}"
 class OuestFranceScraper:
     def __init__(self,paremeter,timeout = 5) -> None:
         self.logfile = open(f"{cpath}/error.log",'a')
@@ -31,7 +34,7 @@ class OuestFranceScraper:
         self.paremeter = paremeter
         self.size=100
         self.producer = AsyncKafkaTopicProducer()
-        self.searchurl = "https://api-phalcon.ouestfrance-immo.com/annonces/"
+        self.searchurl = "https://www-api.ouestfrance-immo.com/api/annonces/"
         self.session = requests.Session()
     def init_session(self):
         self.session.close()
@@ -63,10 +66,15 @@ class OuestFranceScraper:
                 return self.fetch(url,method=method,sid=sid,retry=retry,**kwargs)
             else:return None
         return r
-    def save(self,adslist):
-        self.producer.PushDataList(kafkaTopicName,adslist)
-        adslist = [ParseOuestfrance(ad) for ad in adslist]
-        self.producer.PushDataList(commanPattern,adslist)
+    def save(self,adslist,onlyid=False):
+        if onlyid:
+            now = datetime.now()
+            ads = [{"id":"quest-"+str(ad.get("id")), "last_checked": now.isoformat(),"available":True} for ad in adslist]
+            self.producer.PushDataList_v1(commonIdUpdate,ads)
+        else:
+            self.producer.PushDataList(kafkaTopicName,adslist)
+            adslist = [ParseOuestfrance(ad) for ad in adslist]
+            self.producer.PushDataList(commanPattern,adslist)
         # data = ""
         # for ad in adslist:
         #     data += json.dumps(ad)+"\n"
@@ -75,7 +83,7 @@ class OuestFranceScraper:
         # parseAdList = [ParseLogicImmo(ad) for ad in adslist]
         # self.producer.PushDataList(commonTopicName,parseAdList)
         # self.producer.PushDataList(nortifyTopic,parseAdList)
-    def Crawlparam(self,param,allPage = True,first=False,save=True):
+    def Crawlparam(self,param,allPage = True,first=False,save=True,onlyid=False):
         # input()
         response = self.fetch(self.searchurl, method = "get", params=param,)
         if not response:
@@ -85,7 +93,7 @@ class OuestFranceScraper:
         pagesize = param["limit"]
         ads = res['data']
         fetchedads = ads
-        if save:self.save(fetchedads)
+        if save:self.save(fetchedads,onlyid=onlyid)
         if first:
             return fetchedads[0]
         if allPage:
@@ -96,7 +104,7 @@ class OuestFranceScraper:
             print(f"total page {totalpage}")
             for i in tqdm(range(2,totalpage)):
                 param["page"] = i
-                self.Crawlparam(param,allPage=False)
+                self.Crawlparam(param,allPage=False,onlyid=onlyid)
                 # break
         else:
             return fetchedads
@@ -143,10 +151,10 @@ class OuestFranceScraper:
         lastupd=self.getUpdateDicFromAd(latestad)
         with open(f"{cpath}/lastUpdate.json",'w') as file:
             file.write(json.dumps(lastupd))
-    def CrawlOuestfrance(self):
+    def CrawlOuestfrance(self,onlyid=False):
         param = self.paremeter
-        self.createNewUpdate(latestad=None)
-        self.Crawlparam(param)
+        if not onlyid:self.createNewUpdate(latestad=None)
+        self.Crawlparam(param,onlyid=onlyid)
     def updateLatestAd(self):
         updates = self.getLastUpdate()
         if updates:
@@ -198,6 +206,24 @@ def main_scraper(payload,update=False):
     else:
         ob = OuestFranceScraper(data,timeout=30)
         ob.CrawlOuestfrance()
+def rescrapActiveIdbyType():
+    data = {
+        "limit":200,
+        "tri":"date_decroissant"
+    }
+    ob = OuestFranceScraper(data,timeout=30)
+    ob.CrawlOuestfrance(onlyid=True)
+def rescrapActiveId():
+    nowtime = datetime.now()
+    nowtime = nowtime - timedelta(hours=1)
+    rescrapActiveIdbyType()
+    # main("buy",True)
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+    #     futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["rental","sale"]]
+    #     for f in futures:print(f)
+    # rescrapActiveIdbyType("rental")
+    # print("complited")
+    saveLastCheck(website,nowtime.isoformat())
 if __name__ == "__main__":
     data = {
         "limit":200,
@@ -206,3 +232,5 @@ if __name__ == "__main__":
     ob = OuestFranceScraper(data,timeout=30)
     ob.CrawlOuestfrance()
     # ob.updateLatestAd()
+
+#parms ?limit=2&tri=date_decroissant&balcon=1&criteres_or=1&hasPhoto=1&idslieu=33540&isNeuf=0&limit=10&terrasse=1&tra=V&typIds=201&veranda=1&prix_min=199290&page=1&prix_max=200000

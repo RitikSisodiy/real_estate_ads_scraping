@@ -2,6 +2,7 @@ import os
 import time
 from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
 from real_estate_advert.leboncoin.scraperv4 import updateLebonCoin,leboncoinAdScraper
+from real_estate_advert.leboncoin.scraperv4 import rescrapActiveId as rescrapLeboncoinActiveId
 from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
 from real_estate_advert.paruvendu.scraperv2 import rescrapActiveId as rescrapParuvenduActiveId
 from real_estate_advert.gensdeconfiance.scraper import main_scraper as gensdeconfianceScraper
@@ -19,6 +20,7 @@ from real_estate_advert.logicImmo.logicImmo import rescrapActiveId as rescraplog
 from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
 from real_estate_advert.lefigaro.scraper import rescrapActiveId as rescrapLefigaroActiveId
 from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceScrapper
+from real_estate_advert.ouestfrance.scraper import rescrapActiveId as rescrapOuestFranceActiveId
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 from real_estate_advert.avendrealouer.scraper import rescrapActiveId as rescrapAvendrealouerActiveId
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
@@ -469,15 +471,31 @@ def rescrap_GensdeconfianceActiveId_task():
     except Exception as e:
         traceback.print_exc()
         print("Exception ==============>", e)
+@celery_app.task(base=Singleton,name="rescrap OuestFrance activeid")
+def rescrap_OuestFranceActiveId_task():
+    try:
+        rescrapOuestFranceActiveId()
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ==============>", e)
+@celery_app.task(base=Singleton,name="rescrap Leboncoin activeid")
+def rescrap_LeboncoinActiveId_task():
+    try:
+        rescrapLeboncoinActiveId()
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ==============>", e)
 
 # rescrap_AvendrealouerbienciActiveId_task.apply_async()
 # rescrap_bienciActiveId_task.apply_async()
 # rescrap_papActiveId_task.apply_async()
 # rescrap_paruvenduActiveId_task.apply_async()
 # rescrap_SelogerActiveId_task.apply_async()
-rescrap_LefigaroActiveId_task.apply_async()
-rescrap_logicImmoActiveId_task.apply_async()
-rescrap_GensdeconfianceActiveId_task.apply_async()
+# rescrap_LefigaroActiveId_task.apply_async()
+# rescrap_logicImmoActiveId_task.apply_async()
+# rescrap_GensdeconfianceActiveId_task.apply_async()
+# rescrap_OuestFranceActiveId_task.apply_async()
+rescrap_LeboncoinActiveId_task.apply_async()
 # 4 website 1 Core = 4 Core CPU
 
 

@@ -15,6 +15,7 @@ class ProxyServer:
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
                 }
+        print("cookies",cookies)
         if aio:self.prox = AioScraper(URL,headers,cookies)
         else:self.prox = AsyncScraper(URL,headers) 
         if not proxies:

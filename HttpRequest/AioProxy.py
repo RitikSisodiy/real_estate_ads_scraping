@@ -30,7 +30,7 @@ class ProxyScraper:
             if kwargs.get("proxy"):
                 if self.cookies and d==200:
                     cookies = res.cookies.output(header='', sep=';').strip()
-                    if cookies and "__cf_bm=" in cookies:
+                    if cookies and ("__cf_bm=" in cookies or "datadome" in cookies):
                         d = d,cookies
                     else:
                         d = 403,""

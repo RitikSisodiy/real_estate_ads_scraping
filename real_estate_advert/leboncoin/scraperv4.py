@@ -4,10 +4,9 @@ import threading
 import traceback
 from urllib import response
 import urllib.request
-import aiohttp
-from datetime import datetime
+import aiohttp,concurrent.futures
 import json
-from datetime import datetime
+from datetime import datetime,timedelta
 import time
 import os
 import gzip
@@ -15,6 +14,7 @@ import requests
 
 # from .scrapProxy import ProxyScraper
 from HttpRequest.AioProxy import ProxyScraper
+from saveLastChaeck import saveLastCheck
 from .parser import ParseLeboncoin
 # from aiohttp_socks import ProxyType, ProxyConnector, ChainProxyConnector
 from aiosocksy.connector import ProxyConnector, ProxyClientRequest
@@ -23,6 +23,8 @@ cpath =os.path.dirname(__file__) or "."
 producer = AsyncKafkaTopicProducer()
 KafkaTopicName = 'leboncoin-data_v1'
 commonAdsTopic= "common-ads-data_v1"
+website= "seloger.com"
+commonIdUpdate = f"activeid-{website}"
 def now_time_int():
     dateobj = datetime.now()
     total = int(dateobj.strftime('%S'))
@@ -45,6 +47,8 @@ class LeboncoinScraper:
     def __init__(self) -> None:
         pass
     async def init(self,parameter=None,outputfilename=None,proxyThread=True) -> None:
+        self.pc= 0
+        self.pcd={}
         try:
             self.cookies  = {}
             with open("cookies.txt",'r') as file:
@@ -73,14 +77,14 @@ class LeboncoinScraper:
                 "__Secure-InstanceId":"002a7e78-40ec-4587-9161-e29c293bbe84"
             }
         LEBONCOIN_CHECK_URL = "https://api.leboncoin.fr/finder/classified/2130999715"
-        self.prox = ProxyScraper(LEBONCOIN_CHECK_URL,self.headers)
+        self.prox = ProxyScraper(LEBONCOIN_CHECK_URL,self.headers,True)
         try:
             self.proxies = self.readProxy()
             if not self.proxies:
                 await self.waitgetProxyList()
         except:
             await self.waitgetProxyList()
-        self.proxy = await self.getRandomProxy()
+        self.proxy = {self.pc :await self.getRandomProxy()}
         if proxyThread:self.proxyUpdateThread()
         self.session = requests.session()
         # connector = ProxyConnector.from_url("http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225")
@@ -142,16 +146,23 @@ class LeboncoinScraper:
         self.proc.daemon = True
         self.proc.start()
     async def fetch(self,url,method = "POST",**kwargs):
+        kwargs["ssl"] = False
+        self.proxy[self.pc] = self.proxy.get(self.pc) or await self.getRandomProxy()
+        if kwargs.get("headers"):
+            kwargs["headers"] = {
+                **kwargs.get("headers"),
+                "cookies":self.proxy[self.pc]["cookies"]
+            }
         try:
-            print(self.proxy)
+            print(self.proxy[self.pc])
             if method == "GET":
-                async with self.asyncSession.get(url,proxy=self.proxy["http"],timeout=15,**kwargs) as r:
+                async with self.asyncSession.get(url,proxy=self.proxy[self.pc]["http"],timeout=15,**kwargs) as r:
                     if r.status==200:
                         return True
                     if r.status == 410 or r.status ==404:
                         return False
                     return await self.fetch(url,method=method,**kwargs)
-            async with self.asyncSession.post(url,proxy=self.proxy["http"],timeout=15,**kwargs) as r:
+            async with self.asyncSession.post(url,proxy=self.proxy[self.pc]["http"],timeout=15,**kwargs) as r:
                 print(r)
                 if r.status==200:
                     return await r.json()
@@ -169,7 +180,7 @@ class LeboncoinScraper:
         # connector = ProxyConnector.from_url("http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225")
         # self.asyncSession.delete()
         await self.asyncSession.close()
-        self.proxy = await self.getRandomProxy()
+        self.proxy[self.pc] = await self.getRandomProxy()
         connector = ProxyConnector()
         self.asyncSession = aiohttp.ClientSession(connector=connector, request_class=ProxyClientRequest)
     def updateCookies(self):
@@ -179,7 +190,7 @@ class LeboncoinScraper:
     async def CheckIfAdIdLive(self,id):
         res = await self.fetch(f"{self.singleUrl}/{id}",headers= self.headers,method = "GET")
         return res
-    async def CrawlLeboncoin(self):
+    async def CrawlLeboncoin(self,onlyid=False):
         parameter= self.parameter
         # headers = {
         #     # cookie=datadome= 
@@ -193,9 +204,9 @@ class LeboncoinScraper:
         #     # 'Accept-Encoding': 'gzip',
         # }
         res = await self.fetch("https://api.leboncoin.fr/finder/search",headers=self.headers,json=parameter)
-        await asyncio.sleep(3)
+        self.pc= (self.pc+1)%5
         if self.autoSave:
-            await self.saveAds(res)
+            await self.saveAds(res,onlyid=onlyid)
         return res
         jsondata = json.dumps(parameter)
         jsondataasbytes = jsondata.encode()  
@@ -251,25 +262,30 @@ class LeboncoinScraper:
         except:
             return False
 
-    async def IntCrawling(self):
+    async def IntCrawling(self,onlyid=False):
         self.autoSave = True
-        res = await self.CrawlLeboncoin()
+        res = await self.CrawlLeboncoin(onlyid=onlyid)
         nextpage = self.checkNext(res)
         while nextpage:
             print(nextpage)
             self.parameter['pivot'] = nextpage
-            res = await self.CrawlLeboncoin()
+            res = await self.CrawlLeboncoin(onlyid=onlyid)
             nextpage = self.checkNext(res)
-    async def saveAds(self,res):
+    async def saveAds(self,res,onlyid=False):
         ads = res.get('ads')
         if not ads:
             return 0
         # producer.PushDataList(KafkaTopicName,ads)
         # parseAds = [ParseLeboncoin(ad) for ad in ads]
         # producer.PushDataList(commonAdsTopic,parseAds)
-        await producer.TriggerPushDataList(KafkaTopicName,ads)
-        parseAds = [ParseLeboncoin(ad) for ad in ads]
-        await producer.TriggerPushDataList(commonAdsTopic,parseAds)
+        if onlyid:
+            now = datetime.now()
+            ads = [{"id":ad.get("list_id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
+            await producer.TriggerPushDataList(commonIdUpdate,ads)
+        else:
+            await producer.TriggerPushDataList(KafkaTopicName,ads)
+            parseAds = [ParseLeboncoin(ad) for ad in ads]
+            await producer.TriggerPushDataList(commonAdsTopic,parseAds)
         # totalads = ''
         # for ad in ads:
         #     totalads+= json.dumps(ad)+"\n"
@@ -338,12 +354,13 @@ async def CheckId(id):
     status = await ob.CheckIfAdIdLive(id)
     ob.__del__()
     return status
-async def ScrapLebonCoin():
-    data = json.load(open(f'{cpath}/filter.json','r'))
+async def ScrapLebonCoin(data = {},onlyid=False):
+    if not data:
+        data = json.load(open(f'{cpath}/filter.json','r'))
     ob = LeboncoinScraper()
     try:
         await ob.init(data,"newout1")
-        await ob.IntCrawling()
+        await ob.IntCrawling(onlyid=onlyid)
     finally:ob.__del__()
 def leboncoinAdScraper(payload):
     typ = payload.get("real_state_type")
@@ -354,6 +371,19 @@ def leboncoinAdScraper(payload):
         asyncio.run(updateLebonCoin())
     else:
         asyncio.run(ScrapLebonCoin())
+def rescrapActiveIdbyType():
+    data = json.load(open(f'{cpath}/filter.json','r'))
+    asyncio.run(ScrapLebonCoin(data= data,onlyid=False))
+def rescrapActiveId():
+    nowtime = datetime.now()
+    nowtime = nowtime - timedelta(hours=1)
+    # main("buy",True)
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+    #     futures = [excuter.submit(ScrapLebonCoin, onlyid=True) for i in ["rental","sale"]]
+    #     for f in futures:print(f)
+    rescrapActiveIdbyType()
+    # print("complited")
+    saveLastCheck(website,nowtime.isoformat())
 if __name__=="__main__":
     data = json.load(open(f'{cpath}/filter.json','r'))
     ob = LeboncoinScraper(data,"newout1")
