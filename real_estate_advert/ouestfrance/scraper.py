@@ -108,6 +108,91 @@ class OuestFranceScraper:
                 # break
         else:
             return fetchedads
+    def getTotalResult(self,dic):
+        dic = {
+            **dic,
+            "limit":1
+        }
+        response = self.fetch(self.searchurl, method = "get", params=dic)
+        res = response.json()
+        count = res["count"]
+        return count
+    def getMax(self,dic,max="prix"):
+        dic = {
+            **dic,
+            "tri":f"{max}_desc",
+            f"{max}_min":1,
+            "limit":1
+        }
+        response = self.fetch(self.searchurl, method = "get", params=dic)
+        res = response.json()
+        maxval = res["data"][0][max]
+        return maxval
+    def genFilter(self,parameter={},onlyid=False,low="prix_min",max="prix_max"):
+        if parameter:
+            dic = parameter.copy()
+        else:parameter = self.paremeter.copy()
+        # totalresult = getTotalResult(session,dic)
+        # acres = totalresult
+        # dic['recherche[produit]']=typ
+        if low=="prix_min":
+            # iniinterval =[98976, 98989]
+            iniinterval = [0,1000]
+            maxprize = self.getMax(dic.copy())
+        else:
+            maxprize = self.getMax(dic.copy(),max="surface")
+            iniinterval =[0,1]
+        # maxprize = getMaxPrize(session,dic)
+        maxresult = 4999
+        filterurllist = ""
+        finalresult = 0
+        nooffilter = 0
+        while iniinterval[1]<=maxprize:
+            dic[low],dic[max] = iniinterval
+            totalresult = self.getTotalResult(dic)
+            if totalresult <= maxresult and totalresult>0:
+                # print("condition is stisfy going to next interval",totalresult)
+                # print(iniinterval,">apending")
+                filterurllist += json.dumps(iniinterval) + "/n/:"
+                # FetchFilter(dic,onlyid,session2)
+                self.CrawlOuestfrance(dic.copy(),onlyid)
+                print("going to next")
+                iniinterval[0] = iniinterval[1]+1
+                iniinterval[1] = iniinterval[0]+int(iniinterval[0]/2)
+                finalresult +=totalresult
+                nooffilter +=1
+            # elif acres-finalresult<4800 and acres-finalresult>0:
+            #     print(maxresult, acres , maxresult-acres)
+            #     # input()
+            #     # print("elif 1")
+            #     last = 10
+            #     iniinterval[1] = maxprize
+            elif totalresult == 0:
+                # print("elif 1",iniinterval)
+                last = 10
+                iniinterval[0] = iniinterval[1]
+                iniinterval[1] = iniinterval[0] + (int(iniinterval[1]/last) or 1)
+                # iniinterval[0] = iniinterval[1] 
+                # iniinterval[1] +=1
+            elif iniinterval[1]-iniinterval[0] <=2 and totalresult>maxresult and low=="prix_min":
+                finalresult +=totalresult
+                self.genFilter(dic.copy(),onlyid,"surface_min","surface_max")
+                iniinterval[0] = iniinterval[1] 
+                iniinterval[1]+=1 
+            elif totalresult>maxresult:
+                # print("elif 2",iniinterval)
+                last = -5
+                dif = iniinterval[1]-iniinterval[0]
+                iniinterval[1] = iniinterval[1] + int(dif/-2) 
+                if iniinterval[0]>iniinterval[1]:
+                    iniinterval[1] = iniinterval[0]+1
+            # retrydic[iniinterval[0]] +=1
+            print(f"\r{totalresult}-{maxresult}:::: of  {finalresult}==>{iniinterval} {maxprize} {low} no of filter",end="")
+            # print(totalresult,"-",maxresult,"::::",acres ," of ", finalresult,"==>",iniinterval)
+        filterurllist+=json.dumps(iniinterval)
+        finalresult +=totalresult
+        filterurllist = [json.loads(query) for query in filterurllist.split("/n/:")]
+
     def getLastUpdate(self):
         try:
             with open(f"{cpath}/lastUpdate.json",'r') as file:
@@ -151,8 +236,9 @@ class OuestFranceScraper:
         lastupd=self.getUpdateDicFromAd(latestad)
         with open(f"{cpath}/lastUpdate.json",'w') as file:
             file.write(json.dumps(lastupd))
-    def CrawlOuestfrance(self,onlyid=False):
-        param = self.paremeter
+    def CrawlOuestfrance(self,param=None,onlyid=False):
+        if not param:
+            param = self.paremeter.copy()
         if not onlyid:self.createNewUpdate(latestad=None)
         self.Crawlparam(param,onlyid=onlyid)
     def updateLatestAd(self):
@@ -195,9 +281,16 @@ def CheckId(id):
     return found
 def main_scraper(payload,update=False):
     adtype = payload.get("real_state_type")
+    """
+    typIds
+        201 : for vente
+        214 : for location
+        216 : for location
+    """
     data = {
         "limit":200,
-        "tri":"date_decroissant"
+        "tri":"date_desc",
+        # "typIds":"201,214,216"
     }
     if adtype == "Updated/Latest Ads" or update:
         ob = OuestFranceScraper(data,timeout=10)
@@ -205,14 +298,26 @@ def main_scraper(payload,update=False):
         ob.updateLatestAd()
     else:
         ob = OuestFranceScraper(data,timeout=30)
-        ob.CrawlOuestfrance()
+        ob.genFilter()
 def rescrapActiveIdbyType():
+    """
+    typIds
+        201 : for vente
+        207 : for vente
+        208 : for vente
+        209 : for vente
+        210 : for vente
+        213 : for location
+        214 : for location
+        216 : for location
+    """
     data = {
-        "limit":200,
-        "tri":"date_decroissant"
+        "limit":208,
+        "tri":"date_desc",
+        # "typIds":"201,214,216"
     }
     ob = OuestFranceScraper(data,timeout=30)
-    ob.CrawlOuestfrance(onlyid=True)
+    ob.genFilter(data,onlyid=True)
 def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
@@ -225,9 +330,16 @@ def rescrapActiveId():
     # print("complited")
     saveLastCheck(website,nowtime.isoformat())
 if __name__ == "__main__":
+    """
+    typIds
+        201 : for vente
+        214 : for location
+        216 : for location
+    """
     data = {
         "limit":200,
-        "tri":"date_desc"
+        "tri":"date_desc",
+        # "typIds":"201,214,216"
     }
     ob = OuestFranceScraper(data,timeout=30)
     ob.CrawlOuestfrance()
