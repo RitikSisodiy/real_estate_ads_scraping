@@ -81,8 +81,8 @@ class ProxyServer:
     # def __exit__(self):
     #     self.logfile.close()
 class HttpRequest(ProxyServer):
-    def __init__(self, proxyThread=True, URL="https://www.google.com", headers={},proxyheaders={}, proxies={}, aio=True, cpath="",asyncsize=1,timeout=5,interval=300) -> None:
-        super().__init__(proxyThread, URL, proxyheaders, proxies, aio, cpath,interval)
+    def __init__(self, proxyThread=True, URL="https://www.google.com", headers={},proxyheaders={}, proxies={}, aio=True, cpath="",asyncsize=1,timeout=5,interval=300,cookies=False) -> None:
+        super().__init__(proxyThread, URL, proxyheaders, proxies, aio, cpath,interval,cookies)
         self.asyncsize=asyncsize
         self.headers = {}
         self.headerlist = headers
