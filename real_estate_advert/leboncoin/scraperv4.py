@@ -207,7 +207,7 @@ class LeboncoinScraper:
         #     # 'Accept-Encoding': 'gzip',
         # }
         res = await self.fetch("https://api.leboncoin.fr/finder/search",headers=self.headers,json=parameter)
-        self.pc= (self.pc+1)
+        self.pc= (self.pc+1) % 5
         if self.autoSave:
             await self.saveAds(res,onlyid=onlyid)
         return res
