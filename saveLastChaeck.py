@@ -48,7 +48,12 @@ def saveLastCheck(website,nowtime):
         topic = f"activeid-{website}"
         if checkBehindMessages(topic,session)<=0:break
         time.sleep(10)
-    response = es.update_by_query(index=commonIndex, body=update_query,wait_for_completion=False)
+    while True:
+        try:
+            response = es.update_by_query(index=commonIndex, body=update_query,wait_for_completion=False)
+            break
+        except:pass
+        
     data = {
         "website":website,
         "lastcheck":nowtime,
