@@ -495,7 +495,7 @@ def rescrap_LeboncoinActiveId_task():
 # rescrap_logicImmoActiveId_task.apply_async()
 # rescrap_GensdeconfianceActiveId_task.apply_async()
 # rescrap_OuestFranceActiveId_task.apply_async()
-rescrap_LeboncoinActiveId_task.apply_async()
+# rescrap_LeboncoinActiveId_task.apply_async()
 # 4 website 1 Core = 4 Core CPU
 
 
@@ -524,4 +524,4 @@ def setup_periodic_tasks(sender, **kwargs):
     # Calls update_logicImmo_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_gensdeconfianceScrapper_ads.s(), name='update gensdeconfiance ads every 20 minuts')
     # Calls check bienci active add every week
-    sender.add_periodic_task(24*60*7, rescrap_bienciActiveId_task.s(), name='check bienci active add every week')
+    # sender.add_periodic_task(24*60*7, rescrap_bienciActiveId_task.s(), name='check bienci active add every week')

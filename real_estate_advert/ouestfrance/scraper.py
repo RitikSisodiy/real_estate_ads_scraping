@@ -189,9 +189,7 @@ class OuestFranceScraper:
             # retrydic[iniinterval[0]] +=1
             print(f"\r{totalresult}-{maxresult}:::: of  {finalresult}==>{iniinterval} {maxprize} {low} no of filter",end="")
             # print(totalresult,"-",maxresult,"::::",acres ," of ", finalresult,"==>",iniinterval)
-        filterurllist+=json.dumps(iniinterval)
-        finalresult +=totalresult
-        filterurllist = [json.loads(query) for query in filterurllist.split("/n/:")]
+        self.CrawlOuestfrance(dic.copy(),onlyid)
 
     def getLastUpdate(self):
         try:

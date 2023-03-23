@@ -300,7 +300,7 @@ params  = {
 def main_scraper(payload,update=False):
     data = params
     adtype = payload.get("real_state_type")
-    ob = gensdeconfiance(True,{},False,data,5)
+    ob = gensdeconfiance(True,{},True,data,5)
     try:
         if adtype == "Updated/Latest Ads" or update:
             print(" latedst ads")
