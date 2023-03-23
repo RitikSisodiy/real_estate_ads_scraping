@@ -35,6 +35,7 @@ from celery_singleton import clear_locks
 from celery_singleton import Singleton
 from celery.exceptions import SoftTimeLimitExceeded
 dotenv.load_dotenv()
+worker_concurrency = 20
 celery_app = Celery(TaskQueue, backend=CeleryBackend, broker=CeleryBroker)
 celery_app.config_from_object(__name__)
 runningTasks = set()
