@@ -131,7 +131,7 @@ class OuestFranceScraper:
     def genFilter(self,parameter={},onlyid=False,low="prix_min",max="prix_max"):
         if parameter:
             dic = parameter.copy()
-        else:parameter = self.paremeter.copy()
+        else:dic = self.paremeter.copy()
         # totalresult = getTotalResult(session,dic)
         # acres = totalresult
         # dic['recherche[produit]']=typ
