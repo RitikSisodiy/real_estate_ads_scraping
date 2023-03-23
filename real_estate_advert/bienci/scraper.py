@@ -429,20 +429,23 @@ def main_scraper(payload):
     if payload.get("real_state_type") == "Updated/Latest Ads":
         res = UpdateBienci()
         return res
-    param  = {
-    "size":pageSize,
-    "from":0,
-    "showAllModels":False,
-    "filterType":"buy",
-    "propertyType":["house","flat"],
-    "newProperty":False,
-    "page":1,
-    "sortBy":"relevance",
-    "sortOrder":"desc",
-    "onTheMarket":[True],
-    }
-    genFilter(param,typ="buy")
-    genFilter(param,typ="rent")
+    elif payload.get("real_state_type") == "deletedCheck":
+        rescrapActiveId()
+    else:
+        param  = {
+        "size":pageSize,
+        "from":0,
+        "showAllModels":False,
+        "filterType":"buy",
+        "propertyType":["house","flat"],
+        "newProperty":False,
+        "page":1,
+        "sortBy":"relevance",
+        "sortOrder":"desc",
+        "onTheMarket":[True],
+        }
+        genFilter(param,typ="buy")
+        genFilter(param,typ="rent")
 if __name__ == "__main__":
     # asyncio.run(main())
     param  = {

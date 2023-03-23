@@ -31,6 +31,7 @@ class RealStateType(str, Enum):
     sale = "sale"
     rental = "rental"
     latest = "Updated/Latest Ads"
+    deletedCheck = "deletedCheck"
 
 
 class PropertyType(str, Enum):

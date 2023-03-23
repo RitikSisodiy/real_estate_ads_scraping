@@ -294,6 +294,8 @@ def main_scraper(payload,update=False):
         ob = OuestFranceScraper(data,timeout=10)
         print("updateing latedst ads")
         ob.updateLatestAd()
+    elif payload.get("real_state_type") == "deletedCheck":
+        rescrapActiveId()
     else:
         ob = OuestFranceScraper(data,timeout=30)
         ob.genFilter()

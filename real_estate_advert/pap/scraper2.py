@@ -323,6 +323,9 @@ def pap_scraper(payload):
     if typ == "Updated/Latest Ads":
         UpdatePap()
         return 0
+    elif payload.get("real_state_type") == "deletedCheck":
+        rescrapActiveId()
+        return 
     if typ=="rental":typ="location"
     else: typ = "vente"
     ob= PapScraper(dic,proxy=False)

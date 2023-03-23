@@ -305,6 +305,8 @@ def main_scraper(payload,update=False):
         if adtype == "Updated/Latest Ads" or update:
             print(" latedst ads")
             ob.updateLatestAd()
+        elif payload.get("real_state_type") == "deletedCheck":
+            rescrapActiveId()
         else:
             # print("pass")
             # print(ob.headers)

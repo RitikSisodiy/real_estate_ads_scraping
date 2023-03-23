@@ -372,6 +372,8 @@ def leboncoinAdScraper(payload):
         return asyncio.run(CheckId(id))
     if typ == "Updated/Latest Ads":
         asyncio.run(updateLebonCoin())
+    elif payload.get("real_state_type") == "deletedCheck":
+        rescrapActiveId()
     else:
         asyncio.run(ScrapLebonCoin())
 def rescrapActiveIdbyType():

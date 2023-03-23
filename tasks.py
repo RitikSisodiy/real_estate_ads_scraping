@@ -25,6 +25,7 @@ from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealou
 from real_estate_advert.avendrealouer.scraper import rescrapActiveId as rescrapAvendrealouerActiveId
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
 from celery import Celery
+from celery.schedules import crontab
 from celery.signals import task_received,task_prerun,task_postrun
 from celery.result import AsyncResult
 from settings import *
@@ -423,7 +424,7 @@ def rescrap_bienciActiveId_task():
         traceback.print_exc()
         print("Exception ==============>", e)
 @celery_app.task(base=Singleton,name="rescrap Avendrealouer activeid")
-def rescrap_AvendrealouerbienciActiveId_task():
+def rescrap_AvendrealouerActiveId_task():
     try:
         rescrapAvendrealouerActiveId()
     except Exception as e:
@@ -504,24 +505,43 @@ def setup_periodic_tasks(sender, **kwargs):
     print("rnnnint periodic tasks")
     # Calls update_leboncoin_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_leboncoin_ads.s(), name='update leboncoin ads in every 20 minuts')
-    # sender.add_periodic_task(10, update_test_ads.s(), name='update leboncoin ads in every 20 minuts')
+    # recscrap active ad id leboncoin every week
+    sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_LeboncoinActiveId_task.s(), name='checj leboncoin ads id in every week')
     # Calls update_peruvendu_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_paruvendu_ads.s(), name='update paruvendu ads every 20 minuts')
+    # recscrap active ad id paruvendu every week
+    sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_paruvenduActiveId_task.s(), name='checj paruvendu ads id in every week')
     # # Calls update_pap_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_pap_ads.s(), name='update pap ads every 20 minuts')
+    # recscrap active ad id pap every week
+    sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_papActiveId_task.s(), name='checj pap ads id in every week')
     # Calls update_seloger_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_seloger_ads.s(), name='update seloger ads every 20 minuts')
+    # recscrap active ad id Seloger every week
+    sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_SelogerActiveId_task.s(), name='checj Seloger ads id in every week')
     # Calls update_Bienci_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_Bienci_ads.s(), name='update Bienci ads every 20 minuts')
+    # recscrap active ad id bienci every week
+    sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_bienciActiveId_task.s(), name='checj bienci ads id in every week')
     # Calls update_logicImmo_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_logicImmo_ads.s(), name='update logicImmo ads every 20 minuts')
+    # recscrap active ad id logicImmo every week
+    sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_logicImmoActiveId_task.s(), name='checj logicImmo ads id in every week')
     # Calls update_logicImmo_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_lefigaro_ads.s(), name='update lefigaro ads every 20 minuts')
+    # recscrap active ad id Lefigaro every week
+    sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_LefigaroActiveId_task.s(), name='checj Lefigaro ads id in every week')
     # Calls update_logicImmo_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_avendrealouer_ads.s(), name='update avendrealouer ads every 20 minuts')
+    # recscrap active ad id Avendrealouer every week
+    sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_AvendrealouerActiveId_task.s(), name='checj Avendrealouer ads id in every week')
     # Calls update_logicImmo_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_OuestFranceScrapper_ads.s(), name='update OuestFranceScrapper ads every 20 minuts')
+    # recscrap active ad id OuestFrance every week
+    sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_OuestFranceActiveId_task.s(), name='checj OuestFrance ads id in every week')
     # Calls update_logicImmo_ads in every 20 minutes
     sender.add_periodic_task(20*60, update_gensdeconfianceScrapper_ads.s(), name='update gensdeconfiance ads every 20 minuts')
+    # recscrap active ad id Gensdeconfiance every week
+    sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_GensdeconfianceActiveId_task.s(), name='checj Gensdeconfiance ads id in every week')
     # Calls check bienci active add every week
     # sender.add_periodic_task(24*60*7, rescrap_bienciActiveId_task.s(), name='check bienci active add every week')

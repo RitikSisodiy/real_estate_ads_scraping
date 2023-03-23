@@ -435,6 +435,8 @@ def main_scraper(payload,update=False):
             print(" latedst ads")
             ob.updateLatestAd("rental")
             ob.updateLatestAd("sale")
+        elif payload.get("real_state_type") == "deletedCheck":
+            rescrapActiveId()
         else:
             ob = SelogerScraper(data,asyncsize=10)
             ob.CrawlSeloger(adtype)

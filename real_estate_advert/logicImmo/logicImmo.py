@@ -396,6 +396,8 @@ def main_scraper(payload,update=False):
             ob = LogicImmoScraper(data,asyncsize=1,timeout=10)
             print("updateing latedst ads")
             return str(ob.updateLatestAd("rental")) +","+ str(ob.updateLatestAd("sale"))
+        elif payload.get("real_state_type") == "deletedCheck":
+            rescrapActiveId()
         else:
             ob = LogicImmoScraper(data,asyncsize=1,timeout=30)
             ob.CrawlSeloger(adtype)

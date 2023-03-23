@@ -210,6 +210,8 @@ def main_scraper(payload):
     adtype = payload["real_state_type"]
     if adtype == "Updated/Latest Ads":
         UpdateParuvendu()
+    elif payload.get("real_state_type") == "deletedCheck":
+        rescrapActiveId()
     else:
         asyncio.run(main(adtype))
 def getLastUpdates():
