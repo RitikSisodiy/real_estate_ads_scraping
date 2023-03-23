@@ -23,7 +23,7 @@ cpath =os.path.dirname(__file__) or "."
 producer = AsyncKafkaTopicProducer()
 KafkaTopicName = 'leboncoin-data_v1'
 commonAdsTopic= "common-ads-data_v1"
-website= "seloger.com"
+website= "leboncoin.com"
 commonIdUpdate = f"activeid-{website}"
 def now_time_int():
     dateobj = datetime.now()
@@ -84,11 +84,12 @@ class LeboncoinScraper:
                 await self.waitgetProxyList()
         except:
             await self.waitgetProxyList()
-        self.proxy = {self.pc :await self.getRandomProxy()}
+        self.proxy = {}
+        self.asyncSession = {}
+        await self.changeSessionProxy()
         if proxyThread:self.proxyUpdateThread()
         self.session = requests.session()
         # connector = ProxyConnector.from_url("http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225")
-        self.asyncSession = aiohttp.ClientSession()
         self.parameter = parameter
         # self.updateCookies()
         self.autoSave = True
@@ -147,7 +148,8 @@ class LeboncoinScraper:
         self.proc.start()
     async def fetch(self,url,method = "POST",**kwargs):
         kwargs["ssl"] = False
-        self.proxy[self.pc] = self.proxy.get(self.pc) or await self.getRandomProxy()
+        # self.proxy[self.pc] = self.proxy.get(self.pc) or await self.getRandomProxy()
+        if not self.asyncSession.get(self.pc):await self.changeSessionProxy()
         if kwargs.get("headers"):
             kwargs["headers"] = {
                 **kwargs.get("headers"),
@@ -156,13 +158,13 @@ class LeboncoinScraper:
         try:
             print(self.proxy[self.pc])
             if method == "GET":
-                async with self.asyncSession.get(url,proxy=self.proxy[self.pc]["http"],timeout=15,**kwargs) as r:
+                async with self.asyncSession[self.pc].get(url,proxy=self.proxy[self.pc]["http"],timeout=15,**kwargs) as r:
                     if r.status==200:
                         return True
                     if r.status == 410 or r.status ==404:
                         return False
                     return await self.fetch(url,method=method,**kwargs)
-            async with self.asyncSession.post(url,proxy=self.proxy[self.pc]["http"],timeout=15,**kwargs) as r:
+            async with self.asyncSession[self.pc].post(url,proxy=self.proxy[self.pc]["http"],timeout=15,**kwargs) as r:
                 print(r)
                 if r.status==200:
                     return await r.json()
@@ -179,10 +181,11 @@ class LeboncoinScraper:
     async def changeSessionProxy(self):
         # connector = ProxyConnector.from_url("http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225")
         # self.asyncSession.delete()
-        await self.asyncSession.close()
+        try:await self.asyncSession[self.pc].close()
+        except:pass
         self.proxy[self.pc] = await self.getRandomProxy()
         connector = ProxyConnector()
-        self.asyncSession = aiohttp.ClientSession(connector=connector, request_class=ProxyClientRequest)
+        self.asyncSession[self.pc] = aiohttp.ClientSession(connector=connector, request_class=ProxyClientRequest)
     def updateCookies(self):
         self.headers['Cookie'] = ";".join([(f"{key}={val}") for key,val in self.cookies.items()])
         with open("cookies.txt",'w') as file:
@@ -204,7 +207,7 @@ class LeboncoinScraper:
         #     # 'Accept-Encoding': 'gzip',
         # }
         res = await self.fetch("https://api.leboncoin.fr/finder/search",headers=self.headers,json=parameter)
-        self.pc= (self.pc+1)%5
+        self.pc= (self.pc+1)
         if self.autoSave:
             await self.saveAds(res,onlyid=onlyid)
         return res
@@ -373,7 +376,7 @@ def leboncoinAdScraper(payload):
         asyncio.run(ScrapLebonCoin())
 def rescrapActiveIdbyType():
     data = json.load(open(f'{cpath}/filter.json','r'))
-    asyncio.run(ScrapLebonCoin(data= data,onlyid=False))
+    asyncio.run(ScrapLebonCoin(data= data,onlyid=True))
 def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
