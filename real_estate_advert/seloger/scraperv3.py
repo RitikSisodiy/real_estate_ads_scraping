@@ -435,4 +435,5 @@ def main_scraper(payload,update=False):
             ob = SelogerScraper(data,asyncsize=10)
             ob.CrawlSeloger(adtype)
     finally:
-        ob.__del__()
+        try:ob.__del__()
+        except:pass
