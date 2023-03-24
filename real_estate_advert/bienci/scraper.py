@@ -1,25 +1,24 @@
-import asyncio
 from datetime import datetime,timedelta
 import json
 import os
 import urllib.parse
-import sys
 import traceback
 import requests
 import concurrent.futures
 from HttpRequest.requestsModules import HttpRequest
 from .parser import ParseBienici
-from requests_html import AsyncHTMLSession,HTMLSession
-import random
+from requests_html import HTMLSession
+import settings
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 try:
     from fetch import fetch
 except:
     from .fetch import fetch
 pageSize = 499
-kafkaTopicName = "bienici_data_v1"
-commanTopicName = "common-ads-data_v1"
-commonIdUpdate = "activeid-bienici.com"
+website = "bienici.com"
+kafkaTopicName = settings.KAFKA_BIENICI
+commanTopicName = settings.KAFKA_COMMON_PATTERN
+commonIdUpdate = f"activeid-{website}"
 # define your filter here
 cpath =os.path.dirname(__file__) or "." 
 citys = open(f"{cpath}/finalcitys.json",'r').readlines()
@@ -417,7 +416,6 @@ def rescrapActiveIdbyType(Type):
 def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
-    website = "bienici.com"
     # rescrapActiveIdbyType("buy")
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
         futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["buy","rent"]]

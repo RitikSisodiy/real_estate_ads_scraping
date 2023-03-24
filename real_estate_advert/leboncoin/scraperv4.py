@@ -4,13 +4,13 @@ import threading
 import traceback
 from urllib import response
 import urllib.request
-import aiohttp,concurrent.futures
+import aiohttp
 import json
 from datetime import datetime,timedelta
 import time
 import os
 import gzip
-import requests
+import requests,settings
 
 # from .scrapProxy import ProxyScraper
 from HttpRequest.AioProxy import ProxyScraper
@@ -21,8 +21,8 @@ from aiosocksy.connector import ProxyConnector, ProxyClientRequest
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 cpath =os.path.dirname(__file__) or "."
 producer = AsyncKafkaTopicProducer()
-KafkaTopicName = 'leboncoin-data_v1'
-commonAdsTopic= "common-ads-data_v1"
+KafkaTopicName = settings.KAFKA_LEBONCOIN
+commonAdsTopic= settings.KAFKA_COMMON_PATTERN
 website= "leboncoin.com"
 commonIdUpdate = f"activeid-{website}"
 def now_time_int():
@@ -211,52 +211,6 @@ class LeboncoinScraper:
         if self.autoSave:
             await self.saveAds(res,onlyid=onlyid)
         return res
-        jsondata = json.dumps(parameter)
-        jsondataasbytes = jsondata.encode()  
-        print(self.headers)
-        proxy_support = urllib.request.ProxyHandler({"https":"socks4://127.0.0.1:9050"})
-        opener = urllib.request.build_opener(proxy_support)
-        urllib.request.install_opener(opener)
-        req = urllib.request.Request("https://api.leboncoin.fr/finder/search",headers=self.headers)
-        response = urllib.request.urlopen(req, jsondataasbytes)
-        # response = opener.open(req, jsondataasbytes)
-        # response = requests.post(self.searchurl, headers=self.headers, verify=False,json=parameter)
-        time.sleep(random.randint(5, 20))
-        # print(response.status_code)
-        # if response.status_code==200:
-        print(response.getcode())
-        if response.getcode()==200:
-            resheaders = dict(response.headers._headers)
-            # resheaders = response.headers
-            rescookies = resheaders.get('set-cookie')
-            if rescookies:
-                rescookies = rescookies.split(";")
-                for cookie in rescookies:
-                    try:
-                        key,val = cookie.split("=")
-                        self.cookies[key] = val
-                        self.updateCookies()
-                    except:pass
-            # data = response.read()
-            data = gzip.decompress(response.read())
-            # encoding = response.info().get_content_charset()
-            # print(encoding)
-            # data =data.decode("ISO-8859–1")
-            # print(data)
-            res= json.loads(data)
-            if self.autoSave:
-                self.saveAds(res)
-
-            # res= response.json()
-            return res
-        else:
-            print(response.status_code,"some issue do you wanna retry y/n")
-            # ch = input()
-            # if ch=="Y" or ch=="y":
-            time.sleep(300)
-            return self.CrawlLeboncoin(parameter)
-            # else:
-            #     return False
     def checkNext(self,res):
         try:
             next = res['pivot']

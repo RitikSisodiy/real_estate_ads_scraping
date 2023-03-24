@@ -1,5 +1,4 @@
-import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from api import router as real_estate_router
 from settings import API_V1_STR, DEBUG, title

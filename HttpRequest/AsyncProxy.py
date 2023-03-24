@@ -1,5 +1,3 @@
-from asyncio import protocols
-from dataclasses import dataclass
 import json
 import asyncio
 from requests_html import AsyncHTMLSession

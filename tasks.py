@@ -1,7 +1,6 @@
-import os
 import time
 from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
-from real_estate_advert.leboncoin.scraperv4 import updateLebonCoin,leboncoinAdScraper
+from real_estate_advert.leboncoin.scraperv4 import leboncoinAdScraper
 from real_estate_advert.leboncoin.scraperv4 import rescrapActiveId as rescrapLeboncoinActiveId
 from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
 from real_estate_advert.paruvendu.scraperv2 import rescrapActiveId as rescrapParuvenduActiveId
@@ -26,7 +25,7 @@ from real_estate_advert.avendrealouer.scraper import rescrapActiveId as rescrapA
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
 from celery import Celery
 from celery.schedules import crontab
-from celery.signals import task_received,task_prerun,task_postrun
+from celery.signals import task_prerun,task_postrun
 from celery.result import AsyncResult
 from settings import *
 import dotenv

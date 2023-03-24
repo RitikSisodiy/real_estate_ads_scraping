@@ -1,15 +1,13 @@
 
 import random
-from tabnanny import check
 import threading
 import requests
 from xml.dom import ValidationErr
 from seleniumwire import webdriver
-from selenium.webdriver.chrome.options import Options
 from getChrome import getChromePath
 from urllib.parse import urlencode
 import json,os,time,concurrent.futures
-import warnings
+import warnings,settings
 warnings.filterwarnings("ignore", message="Unverified HTTPS request")
 from saveLastChaeck import saveLastCheck
 from  .parser import ParsePap
@@ -19,12 +17,11 @@ from datetime import datetime,timedelta
 from HttpRequest.AioProxy import ProxyScraper
 # except:from .scrapProxy import ProxyScraper
 from HttpRequest.uploader import AsyncKafkaTopicProducer
-from kafka_publisher import KafkaTopicProducer
 # producer = KafkaTopicProducer()
 producer = AsyncKafkaTopicProducer()
 website = "pap.fr"
-kafkaTopicName = "pap_data_v1"
-commanPattern ="common-ads-data_v1"
+kafkaTopicName = settings.KAFKA_PAP
+commanPattern =settings.KAFKA_COMMON_PATTERN
 commonIdUpdate = f"activeid-{website}"
 cpath =os.path.dirname(__file__) or "."
 chrome = getChromePath()
@@ -342,12 +339,11 @@ def rescrapActiveIdbyType(typ):
     if typ=="rental":typ="location"
     else: typ = "vente"
     ob= PapScraper(param,proxy=False)
-    ob.Crawl(typ,True)
+    ob.Crawl(typ,onlyid=True)
     ob.__del__()
 def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
-    # rescrapActiveIdbyType("location")
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
         futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["rental","vente"]]
         for f in futures:print(f)

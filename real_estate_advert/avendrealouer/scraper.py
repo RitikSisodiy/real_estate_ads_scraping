@@ -1,19 +1,18 @@
 from datetime import datetime,timedelta
 from saveLastChaeck import saveLastCheck
-from email import header
-from socket import timeout
 import traceback,concurrent.futures
-import aiohttp
 import asyncio,requests
-import os,sys
+import os
 from requests_html import HTMLSession
 import json,re,time
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 from HttpRequest.requestsModules import HttpRequest
+import settings
 from .parser import ParseAvendrealouer
-kafkaTopicName = "avendrealouer-data_v1"
-commonTopicName = "common-ads-data_v1"
-commonIdUpdate = "activeid-avendrealouer.fr"
+website = "avendrealouer.fr"
+kafkaTopicName = settings.KAFKA_AVENDREALOUER
+commonTopicName = settings.KAFKA_COMMON_PATTERN
+commonIdUpdate = f"activeid-{website}"
 s= HTMLSession()
 pagesize  = 100 # maxsize is 100
 cpath =os.path.dirname(__file__) or "."
@@ -429,7 +428,6 @@ def asyncUpdateParuvendu():
 def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
-    website = "avendrealouer.fr"
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
         futures = excuter.map(main,["rental","sale"],[True,True])
         for f in futures:print(f)

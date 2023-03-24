@@ -3,7 +3,7 @@ import traceback
 import asyncio
 import os,time,concurrent.futures
 from requests_html import HTML
-import json,requests
+import json,requests,settings
 
 from saveLastChaeck import saveLastCheck
 from . getGeolocation import Fetch
@@ -18,8 +18,8 @@ pagesize  = 100 # maxsize is 100
 import json
 import time
 website = "paruvendu.fr"
-kafkaTopicName = 'paruvendu-data_v1'
-commanTopicName = "common-ads-data_v1"
+kafkaTopicName = settings.KAFKA_PARUVENDU
+commanTopicName =settings.KAFKA_COMMON_PATTERN
 commonIdUpdate = f"activeid-{website}"
 def GetUrlFilterdDict(url):
     sdata = url.split("?")

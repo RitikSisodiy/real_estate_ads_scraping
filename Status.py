@@ -1,10 +1,10 @@
-import requests,json
+import json
 from urllib.parse import urlencode
 import aiohttp,asyncio,dotenv,os
 from aiosocksy.connector import ProxyConnector, ProxyClientRequest
-import time
+import time,settings
 dotenv.load_dotenv()
-proxy = os.getenv("Proxy")
+proxy = settings.PROXY
 # proxy = None
 proxy = {'http': proxy,'https': proxy}
 

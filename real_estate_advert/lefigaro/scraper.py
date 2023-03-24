@@ -1,17 +1,16 @@
 from datetime import datetime,timedelta
-from email import header
 import traceback,concurrent.futures
 import aiohttp
 import asyncio
-import os
+import os,settings
 from requests_html import HTMLSession
 import json,re
 
 from saveLastChaeck import saveLastCheck
 from .parser import ParseLefigaro
 from HttpRequest.uploader import AsyncKafkaTopicProducer
-kafkaTopicName = "lefigaro-data_v1"
-commonTopicName = "common-ads-data_v1"
+kafkaTopicName = settings.KAFKA_LEFIGARO
+commonTopicName =settings.KAFKA_COMMON_PATTERN
 website= "immobilier.lefigaro.fr"
 commonIdUpdate = f"activeid-{website}"
 s= HTMLSession()

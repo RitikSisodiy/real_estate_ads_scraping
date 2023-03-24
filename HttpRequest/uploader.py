@@ -1,12 +1,15 @@
-from asyncio import tasks
 from fileinput import filename
 import json
 from aiokafka import AIOKafkaProducer
 import asyncio
 import traceback    
+import settings
 # import sys,os
 # from .s3Client import S3
 # filename=sys.argv[1]
+if not settings.BROKER_IPS:
+    raise ValueError("Please set the BROKER_IPS  variable in settings")
+bootstrap_server = settings.BROKER_IPS
 async def send_one(topic,data,producer):
     # Get cluster layout and initial topic/partition leadership information
     
@@ -45,7 +48,7 @@ async def bulkuploadAdImages(ads,s3client):
     return result
 async def main():
     producer = AIOKafkaProducer(
-        bootstrap_servers=[f"10.8.0.27:9091",f"10.8.0.27:9092", f"10.8.0.27:9093"])
+        bootstrap_servers=bootstrap_server)
     await producer.start()
     with open(filename,'r') as file:
         data = file.readlines()
@@ -64,7 +67,7 @@ async def main():
     await producer.stop()
 async def PushData(data,producer=None):
     if not producer:
-        producer = AIOKafkaProducer(bootstrap_servers=[f"10.8.0.27:9091",f"10.8.0.27:9092", f"10.8.0.27:9093"])
+        producer = AIOKafkaProducer(bootstrap_servers=bootstrap_server)
     await producer.start()
 class AsyncKafkaTopicProducer:
     def __init__(self) -> None:
@@ -73,7 +76,7 @@ class AsyncKafkaTopicProducer:
         # self.producer = asyncio.run(self.statProducer())
         # print(self.producer,"producer started")
     async def statProducer(self):
-        self.producer = AIOKafkaProducer(bootstrap_servers=[f"10.8.0.27:9091",f"10.8.0.27:9092", f"10.8.0.27:9093"])
+        self.producer = AIOKafkaProducer(bootstrap_servers=bootstrap_server)
         await self.producer.start()
         self.start = True
         # return producer
@@ -127,7 +130,7 @@ class AsyncKafkaTopicProducer:
         # await s3client.close()
     async def TriggerPushDataList_v1(self,topic,data):
         tasks = []
-        producer = AIOKafkaProducer(bootstrap_servers=[f"10.8.0.27:9091",f"10.8.0.27:9092", f"10.8.0.27:9093"])
+        producer = AIOKafkaProducer(bootstrap_servers=bootstrap_server)
         await producer.start()
         # s3client = S3(os.getenv("BUCKET_NAME"))
         # data = await bulkuploadAdImages(data,s3client)

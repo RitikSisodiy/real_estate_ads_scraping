@@ -1,7 +1,7 @@
 from datetime import datetime,timedelta
 import requests
 import json
-import urllib
+import urllib,settings
 import os,concurrent.futures
 
 from saveLastChaeck import saveLastCheck
@@ -19,8 +19,8 @@ proxy = {'https': proxyurl, 'http': proxyurl}
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 from HttpRequest.requestsModules import HttpRequest
 cpath =os.path.dirname(__file__) or "."
-kafkaTopicName = "logicImmo_data_v1"
-commonTopicName = "common-ads-data_v1"
+kafkaTopicName = settings.KAFKA_LOGICIMMO
+commonTopicName = settings.KAFKA_COMMON_PATTERN
 website= "logic-immo.com"
 commonIdUpdate = f"activeid-{website}"
 class LogicImmoScraper(HttpRequest):

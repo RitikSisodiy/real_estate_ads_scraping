@@ -1,5 +1,4 @@
 from datetime import datetime
-from email import header
 import traceback
 import aiohttp
 import asyncio

@@ -1,14 +1,13 @@
-from operator import imod
 import os,traceback,requests,time,json
 from datetime import datetime,timedelta
 from tqdm import tqdm
-
+import settings
 from saveLastChaeck import saveLastCheck
 from .parser import ParseOuestfrance
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 cpath =os.path.dirname(__file__) or "."
-kafkaTopicName = "ouestfrance-immo-v1"
-commanPattern ="common-ads-data_v1"
+kafkaTopicName = settings.KAFKA_OUESTFRANCE
+commanPattern =settings.KAFKA_COMMON_PATTERN
 website= "ouestfrance-immo.com"
 commonIdUpdate = f"activeid-{website}"
 class OuestFranceScraper:

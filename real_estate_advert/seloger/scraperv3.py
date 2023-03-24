@@ -1,17 +1,11 @@
 import concurrent.futures
 from datetime import datetime,timedelta
-import imp
-from fastapi import FastAPI
-from pytest import param
-import threading
 import requests
 import json
-import random
 import urllib
-import os
+import os,settings
 
 from saveLastChaeck import saveLastCheck
-from .scrapProxy import ProxyScraper
 from .parser import ParseSeloger
 import traceback
 proxyurl = "http://lum-customer-c_5afd76d0-zone-residential:7nuh5ts3gu7z@zproxy.lum-superproxy.io:22225"
@@ -25,8 +19,8 @@ cpath =os.path.dirname(__file__) or "."
 
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 from HttpRequest.requestsModules import HttpRequest
-kafkaTopicName = "seloger_data_v1"
-commonTopicName = "common-ads-data_v1"
+kafkaTopicName = settings.KAFKA_SELOGER
+commonTopicName = settings.KAFKA_COMMON_PATTERN
 website= "seloger.com"
 commonIdUpdate = f"activeid-{website}"
 class SelogerScraper(HttpRequest):

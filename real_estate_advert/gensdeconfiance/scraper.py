@@ -1,21 +1,20 @@
-from datetime import datetime, timedelta,timezone
+from datetime import datetime, timedelta
 from HttpRequest.requestsModules import okHTTpClient
 from HttpRequest.uploader import AsyncKafkaTopicProducer
 import copy
-import os,json , pytz
+import os,json 
 import rstr
 import random
 from datetime import datetime
-import time
 import concurrent.futures
 import os,json
-import asyncio,requests
-import warnings
+import requests
+import warnings,settings
 warnings.filterwarnings("ignore", message="Unverified HTTPS request")
 from saveLastChaeck import saveLastCheck
 from .parser import ParseGensdeconfiance
-kafkaTopicName = "gensdeconfiance_data_v1"
-commonTopicName = "common-ads-data_v1"
+kafkaTopicName = settings.KAFKA_GENSDECONFIANCE
+commonTopicName = settings.KAFKA_COMMON_PATTERN
 website= "gensdeconfiance.com"
 commonIdUpdate = f"activeid-{website}"
 class gensdeconfiance(okHTTpClient):
