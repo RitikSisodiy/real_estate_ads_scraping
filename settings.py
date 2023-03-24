@@ -1,4 +1,6 @@
 import os
+import dotenv
+dotenv.load_dotenv()
 """
 
 APP settings
@@ -9,7 +11,7 @@ DEBUG = True
 
 """ Kafka Publisher Configurations """
 
-BROKER_IPS = [f"10.8.0.27:9091",f"10.8.0.27:9092", f"10.8.0.27:9093"]
+BROKER_IPS = os.getenv("BROKER_IPS") and os.getenv("BROKER_IPS").split(",") 
 TIMEOUT = 60
 CRAWLER_SOCKS_PROXY_HOST = '127.0.0.1'
 """Celery configurations """
@@ -21,17 +23,17 @@ CeleryBackend = 'redis://localhost:6379/0'
 CeleryBroker = f'redis://localhost:6379/0'
 
 # s3 Client 
-REGION_NAME="" 
-BUCKET_NAME=""
+REGION_NAME=os.getenv("REGION_NAME")
+BUCKET_NAME=os.getenv("BUCKET_NAME")
 
 # ES Client
 
-ES_HOSTS = ["https://node-1.kifwat.net:9200","https://node-3.kifwat.net:9200","https://node-4.kifwat.net:9200"]
-ES_USER = "elastic"
-ES_PASSWORD  = "p1a9tYGpvMxyHpj-_Fsx"
+ES_HOSTS = os.getenv("BROKER_IPS").split(",")
+ES_USER =  os.getenv("ES_USER")
+ES_PASSWORD  = os.getenv("ES_PASSWORD")
 
 # Proxy
-PROXY = os.getenv("Proxy")
+PROXY = os.getenv("PROXY")
 
 # KAFKA TOPICS
 KAFKA_COMMON_PATTERN = "common-ads-data_v1"

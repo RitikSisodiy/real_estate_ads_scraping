@@ -66,3 +66,15 @@ Python 3.7+, pip and git
   Example
   10.8.0.27:8000/docs
     ```
+note make sure to create .env file of set enviorment variable
+````# KAFKA
+BROKER_IPS=<host>:<port>,<host>:<port>
+# s3 Client 
+REGION_NAME= 
+BUCKET_NAME=
+# ES Client
+ES_HOSTS=<host>:<port>,<host>:<port>
+ES_USER=<username>
+ES_PASSWORD=<passworkd>
+# Proxy
+Proxy=<proxyurl>````
