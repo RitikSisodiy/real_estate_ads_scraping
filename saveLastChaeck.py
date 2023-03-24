@@ -8,7 +8,6 @@ cred = {
     "hosts":["https://node-1.kifwat.net:9200","https://node-3.kifwat.net:9200","https://node-4.kifwat.net:9200"],
     "http_auth":('elastic', 'p1a9tYGpvMxyHpj-_Fsx')
 }
-es = Elasticsearch(**cred)
 session = requests.session()
 def checkBehindMessages(topic,session):
     url = f"https://kafka.kifwat.net/api/clusters/kifwat-kafka/topics/{topic}/consumer-groups"
@@ -50,9 +49,12 @@ def saveLastCheck(website,nowtime):
         time.sleep(10)
     while True:
         try:
+            es = Elasticsearch(**cred)
             response = es.update_by_query(index=commonIndex, body=update_query,wait_for_completion=False)
+            es.close()
             break
         except:pass
+        finally:es.close()
         
     data = {
         "website":website,
