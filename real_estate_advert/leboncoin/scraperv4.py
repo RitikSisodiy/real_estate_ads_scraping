@@ -222,11 +222,14 @@ class LeboncoinScraper:
     async def IntCrawling(self,onlyid=False):
         self.autoSave = True
         res = await self.CrawlLeboncoin(onlyid=onlyid)
+        totalcount = res.get("total")
+        scrapedCount = len(res.get("ads"))
         nextpage = self.checkNext(res)
-        while nextpage:
+        while nextpage and scrapedCount<=totalcount:
             print(nextpage)
             self.parameter['pivot'] = nextpage
             res = await self.CrawlLeboncoin(onlyid=onlyid)
+            scrapedCount += len(res.get("ads"))
             nextpage = self.checkNext(res)
     async def saveAds(self,res,onlyid=False):
         ads = res.get('ads')
