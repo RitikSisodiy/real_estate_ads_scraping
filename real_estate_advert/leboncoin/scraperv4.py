@@ -343,9 +343,9 @@ def rescrapActiveId():
     # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
     #     futures = [excuter.submit(ScrapLebonCoin, onlyid=True) for i in ["rental","sale"]]
     #     for f in futures:print(f)
-    rescrapActiveIdbyType()
+    try:rescrapActiveIdbyType()
     # print("complited")
-    saveLastCheck(website,nowtime.isoformat())
+    finally:saveLastCheck(website,nowtime.isoformat())
 if __name__=="__main__":
     data = json.load(open(f'{cpath}/filter.json','r'))
     ob = LeboncoinScraper(data,"newout1")

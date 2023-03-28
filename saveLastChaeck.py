@@ -1,5 +1,4 @@
 from HttpRequest.uploader import AsyncKafkaTopicProducer
-producer = AsyncKafkaTopicProducer()
 import requests,time
 import settings
 from elasticsearch import Elasticsearch
@@ -21,6 +20,7 @@ def checkBehindMessages(topic,session):
 commonIdUpdate = "common-ads-portal-lastcheck"
 # This function is used to update the last check time of all ads for a given website.
 def saveLastCheck(website,nowtime):
+    producer = AsyncKafkaTopicProducer()
      # creating an update query to mark all ads with a last_check time less than nowtime as inactive
     update_query = {
         "script": {
@@ -48,6 +48,11 @@ def saveLastCheck(website,nowtime):
         }
     }
     # checking the messages behind the Kafka topic consumer group before updating the ads
+    data = {
+        "website":website,
+        "lastcheck":nowtime,
+    }
+    producer.PushDataList(commonIdUpdate,[data])
     while True:
         topic = f"activeid-{website}"
         if checkBehindMessages(topic,session)<=0:break
@@ -63,10 +68,6 @@ def saveLastCheck(website,nowtime):
         finally:es.close()
 
     # pushing a message to the common-ads-portal-lastcheck Kafka topic with the updated last check time information   
-    data = {
-        "website":website,
-        "lastcheck":nowtime,
-         "task_id" :response['task']
-    }
+    data["task_id"] =response['task']
     producer.PushDataList(commonIdUpdate,[data])
-   
+    
