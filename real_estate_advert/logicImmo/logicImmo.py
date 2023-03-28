@@ -358,8 +358,10 @@ class LogicImmoScraper(HttpRequest):
         else:
             return fetchedads
     def CrawlSeloger(self,adtype,onlyid=False):
-        param = self.paremeter
-        if not onlyid :self.createNewUpdate(adtype.copy(),latestad=None)
+        param = self.paremeter.copy()
+        if adtype=="sale":param["listingSearchCriterias"]["transactionTypesIds"]=[1,4,5,11]
+        else:param["listingSearchCriterias"]["transactionTypesIds"] = [2,3] 
+        if not onlyid :self.createNewUpdate(adtype,latestad=None)
         self.Crawlparam(param,onlyid=onlyid)
         # filterlist= self.genFilter(adtype)
         # for Filter in filterlist:
