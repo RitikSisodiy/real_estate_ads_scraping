@@ -182,8 +182,8 @@ class LogicImmoScraper(HttpRequest):
         return flist
     def genFilter(self,adtype):
         dic = self.paremeter
-        if adtype=="sale":dic["listingSearchCriterias"]["transactionTypesIds"]=[3]
-        else:dic["listingSearchCriterias"]["transactionTypesIds"] = 1
+        if adtype=="sale":dic["listingSearchCriterias"]["transactionTypesIds"]=[1,4,5,11]
+        else:dic["listingSearchCriterias"]["transactionTypesIds"] = [2,3]
         totalresult =self.getTotalResult(dic)
         print(totalresult)
         acres = totalresult
@@ -237,8 +237,8 @@ class LogicImmoScraper(HttpRequest):
             return {}
     def getlatestAd(self,adtype):
         param = self.paremeter
-        if adtype=="sale":param["listingSearchCriterias"]["transactionTypesIds"]=[1]
-        else:param["listingSearchCriterias"]["transactionTypesIds"] = [2] 
+        if adtype=="sale":param["listingSearchCriterias"]["transactionTypesIds"]=[1,4,5,11]
+        else:param["listingSearchCriterias"]["transactionTypesIds"] = [2,3] 
         param["searchParameters"]["sortBy"] =1
         size = param["searchParameters"]["limit"]
         param["searchParameters"]["limit"] =1
@@ -280,8 +280,8 @@ class LogicImmoScraper(HttpRequest):
         res = []
         if updates:
             param = self.paremeter
-            if adtype=="sale":param["listingSearchCriterias"]["transactionTypesIds"]=[1]
-            else:param["listingSearchCriterias"]["transactionTypesIds"] = [2] 
+            if adtype=="sale":param["listingSearchCriterias"]["transactionTypesIds"]=[1,4,5,11]
+            else:param["listingSearchCriterias"]["transactionTypesIds"] = [2,3] 
             param["searchParameters"]["sortBy"] =1
             self.paremeter["searchParameters"]["limit"] = 100
             updated = False
@@ -374,7 +374,7 @@ def CheckId(id):
     return found
 def rescrapActiveIdbyType(typ):
     try:
-        ob = LogicImmoScraper(data,asyncsize=1,timeout=10)
+        ob = LogicImmoScraper(data.copy(),asyncsize=1,timeout=10)
         ob.CrawlSeloger(typ,onlyid=True)
     finally:
         ob.__del__()
