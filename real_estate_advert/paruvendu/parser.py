@@ -49,7 +49,7 @@ def ParseParuvendu(data):
       "title": data.get("title"),
       "description": spec["text"],
       "postal_code": re.search(pinRegx,spec.get("address")).group() if re.search(pinRegx,spec.get("address")) else "",
-      "agency": sellerdetail.get(type)=="PRO",
+      "agency": sellerdetail.get("type")=="PRO",
       "agency_name": sellerdetail.get("company"),
       "agency_details": {
         "address":sellerdetail.get("address"),
