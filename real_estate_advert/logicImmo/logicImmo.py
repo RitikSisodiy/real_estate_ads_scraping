@@ -347,7 +347,8 @@ class LogicImmoScraper(HttpRequest):
         if first:
             ads = ads[:1]
         fetchedads = ads
-        totalpage = int(totalpage/pagesize)+1
+        if pagesize:
+            totalpage = int(totalpage/pagesize)+1
         if first:
             return fetchedads[0]
         if save:self.save(fetchedads,onlyid=onlyid)
