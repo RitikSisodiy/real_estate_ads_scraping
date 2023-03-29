@@ -411,4 +411,5 @@ def main_scraper(payload,update=False):
             ob = LogicImmoScraper(data,asyncsize=1,timeout=30)
             ob.CrawlSeloger(adtype)
     finally:
-        ob.__del__()
+        try:ob.__del__()
+        except:pass
