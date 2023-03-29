@@ -206,7 +206,7 @@ class SelogerScraper(HttpRequest):
             while iniinterval[1]<=maxprice:
                 dic["query"]['minimumPrice'],dic["query"]['maximumPrice'] = iniinterval
                 totalresult = self.getTotalResult(dic)
-                if totalresult < maxresult and maxresult-totalresult<=3000:
+                if totalresult < maxresult and totalresult>0:
                     last = 1
                     dic.update({"pageIndex":page})
                     print(page,dic)
@@ -232,7 +232,7 @@ class SelogerScraper(HttpRequest):
                 # print(iniinterval)
             # yield self.Crawlparam(dic)
             yield [dic],{"onlyid":onlyid,"page":page,"sid":sid}
-            if os.path.isfile(f'{cpath}prev{dic["query"]["transactionType"]}.json','w'):
+            if os.path.isfile(f'{cpath}prev{dic["query"]["transactionType"]}.json'):
                 os.remove(f'{cpath}prev{dic["query"]["transactionType"]}.json','w')
             # filterurllist+=json.dumps(dic)
             finalresult +=totalresult
