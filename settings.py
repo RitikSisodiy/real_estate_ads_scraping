@@ -28,7 +28,7 @@ BUCKET_NAME=os.getenv("BUCKET_NAME")
 
 # ES Client
 
-ES_HOSTS = os.getenv("BROKER_IPS").split(",")
+ES_HOSTS = os.getenv("ES_HOSTS").split(",")
 ES_USER =  os.getenv("ES_USER")
 ES_PASSWORD  = os.getenv("ES_PASSWORD")
 
