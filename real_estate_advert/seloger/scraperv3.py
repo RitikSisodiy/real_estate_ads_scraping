@@ -79,7 +79,7 @@ class SelogerScraper(HttpRequest):
         try:self.proxy[sid] = (init and self.proxy.get(sid)) or self.getRandomProxy()
         except:
             self.getProxyList()
-            return self.init_headers(sid,init)
+            self.init_headers()
         try:
             headers = {
                 "Accept": "application/json",
@@ -100,7 +100,7 @@ class SelogerScraper(HttpRequest):
         except Exception as e :
             print("excepition==============>",e)
             traceback.print_exc(file=self.logfile)
-            return self.init_headers(sid,init)
+            return self.init_headers(sid)
     def GetAdInfo(self,addId:int,sid=0):
         url = f"{ViewAddUrl}{addId}"
         response = self.fetch(url,sid=sid,proxies=self.proxy[sid])
