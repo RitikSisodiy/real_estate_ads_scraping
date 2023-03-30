@@ -414,10 +414,11 @@ def rescrapActiveId():
     nowtime = datetime.now()
     nowtime = nowtime - timedelta(hours=1)
     # main("buy",True)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
-        futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["rental","sale"]]
-        for f in futures:print(f)
-    # rescrapActiveIdbyType("rental")
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
+    #     futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["rental","sale"]]
+    #     for f in futures:print(f)
+    rescrapActiveIdbyType("rental")
+    rescrapActiveIdbyType("sale")
     # print("complited")
     saveLastCheck(website,nowtime.isoformat())
 def main_scraper(payload,update=False):
