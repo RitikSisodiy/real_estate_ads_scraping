@@ -340,6 +340,7 @@ class LogicImmoScraper(HttpRequest):
         pagination = res['pagination']
         pagesize = pagination["pageSize"]
         ads = res['items']
+        if save:self.save(fetchedads,onlyid=onlyid)
         if not allPage:
             return ads
         totalpage = pagination["totalCount"]
@@ -353,7 +354,6 @@ class LogicImmoScraper(HttpRequest):
             totalpage = int(totalpage/pagesize)+1
         if first:
             return fetchedads[0]
-        if save:self.save(fetchedads,onlyid=onlyid)
         if allPage:
             while True:
                 param["searchParameters"]["offset"] += len(ads)
