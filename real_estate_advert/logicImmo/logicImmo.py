@@ -28,7 +28,7 @@ class LogicImmoScraper(HttpRequest):
             "token":"",
             "expiry":0
         }
-    def __init__(self,paremeter,asyncsize=20,timeout = 5,proxy = None) -> None:
+    def __init__(self,paremeter,asyncsize=20,timeout = 5,proxy = None,maxtry=False) -> None:
         cpath =os.path.dirname(__file__) or "."
         self.logfile = open(f"{cpath}/error.log",'a')
         self.timeout = timeout
@@ -36,6 +36,7 @@ class LogicImmoScraper(HttpRequest):
         headers = {
                     'User-Agent': 'okhttp/4.6.0',
                 }
+        self.maxtry = maxtry
         self.producer = AsyncKafkaTopicProducer()
         self.paremeter= paremeter
         super().__init__(True, SELOGER_SECURITY_URL,{}, headers, {}, False, cpath, asyncsize, 5)
@@ -101,7 +102,7 @@ class LogicImmoScraper(HttpRequest):
             time.sleep(1)
             self.init_headers(sid=sid)
             if retry<10:
-                retry+=1
+                if not self.maxtry:retry+=1
                 return self.fetch(url,method=method,sid=sid,retry=retry,**kwargs)
             else:return None
         if r.status_code not in [200,404]:
@@ -379,13 +380,13 @@ def CheckId(id):
 def rescrapActiveIdbyType():
     try:
         readdata = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
-        ob = LogicImmoScraper(readdata.copy(),asyncsize=1,timeout=10)
+        ob = LogicImmoScraper(readdata.copy(),asyncsize=1,timeout=10,maxtry=True)
         ob.CrawlSeloger("rental",onlyid=True)
     finally:
         ob.__del__()
     try:
         readdata = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
-        ob = LogicImmoScraper(readdata.copy(),asyncsize=1,timeout=10)
+        ob = LogicImmoScraper(readdata.copy(),asyncsize=1,timeout=10,maxtry=True)
         ob.CrawlSeloger("sale",onlyid=True)
     finally:
         ob.__del__()
