@@ -233,7 +233,7 @@ class SelogerScraper(HttpRequest):
             # yield self.Crawlparam(dic)
             yield [dic],{"onlyid":onlyid,"page":page,"sid":sid}
             if os.path.isfile(f'{cpath}prev{dic["query"]["transactionType"]}.json'):
-                os.remove(f'{cpath}prev{dic["query"]["transactionType"]}.json','w')
+                os.remove(f'{cpath}prev{dic["query"]["transactionType"]}.json')
             # filterurllist+=json.dumps(dic)
             finalresult +=totalresult
         print(f"{finalresult},{acres}")
