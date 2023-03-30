@@ -79,7 +79,7 @@ class SelogerScraper(HttpRequest):
         try:self.proxy[sid] = (init and self.proxy.get(sid)) or self.getRandomProxy()
         except:
             self.getProxyList()
-            self.init_headers()
+            return self.init_headers()
         try:
             headers = {
                 "Accept": "application/json",
