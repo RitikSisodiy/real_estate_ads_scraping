@@ -378,12 +378,14 @@ def CheckId(id):
     return found
 def rescrapActiveIdbyType():
     try:
-        ob = LogicImmoScraper(data.copy(),asyncsize=1,timeout=10)
+        readdata = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
+        ob = LogicImmoScraper(readdata.copy(),asyncsize=1,timeout=10)
         ob.CrawlSeloger("rental",onlyid=True)
     finally:
         ob.__del__()
     try:
-        ob = LogicImmoScraper(data.copy(),asyncsize=1,timeout=10)
+        readdata = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
+        ob = LogicImmoScraper(readdata.copy(),asyncsize=1,timeout=10)
         ob.CrawlSeloger("sale",onlyid=True)
     finally:
         ob.__del__()
