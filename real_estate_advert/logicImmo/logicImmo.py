@@ -330,7 +330,7 @@ class LogicImmoScraper(HttpRequest):
 
     def Crawlparam(self,param,allPage = True,first=False,save=True,onlyid=False):
         print(param)
-        if allPage:param["searchParameters"]["offset"] = 1
+        if allPage:param["searchParameters"]["offset"] = 0
         # input()
         response = self.fetch(searchurl, method = "post", json=param,)
         if not response:
@@ -340,6 +340,8 @@ class LogicImmoScraper(HttpRequest):
         pagination = res['pagination']
         pagesize = pagination["pageSize"]
         ads = res['items']
+        if not allPage:
+            return ads
         totalpage = pagination["totalCount"]
         print(f"total page {totalpage}")
         # input()
@@ -353,11 +355,10 @@ class LogicImmoScraper(HttpRequest):
             return fetchedads[0]
         if save:self.save(fetchedads,onlyid=onlyid)
         if allPage:
-            for i in range(1,totalpage):
-                param["searchParameters"]["offset"] = (i*pagesize) or 1
-                self.Crawlparam(param,allPage=False,onlyid=onlyid)
-        else:
-            return fetchedads
+            while True:
+                param["searchParameters"]["offset"] += len(ads)
+                ads = self.Crawlparam(param,allPage=False,onlyid=onlyid)
+                if not ads:break
     def CrawlSeloger(self,adtype,onlyid=False):
         param = self.paremeter.copy()
         if adtype=="sale":param["listingSearchCriterias"]["transactionTypesIds"]=[1,4,5,11]
