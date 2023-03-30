@@ -28,7 +28,7 @@ class SelogerScraper(HttpRequest):
             "token":"",
             "expiry":0
         }
-    def __init__(self,paremeter,asyncsize=20,proxyThread=True,proxies = {}) -> None:
+    def __init__(self,paremeter,asyncsize=20,proxyThread=True,proxies = {},maxtry=False) -> None:
         cpath =os.path.dirname(__file__) or "."
         self.logfile = open(f"{cpath}/error.log",'a')
         self.timeout = 5
@@ -44,7 +44,7 @@ class SelogerScraper(HttpRequest):
                 "Connection": "Keep-Alive",
                 "Accept-Encoding": "gzip",
             }
-        super().__init__(proxyThread, SELOGER_SECURITY_URL,{}, headers, proxies, False, cpath, asyncsize, 5)
+        super().__init__(proxyThread, SELOGER_SECURITY_URL,{}, headers, proxies, False, cpath, asyncsize, 5,maxtry=maxtry)
     
     def __exit__(self):
         self.logfile.close()
@@ -406,7 +406,7 @@ def CheckId(id):
 def rescrapActiveIdbyType(Type):
     try:
         data = json.load(open(f"{cpath}/selogerapifilter.json",'r'))
-        ob = SelogerScraper(data,asyncsize=10)
+        ob = SelogerScraper(data,asyncsize=10,maxtry=True)
         ob.genFilter(Type,onlyid =True)
     finally:
         ob.__del__()

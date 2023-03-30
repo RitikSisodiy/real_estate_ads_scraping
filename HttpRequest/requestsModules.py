@@ -81,10 +81,11 @@ class ProxyServer:
     # def __exit__(self):
     #     self.logfile.close()
 class HttpRequest(ProxyServer):
-    def __init__(self, proxyThread=True, URL="https://www.google.com", headers={},proxyheaders={}, proxies={}, aio=True, cpath="",asyncsize=1,timeout=5,interval=300,cookies=False) -> None:
+    def __init__(self, proxyThread=True, URL="https://www.google.com", headers={},proxyheaders={}, proxies={}, aio=True, cpath="",asyncsize=1,timeout=5,interval=300,cookies=False,maxtry=False) -> None:
         super().__init__(proxyThread, URL, proxyheaders, proxies, aio, cpath,interval,cookies)
         self.asyncsize=asyncsize
         self.headers = {}
+        self.maxtry = maxtry
         self.headerlist = headers
         self.timeout = timeout
         self.cpath = cpath
@@ -120,7 +121,7 @@ class HttpRequest(ProxyServer):
             time.sleep(1)
             self.init_headers(sid=sid)
             if retry<10:
-                retry+=1
+                if not self.maxtry: retry+=1
                 return self.fetch(url,method=method,sid=sid,retry=retry,**kwargs)
             else:return None
         if r.status_code not in [200,404,400]:
