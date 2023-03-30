@@ -91,7 +91,7 @@ def ParseAvendrealouer(data):
             "longitude": cordinates.get("lon"),
             "latitude": cordinates.get("lat"),
             "location": f"{cordinates.get('lat')}, {cordinates.get('lon')}",
-            "agency": True if seller.get("type")=="pro" else False,
+            "agency": True if seller.get("pro") else False,
             "agency_name": seller.get('name'),
             "agency_details": {
                 "logo":sellerlogo,
