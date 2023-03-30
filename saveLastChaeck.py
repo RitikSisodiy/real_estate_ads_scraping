@@ -37,6 +37,11 @@ def saveLastCheck(website,nowtime):
                             }
                         },
                         {
+                            "match": {
+                                "available": True
+                            }
+                        },
+                        {
                             "range": {
                                 "last_checked": {
                                     "lte": nowtime
@@ -62,7 +67,7 @@ def saveLastCheck(website,nowtime):
         while True:
             try:
                 es = Elasticsearch(**cred)
-                response = es.update_by_query(index=commonIndex, body=update_query,wait_for_completion=False)
+                response = es.update_by_query(index=commonIndex, body=update_query,wait_for_completion=False,conflicts="proceed")
                 es.close()
                 break
             except:pass
