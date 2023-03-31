@@ -39,7 +39,7 @@ def ParsePap(data):
         caracteristiquesdic[key[0]] = key[1]
       else:
         caracteristiquesdic[key[1]] = key[0]
-    try:price = re.search(r"[0-9.]+",unidecode(data.get("prix"))).group()
+    try:price = re.search(r"[0-9]+",unidecode(data.get("prix"))).group()
     except:price = 0
     area = caracteristiquesdic.get("mA2") or caracteristiquesdic.get("m2") or ""
     if area: area = str(area).replace(",",'.')
