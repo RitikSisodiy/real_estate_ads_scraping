@@ -130,6 +130,7 @@ class HttpRequest(ProxyServer):
             print(kwargs)
             self.init_headers(sid=sid)
             if retry<10:
+                if not self.maxtry: retry+=1
                 retry+=1
                 return self.fetch(url,method=method,sid=sid,retry=retry,**kwargs)
             else:return None
