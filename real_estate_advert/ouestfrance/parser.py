@@ -13,8 +13,10 @@ def getTimeStamp(strtime):
 def getFieldLlstStartWith(start,datadic):
   res = {}
   for key,val in datadic.items():
-    if start in key and val:
-      res[key.replace(start,"").replace("_","")] = str(val)
+    if start in key:
+      if val=="true":val=True
+      if val=="false":val=False
+      res[key+"s"] = bool(val)
   return res
 def getAjency(id):
     reqUrl = f"https://www-api.ouestfrance-immo.com/api/clients/{id}"
