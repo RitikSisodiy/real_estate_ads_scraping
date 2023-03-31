@@ -9,7 +9,10 @@ def getTimeStamp(strtime):
         return int(t.timestamp())
 def ParseSeloger(data):
   now = datetime.now()
-  assetlist = [d.get("label") for d in data.get("features")]
+  assetlist = []
+  if data.get("features"):
+    for d in data.get("features"):
+      if d:assetlist.append(d.get("label") )
   isdata = {
     "Balcon": False,
     "Parking": False,
