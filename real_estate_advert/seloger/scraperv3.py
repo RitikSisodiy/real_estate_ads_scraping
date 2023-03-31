@@ -49,7 +49,7 @@ class SelogerScraper(HttpRequest):
     def __exit__(self):
         self.logfile.close()
     def getToken(self,sid):
-        if SelogerScraper.token and SelogerScraper.token.get("expiry") and SelogerScraper.token.get("expiry") - time.time()<300:
+        if SelogerScraper.token and SelogerScraper.token.get("expiry") and SelogerScraper.token.get("expiry") >time.time():
             return SelogerScraper.token.get('token')
         headers = {
                 "Accept": "application/json",
