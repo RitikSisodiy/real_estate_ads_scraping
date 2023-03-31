@@ -341,7 +341,7 @@ class SelogerScraper(HttpRequest):
         # input()
         print(len(ads),"_total ads+++++++++++++")
         if first:
-            return ads[0]
+            ads = ads[:1]
         try:
             data = {
                     "ini":[param["query"]['minimumPrice'],param["query"]['maximumPrice']],
@@ -369,6 +369,8 @@ class SelogerScraper(HttpRequest):
                     # adlist.append(adInfo)
                 # with open("sampleout4.json",'a') as file:
                 #     file.write(json.dumps(adInfo)+"\n")
+        if first:
+            return fetchedads[0]
         if save:self.save(fetchedads,onlyid)
         if allPage:
             totalpage = 200 if totalpage>200 else totalpage
