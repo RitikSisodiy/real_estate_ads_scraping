@@ -392,7 +392,7 @@ def rescrapActiveIdbyType():
         ob.__del__()
 def rescrapActiveId():
     nowtime = datetime.now()
-    nowtime = nowtime - timedelta(hours=1)
+    nowtime = nowtime - timedelta(hours=5)
     # main("buy",True)
     # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as excuter:
     #     futures = [excuter.submit(rescrapActiveIdbyType, i) for i in ["rental","sale"]]
