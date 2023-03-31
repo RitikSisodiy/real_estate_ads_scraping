@@ -373,15 +373,17 @@ class SelogerScraper(HttpRequest):
             return fetchedads[0]
         if save:self.save(fetchedads,onlyid)
         if allPage:
+            if onlyid:asyncsize = self.asyncsize
+            else:asyncsize = 1
             totalpage = 200 if totalpage>200 else totalpage
             pages = [i for i in range(int(param["pageIndex"])+1,totalpage+1)]
-            pageslist = self.splitListInNpairs(pages,self.asyncsize)
+            pageslist = self.splitListInNpairs(pages,asyncsize)
             futures = []
             for pages in pageslist:
-                with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=asyncsize) as excuter:
                     for i in pages:
                         param["pageIndex"] = i
-                        ssid = i%self.asyncsize
+                        ssid = i%asyncsize
                         futures.append(excuter.submit(self.Crawlparam,param.copy(),allPage=False,sid=ssid,onlyid=onlyid))
                         for f in futures:
                             fetchedads.append(f)
