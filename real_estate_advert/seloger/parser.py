@@ -10,6 +10,8 @@ def getTimeStamp(strtime):
 def ParseSeloger(data):
   now = datetime.now()
   assetlist = []
+  if not data:
+     return data
   if data.get("features"):
     for d in data.get("features"):
       if d:assetlist.append(d.get("label") )
