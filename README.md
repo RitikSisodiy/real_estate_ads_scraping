@@ -79,7 +79,16 @@ A powerful and flexible toolkit for building web scraping.
     celery -A tasks.celery_app beat -l info
     ```
 
-4. To run the script:
+4. To start the Celery-flower monitering
+    ```
+    celery -A tasks.celery_app flower --port=38000
+    ```
+5. To start the seloger token genrater
+    ```
+    java -jar real_estate_advert/seloger/selger.jar
+    ```
+
+5. To run the script:
 
     ```
     cd /apps/KI/real-estate-ads-scraping/ && source env/bin/activate && (uvicorn main:app --host 0.0.0.0 --port 8000 & celery -A tasks.celery_app flower --port=38000 & celery -A tasks.celery_app worker --loglevel=info & celery -A tasks.celery_app beat -l info & java -jar real_estate_advert/seloger/selger.jar)
@@ -106,3 +115,46 @@ Note: Make sure to create .env file or set environment variables.
   * ES_PASSWORD: `<password>`
 * Proxy:
   * Proxy: `<proxyurl>`
+
+
+
+
+# Method 2 
+Real Estate Ads Scraping Docker Image
+This Docker image is used to scrape real estate ads using Python, Celery, and Redis. It includes a Java program for web scraping real estate websites.
+
+### Building the Image
+
+To build the image, run the following command in the directory where the Dockerfile is located:
+
+```
+docker build -t realscraper .
+```
+
+This will create a Docker image with the tag "realscraper".
+
+### Running the Container
+
+To run the container, use the following command:
+
+```
+docker run -it --name realscraper -v /apps/KI/real-estate-ads-scraping:/app -p 38000:38000 -p 8000:8000 --add-host node-2.kifwat.net:10.8.0.44 --add-host node-3.kifwat.net:10.8.0.45 --add-host node-4.kifwat.net:10.8.0.46 --add-host node-1.kifwat.net:10.8.0.43 realscraper
+```
+
+This will run the container with the name "realscraper", map the ports 38000 and 8000 to the host machine, and add the specified hosts. It will also mount the local directory `/apps/KI/real-estate-ads-scraping` to the `/app` directory inside the container.
+
+### Detaching from the Container
+
+To detach from the running container without stopping the process, press `Ctrl+p`, followed by `Ctrl+q`.
+
+### Accessing the Application
+
+Once the container is running, you can access the application at http://localhost:8000. You can also access the Celery Flower monitoring tool at http://localhost:38000.
+
+### Environment Variables
+
+The image defines an environment variable `NAME` which is set to `World` by default. You can change the value of this variable by setting it when running the container, like this:
+
+```
+docker run -it --name realscraper -v /apps/KI/real-estate-ads-scraping:/app -p 38000:38000 -p 8000:8000 --add-host node-2.kifwat.net:10.8.0.44 --add-host node-3.kifwat.net:10.8.0.45 --add-host node-4.kifwat.net:10.8.0.46 --add-host node-1.kifwat.net:10.8.0.43 -e NAME=John realscraper
+``` 
