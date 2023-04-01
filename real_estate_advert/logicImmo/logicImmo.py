@@ -357,6 +357,7 @@ class LogicImmoScraper(HttpRequest):
             return fetchedads[0]
         if allPage:
             while True:
+                param["G"] = ads[-1]["id"].lower()
                 param["searchParameters"]["offset"] += len(ads)
                 ads = self.Crawlparam(param,allPage=False,onlyid=onlyid)
                 if not ads:break
