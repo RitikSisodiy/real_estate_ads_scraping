@@ -2,7 +2,7 @@ from datetime import datetime,timedelta
 import requests
 import json
 import urllib,settings
-import os,concurrent.futures
+import os,uuid
 
 from saveLastChaeck import saveLastCheck
 # from .scrapProxy import ProxyScraper
@@ -357,7 +357,6 @@ class LogicImmoScraper(HttpRequest):
             return fetchedads[0]
         if allPage:
             while True:
-                param["G"] = ads[-1]["id"].lower()
                 param["searchParameters"]["offset"] += len(ads)
                 ads = self.Crawlparam(param,allPage=False,onlyid=onlyid)
                 if not ads:break
@@ -365,6 +364,7 @@ class LogicImmoScraper(HttpRequest):
         param = self.paremeter.copy()
         if adtype=="sale":param["listingSearchCriterias"]["transactionTypesIds"]=[1,4,5,11]
         else:param["listingSearchCriterias"]["transactionTypesIds"] = [2,3] 
+        param["listingSearchCriterias"]["G"] = f"{uuid.uuid4()}"
         if not onlyid :self.createNewUpdate(adtype,latestad=None)
         self.Crawlparam(param,onlyid=onlyid)
         # filterlist= self.genFilter(adtype)
