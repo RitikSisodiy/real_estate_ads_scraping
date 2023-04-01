@@ -2,7 +2,7 @@
     "searchParameters": {
         "limit": 1000,
         "offset": 0,
-        "sortBy": 0
+        "sortBy": 1
     },
     "listingSearchCriterias": {
         "advancedCriteriaIds": [],
