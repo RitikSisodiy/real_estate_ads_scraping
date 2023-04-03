@@ -40,7 +40,7 @@ def ParsePap(data):
       else:
         caracteristiquesdic[key[1]] = key[0]
     try:
-      price = re.findall(r"\b\d+\b",unidecode(data["_source"].get("prix")))
+      price = re.findall(r"\b\d+\b",unidecode(data.get("prix")))
       if price:price= "".join(price)
       else:price = 0
     except:price = 0
