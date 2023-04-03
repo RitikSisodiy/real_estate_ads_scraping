@@ -428,7 +428,7 @@ def main_scraper(payload,update=False):
     try:
         adtype = payload.get("real_state_type")
         if adtype == "Updated/Latest Ads" or update:
-            ob = SelogerScraper(data,asyncsize=5)
+            ob = SelogerScraper(data,asyncsize=5,maxtry=True)
             print(" latedst ads")
             ob.updateLatestAd("rental")
             ob.updateLatestAd("sale")
