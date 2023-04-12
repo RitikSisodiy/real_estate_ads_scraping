@@ -29,8 +29,14 @@ def ParseParuvendu(data):
     else:adtyp="buy"
     area = data.get("title")[data.get("title").rfind("- ")+2:].replace("m²","").strip()
     try:area = int(area)
-    except: area = int(detailV.get("SUR")) if detailV.get("SUR") else 0
-
+    except: area = detailV.get("7770503_90")
+    roomscount = detailT.get("NBP")
+    bedroomscount = detailT.get("9999999_10")
+    if "+" in roomscount:roomscount = roomscount.replace("+","").strip()
+    if "/" in roomscount:roomscount = roomscount[roomscount.find("/")+1:]
+    if "+" in bedroomscount:bedroomscount = bedroomscount.replace("+","").strip()
+    if "/" in bedroomscount:bedroomscount = bedroomscount[bedroomscount.find("/")+1:]
+    
     pinRegx = r'(\d{5}\-?\d{0,4})'
     sdata = {
       "id": data.get("id"),
@@ -42,10 +48,10 @@ def ParseParuvendu(data):
       "declared_habitable_surface": int(detailV.get("SUR")) if detailV.get("SUR") else 0,
       "declared_land_surface": detailT.get("9999999_125"),
       "land_surface": detailT.get("9999999_125"),
-      "declared_rooms": detailT.get("NBP"),
-      "declared_bedrooms": detailT.get("9999999_10"),
-      "rooms": detailT.get("NBP"),
-      "bedrooms": detailT.get("9999999_10"),
+      "declared_rooms": roomscount,
+      "declared_bedrooms": bedroomscount,
+      "rooms": roomscount,
+      "bedrooms": bedroomscount,
       "title": data.get("title"),
       "description": spec["text"],
       "postal_code": re.search(pinRegx,spec.get("address")).group() if re.search(pinRegx,spec.get("address")) else "",
