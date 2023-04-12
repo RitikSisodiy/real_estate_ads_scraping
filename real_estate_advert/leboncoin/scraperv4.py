@@ -239,8 +239,7 @@ class LeboncoinScraper:
         # parseAds = [ParseLeboncoin(ad) for ad in ads]
         # producer.PushDataList(commonAdsTopic,parseAds)
         if onlyid:
-            now = datetime.now()
-            ads = [{"id":ad.get("list_id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
+            ads = parseAds = [ParseLeboncoin(ad) for ad in ads]
             await producer.TriggerPushDataList(commonIdUpdate,ads)
         else:
             await producer.TriggerPushDataList(KafkaTopicName,ads)
