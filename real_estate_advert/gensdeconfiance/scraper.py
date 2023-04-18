@@ -130,8 +130,9 @@ class gensdeconfiance(okHTTpClient):
     def saveAdList(self,adsdata,onlyid=False):
         # producer.PushDataList(kafkaTopicName,adsdata)
         if onlyid:
-            now = datetime.now()
-            ads = [{"id":ad.get("uuid"), "last_checked": now.isoformat(),"available":True} for ad in adsdata]
+            # now = datetime.now()
+            ads = [ParseGensdeconfiance(ad) for ad in adsdata]
+            # ads = [{"id":ad.get("uuid"), "last_checked": now.isoformat(),"available":True} for ad in adsdata]
             self.producer.PushDataList_v1(commonIdUpdate,ads)
         else:
             self.producer.PushDataList(kafkaTopicName,adsdata)

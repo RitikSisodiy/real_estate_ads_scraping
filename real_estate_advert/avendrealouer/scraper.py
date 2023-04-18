@@ -64,8 +64,9 @@ def savedata(resjson,**kwargs):
     ads = resjson["items"]
     producer = kwargs["producer"]
     if kwargs.get("onlyid"):
-        now = datetime.now()
-        ads = [{"id":"aven"+str(ad.get("id")), "last_checked": now.isoformat(),"available":True} for ad in ads]
+        # now = datetime.now()
+        ads = [ParseAvendrealouer(ad) for ad in ads]
+        # ads = [{"id":"aven"+str(ad.get("id")), "last_checked": now.isoformat(),"available":True} for ad in ads]
         producer.PushDataList_v1(commonIdUpdate,ads)
     else:
         producer.PushDataList(kafkaTopicName,ads)

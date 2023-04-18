@@ -318,7 +318,7 @@ class SelogerScraper(HttpRequest):
     def save(self,adslist,onlyid=False):
         if onlyid:
             now = datetime.now()
-            ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in adslist]
+            ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True,"website":"seloger.com"} for ad in adslist]
             self.producer.PushDataList_v1(commonIdUpdate,ads)
         else:
             self.producer.PushDataList(kafkaTopicName,adslist)

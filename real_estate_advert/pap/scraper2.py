@@ -174,9 +174,7 @@ class PapScraper:
         # tasks = [ad['_links']['self']['href'] for ad in ads]
         now = datetime.now()
         if onlyid:
-            adlist = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
-            producer.PushDataList_v1(commonIdUpdate,adlist)
-            return 
+            adlist = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True,"website":"pap.fr"} for ad in ads]
         else:
             adlist = []
             for ad in ads:

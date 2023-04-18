@@ -198,6 +198,7 @@ asyncpage = 10
 def saveRealstateAds(ads,**kwargs):
     producer = kwargs.get("producer")
     if kwargs.get("onlyid"):
+        ads = [ParseBienici(ad) for ad in ads]
         producer.PushDataList_v1(commonIdUpdate,ads)
     else:
         producer.PushDataList(kafkaTopicName,ads)
@@ -222,9 +223,6 @@ def GetAllPages(baseurl,session,first=False,Filter=None,save=True,**kwargs):
         print(f"from===========>{r['from']}")
         if save:
             ads = r['realEstateAds']
-            if kwargs.get("onlyid"):
-                now = datetime.now()
-                ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
             saveRealstateAds(ads,**kwargs)
         else:
             return r["realEstateAds"]
