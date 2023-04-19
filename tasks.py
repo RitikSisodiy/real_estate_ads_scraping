@@ -23,6 +23,7 @@ from real_estate_advert.ouestfrance.scraper import rescrapActiveId as rescrapOue
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 from real_estate_advert.avendrealouer.scraper import rescrapActiveId as rescrapAvendrealouerActiveId
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
+from real_estate_advert.MissingAdFields.MissingFieldsUpdate import updateMissinField
 from celery import Celery
 from celery.schedules import crontab
 from celery.signals import task_prerun,task_postrun
@@ -485,8 +486,15 @@ def rescrap_LeboncoinActiveId_task():
     except Exception as e:
         traceback.print_exc()
         print("Exception ==============>", e)
+@celery_app.task(base=Singleton,name="rescrap missing data in elasticsearch")
+def rescrap_updateMissinField_task():
+    try:
+        updateMissinField()
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ==============>", e)
 
-# rescrap_AvendrealouerbienciActiveId_task.apply_async()
+# rescrap_updateMissinField_task.apply_async()
 # rescrap_bienciActiveId_task.apply_async()
 # rescrap_papActiveId_task.apply_async()
 # rescrap_paruvenduActiveId_task.apply_async()
@@ -543,4 +551,4 @@ def setup_periodic_tasks(sender, **kwargs):
     # recscrap active ad id Gensdeconfiance every week
     sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_GensdeconfianceActiveId_task.s(), name='checj Gensdeconfiance ads id in every week')
     # Calls check bienci active add every week
-    # sender.add_periodic_task(24*60*7, rescrap_bienciActiveId_task.s(), name='check bienci active add every week')
+    sender.add_periodic_task(60*60*24, rescrap_updateMissinField_task.s(), name='rescrap missing fields in From source portal')

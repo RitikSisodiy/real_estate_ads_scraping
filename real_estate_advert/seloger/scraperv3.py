@@ -315,15 +315,32 @@ class SelogerScraper(HttpRequest):
             print("there is no update available l")
     def __del__(self):
         return super().__del__()
-    def save(self,adslist,onlyid=False):
+    def save(self,adslist,onlyid=False,all=False):
         if onlyid:
             now = datetime.now()
-            ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True,"website":"seloger.com"} for ad in adslist]
+            if not all:
+                ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True,"website":"seloger.com"} for ad in adslist]
+            else:
+                ads = [ParseSeloger(ad) for ad in adslist]
             self.producer.PushDataList_v1(commonIdUpdate,ads)
         else:
             self.producer.PushDataList(kafkaTopicName,adslist)
             parseAdList = [ParseSeloger(ad) for ad in adslist]
             self.producer.PushDataList(commonTopicName,parseAdList)
+    def fetchId(self,ids,save=False):
+        adlist = self.splitListInNpairs(ids,self.asyncsize)
+        fetchedads = []
+        for ads in adlist:
+            # time.sleep(2)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
+                adsidlist = ads
+                futures = excuter.map(self.GetAdInfo,adsidlist,[i for i in range(0,len(adsidlist))])
+                for f in futures:
+                    fetchedads.append(f)
+        return fetchedads
+    def updateId(self, ids):
+        adslist = self.fetchId(ids)
+        self.save(adslist)
     def Crawlparam(self,param,allPage = True,first=False,save=True,page=1,sid=0,onlyid=False):
         if allPage:param['pageIndex'] = page
         # input()
@@ -355,15 +372,9 @@ class SelogerScraper(HttpRequest):
         if onlyid:
             fetchedads = ads
         else:
-            adlist = self.splitListInNpairs(ads,self.asyncsize)
-            fetchedads = []
-            for ads in adlist:
-                # time.sleep(2)
-                with concurrent.futures.ThreadPoolExecutor(max_workers=self.asyncsize) as excuter:
-                    adsidlist = [ad["id"] for ad in ads]
-                    futures = excuter.map(self.GetAdInfo,adsidlist,[i for i in range(0,len(adsidlist))])
-                    for f in futures:
-                        fetchedads.append(f)
+            adslist = [ad["id"] for ad in adslist]
+            # fetch the information from id
+            fetchedads = self.fetchId(adslist)
                     # excuter.shutdown(wait=True)
                     # adInfo = self.GetAdInfo(ad["id"])
                     # adlist.append(adInfo)

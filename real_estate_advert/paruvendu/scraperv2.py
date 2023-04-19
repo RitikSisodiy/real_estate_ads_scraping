@@ -20,6 +20,7 @@ import time
 website = "paruvendu.fr"
 kafkaTopicName = settings.KAFKA_PARUVENDU
 commanTopicName =settings.KAFKA_COMMON_PATTERN
+deleteTopicName = settings.KAFKA_DELETE
 commonIdUpdate = f"activeid-{website}"
 def GetUrlFilterdDict(url):
     sdata = url.split("?")
@@ -144,13 +145,17 @@ def fetch(session,url,params = None,method="get",Json=True,retry=0,**kwargs):
     try:
         res = session.fetch(url,params=params)
     except Exception as e:
+        print("exception :",e)
         time.sleep(3)
         return fetch(session,url,params,method,Json=Json,retry=retry,**kwargs)
     try:
         print(res.status_code)
         if Json:response = res.json()
         else:response=res
-    except: return fetch(session,url,params,method,Json=Json,retry=retry,**kwargs)
+    except Exception as e:
+        print(f"json exception = {e}")
+        session.init_headers()
+        return fetch(session,url,params,method,Json=Json,retry=retry,**kwargs)
     return response
 
 def savedata(resjson,**kwargs):
@@ -158,8 +163,7 @@ def savedata(resjson,**kwargs):
     ads = resjson['feed']["row"]
     producer = kwargs["producer"]
     if kwargs.get("onlyid"):
-        now = datetime.now()
-        ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True,"website":"paruvendu.fr"} for ad in ads]
+        ads = [ParseParuvendu(ad) for ad in ads]
         producer.PushDataList_v1(commonIdUpdate,ads)
     else:
         producer.PushDataList(kafkaTopicName,ads)
@@ -215,6 +219,35 @@ def CheckId(id):
     if data and len(data["feed"]["row"])==1:
         return True
     else:return False
+
+class UpdateId:
+    def __init__(self) -> None:
+        self.session = HttpRequest(True,'https://www.paruvendu.fr/communfo/appmobile/default/pa_search_list?itemsPerPage=1',headers,{},{},False,cpath,1,10)
+        self.producer=AsyncKafkaTopicProducer()
+        pass
+    def updateId(self,ids):
+        ads = []
+        deltedAds = []
+        print(ids)
+        for id in ids:
+            params = {
+                "paId": id,
+                "showdetail":1
+            }
+            ad = fetch(self.session,url,params)
+            print("fetched : ", id)
+            if  ad and ad.get("feed") and ad.get("feed").get("@totalResults") == "1":
+                ads.append(ad["feed"]["row"][0])
+            else:
+                deltedAds.append({
+                    "id":id,
+                    "index_name":commanTopicName
+                })
+        resjson = {'feed':{"row":ads}}
+        self.producer.TriggerPushDataList_v1(deleteTopicName,deltedAds)
+        savedata(resjson,producer=self.producer)
+    def __del__(self):
+        self.session.__del__()
 def main(adsType = "",onlyid= False):
     # catid info
     # IVH00000 is for  Vente immobilier 

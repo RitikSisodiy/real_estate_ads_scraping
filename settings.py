@@ -31,6 +31,7 @@ BUCKET_NAME=os.getenv("BUCKET_NAME")
 ES_HOSTS = os.getenv("ES_HOSTS").split(",")
 ES_USER =  os.getenv("ES_USER")
 ES_PASSWORD  = os.getenv("ES_PASSWORD")
+ES_COMMON_TOPIC = "search-common-ads-data_v2"
 
 # Proxy
 PROXY = os.getenv("PROXY")
@@ -47,3 +48,9 @@ KAFKA_OUESTFRANCE = "ouestfrance-immo-v1"
 KAFKA_PAP = "pap_data_v1"
 KAFKA_PARUVENDU = "paruvendu-data_v1"
 KAFKA_SELOGER = "seloger_data_v1"
+KAFKA_DELETE = "Delete_doc_es"
+
+MissingAdFieldsPortals = {
+    "pap.fr",
+    "seloger.com"
+}

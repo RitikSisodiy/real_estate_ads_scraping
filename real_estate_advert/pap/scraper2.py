@@ -167,6 +167,13 @@ class PapScraper:
             self.restartSession()
             return self.fetchJson(url,retry=retry)
         return parsed_json
+    def updateId(self,ids):
+        adlist = []
+        for adid in ids:
+            adurl = f"{self.apiurl}/detail?id={adid}"
+            adinfo = self.fetchJson(adurl)
+            if adinfo:adlist.append(adinfo)
+        self.saveAdList(adlist)
     def save(self,data,onlyid=False):
         ads = data.get("annonces") or []
         # print(ads)

@@ -141,8 +141,10 @@ class AsyncKafkaTopicProducer:
         await producer.stop()
         # await s3client.close()
     def PushDataList(self,topic,data):
+        data = [da for da in data if da]
         asyncio.run(self.TriggerPushDataList(topic,data))
     def PushDataList_v1(self,topic,data):
+        data = [da for da in data if da]
         asyncio.run(self.TriggerPushDataList_v1(topic,data))
 # asyncio.run(main())
 
