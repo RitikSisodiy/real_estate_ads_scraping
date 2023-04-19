@@ -177,8 +177,7 @@ def savedata(resjson,**kwargs):
     # print('saved data')s
 def startCrawling(session,filterParamList,**kwargs):
     for param in filterParamList:
-        if kwargs.get("onlyid"):param['showdetail'] = 0
-        else:param['showdetail'] = 1
+        param['showdetail'] = 1
         param["itemsPerPage"] = pagesize
         data = fetch(session,url,param)
         # data= json.load(res)
