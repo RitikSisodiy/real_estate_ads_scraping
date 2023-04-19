@@ -32,10 +32,10 @@ def ParseParuvendu(data):
     except: area = detailV.get("7770503_90")
     roomscount = detailT.get("NBP")
     bedroomscount = detailT.get("9999999_10")
-    if "+" in roomscount:roomscount = roomscount.replace("+","").strip()
-    if "/" in roomscount:roomscount = roomscount[roomscount.find("/")+1:]
-    if "+" in bedroomscount:bedroomscount = bedroomscount.replace("+","").strip()
-    if "/" in bedroomscount:bedroomscount = bedroomscount[bedroomscount.find("/")+1:]
+    if roomscount and "+" in roomscount:roomscount = roomscount.replace("+","").strip()
+    if roomscount and "/" in roomscount:roomscount = roomscount[roomscount.find("/")+1:]
+    if bedroomscount and "+" in bedroomscount:bedroomscount = bedroomscount.replace("+","").strip()
+    if bedroomscount and "/" in bedroomscount:bedroomscount = bedroomscount[bedroomscount.find("/")+1:]
     
     pinRegx = r'(\d{5}\-?\d{0,4})'
     sdata = {
@@ -95,7 +95,7 @@ def ParseParuvendu(data):
       "dpe": detailT.get("GES"),
       "ges": detailT.get("DPE"),
       "location":"0,0",
-            "last_checked": now.isoformat(),
+      "last_checked": now.isoformat(),
       }
     return sdata
   except:
