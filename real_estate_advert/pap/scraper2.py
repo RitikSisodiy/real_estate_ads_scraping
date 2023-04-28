@@ -21,6 +21,7 @@ from HttpRequest.uploader import AsyncKafkaTopicProducer
 producer = AsyncKafkaTopicProducer()
 website = "pap.fr"
 kafkaTopicName = settings.KAFKA_PAP
+commonIndexName = settings.KAFKA_COMMON_ES_INDEX
 commanPattern =settings.KAFKA_COMMON_PATTERN
 commonIdUpdate = f"activeid-{website}"
 cpath =os.path.dirname(__file__) or "."
@@ -173,7 +174,12 @@ class PapScraper:
             adurl = f"{self.apiurl}/detail?id={adid}"
             adinfo = self.fetchJson(adurl)
             if adinfo:adlist.append(adinfo)
+        scraped = {ad["annonce"]["id"] for ad in adlist if ad.get("annonce")}
+        deleted = scraped.intersection(ids)
         self.saveAdList(adlist)
+        if deleted:
+            deleted = [{"index":commonIndexName,"id":id} for id in deleted]
+            self.producer.PushDataList_v1("Delete_doc_es",deleted)
     def save(self,data,onlyid=False):
         ads = data.get("annonces") or []
         # print(ads)
