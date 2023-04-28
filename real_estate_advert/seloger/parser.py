@@ -7,6 +7,16 @@ def getTimeStamp(strtime):
         # 2022-06-19T05:26:55
         t = datetime.strptime(strtime,formate)
         return int(t.timestamp())
+def getOrNone(dic,path):
+  val = dic
+  try:
+    for i in path.split("."):
+      try:i=int(i)
+      except:pass
+      val= val[i]
+    return val
+  except:
+     return None
 def ParseSeloger(data):
   now = datetime.now()
   assetlist = []
@@ -26,7 +36,7 @@ def ParseSeloger(data):
   for lab in assetlist:
     for k,v in isdata.items():
       if k in lab:isdata[k]=True
-  professionals = data.get("professionals")[0]
+  professionals = (data.get("professionals") or {}) and data.get("professionals")[0]
   # pinRegx = r'(\d{5}\-?\d{0,4})'
   try:
     sdata = {
@@ -46,16 +56,16 @@ def ParseSeloger(data):
         "title": data.get("title"),
         "description": data.get("description"),
         "postal_code":  data.get("zipCode"),
-        "longitude": data['coordinates']['longitude'],
-        "latitude": data['coordinates']['latitude'],
-        "location": f"{data['coordinates']['latitude']}, {data['coordinates']['longitude']}",
-        "agency": True if professionals['type']==1 else False,
-        "agency_name": professionals['name'],
+        "longitude": getOrNone(data,"coordinates.longitude") or "0",
+        "latitude": getOrNone(data,"coordinates.latitude") or "0",
+        "location": f'{getOrNone(data,"coordinates.latitude") or "0"}, {getOrNone(data,"coordinates.longitude") or "0"}',
+        "agency": True if professionals.get('type')==1 else False,
+        "agency_name": professionals.get('name'),
         "agency_details": {
           "address": professionals.get('address'),
           "name": professionals.get("name"),
           "rcs": professionals.get('rcs'),
-          "phone": professionals.get('phoneNumber').replace(" ",""),
+          "phone": professionals.get('phoneNumber') and professionals.get('phoneNumber').replace(" ",""),
           "email": professionals.get('email'),
           "website": professionals.get('website'),
           "url_seloger": professionals.get('url'),
@@ -68,13 +78,13 @@ def ParseSeloger(data):
         "last_checked_at": now.isoformat(),
         "coloc_friendly": False,
         "furnished": any(word in (data.get("description").lower()) for word in ["furnished","meublée","meublé"]),
-        "elevator": isdata["Ascenseur"] or any(word in (data.get("description").lower()) for word in ["elevator","ascenseur"]),
-        "pool": isdata["Piscine"]  or any(word in (data.get("description").lower()) for word in ["piscine","piscina"]),
-        "floor": isdata['Rez-de-chaussée'] or any(word in (data.get("description").lower()) for word in ["estage","floor","étage"]),
-        "balcony": isdata["Balcon"] or any(word in (data.get("description").lower()) for word in ["balcony","balcon",]),
-        "terrace": isdata["Terrasse"] or any(word in (data.get("description").lower()) for word in  ["terrace","terrasse"]),
+        "elevator": isdata.get("Ascenseur") or any(word in (data.get("description").lower()) for word in ["elevator","ascenseur"]),
+        "pool": isdata.get("Piscine")  or any(word in (data.get("description").lower()) for word in ["piscine","piscina"]),
+        "floor": isdata.get('Rez-de-chaussée') or any(word in (data.get("description").lower()) for word in ["estage","floor","étage"]),
+        "balcony": isdata.get("Balcon") or any(word in (data.get("description").lower()) for word in ["balcony","balcon",]),
+        "terrace": isdata.get("Terrasse") or any(word in (data.get("description").lower()) for word in  ["terrace","terrasse"]),
         "insee_code": data.get("zipCode"),
-        "parking": isdata["Parking"] or any(word in (data.get("description").lower()) for word in  ["parking","garage"]),
+        "parking": isdata.get("Parking") or any(word in (data.get("description").lower()) for word in  ["parking","garage"]),
         "images_url": data.get("photos"),
         "is_new": True if data.get("isNew") else False,
         "website": "seloger.com",
@@ -84,12 +94,12 @@ def ParseSeloger(data):
         "last_modified": getTimeStamp(data.get("lastModified")),
         "others": {
           "assets":assetlist,
-          "ges":data.get("energyBalance")["ges"].get("category"),        
-          "dpe":data.get("energyBalance")["dpe"].get("category"),        
+          "ges":getOrNone(data,"energyBalance.ges.category"),        
+          "dpe":getOrNone(data,"energyBalance.dpe.category"),        
         },
         "url": data.get("permalink"),
-        "ges":data.get("energyBalance")["ges"].get("category"),
-        "dpe":data.get("energyBalance")["dpe"].get("category"),
+        "ges":getOrNone(data,"energyBalance.ges.category"),
+        "dpe":getOrNone(data,"energyBalance.dpe.category"),
         "last_checked": now.isoformat(),
       }
   except:
