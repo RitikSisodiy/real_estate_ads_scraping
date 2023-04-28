@@ -9,14 +9,14 @@ def getTimeStamp(strtime):
         return int(t.timestamp())
 def getOrNone(dic,path):
   val = dic
-  # try:
-  for i in path.split("."):
-    try:i=int(i)
-    except:pass
-    val= val[i]
-  return val
-  # except:
-  #    return None
+  try:
+    for i in path.split("."):
+      try:i=int(i)
+      except:pass
+      val= val[i]
+    return val
+  except:
+     return None
 def ParseSeloger(data):
   now = datetime.now()
   assetlist = []
