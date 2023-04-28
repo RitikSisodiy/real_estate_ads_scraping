@@ -341,7 +341,7 @@ class SelogerScraper(HttpRequest):
     def updateId(self, ids):
         adslist = self.fetchId(ids)
         ads = [ad for ad in adslist if ad.get("errorCode")!=404]
-        scraped = {ad["id"] for ad in ads if ads.get("id")}
+        scraped = {ad["id"] for ad in ads if ad.get("id")}
         deleted = scraped.intersection(ids)
         self.save()
         if deleted:
