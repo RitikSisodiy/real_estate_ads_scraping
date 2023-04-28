@@ -179,7 +179,7 @@ class PapScraper:
         self.saveAdList(adlist)
         if deleted:
             deleted = [{"index":commonIndexName,"id":id} for id in deleted]
-            self.producer.PushDataList_v1("Delete_doc_es",deleted)
+            producer.PushDataList_v1("Delete_doc_es",deleted)
     def save(self,data,onlyid=False):
         ads = data.get("annonces") or []
         # print(ads)
