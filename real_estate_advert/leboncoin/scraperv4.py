@@ -240,7 +240,7 @@ class LeboncoinScraper:
         # producer.PushDataList(commonAdsTopic,parseAds)
         if onlyid:
             ads = parseAds = [ParseLeboncoin(ad) for ad in ads]
-            await producer.TriggerPushDataList(commonIdUpdate,ads)
+            await producer.TriggerPushDataList_v1(commonIdUpdate,ads)
         else:
             await producer.TriggerPushDataList(KafkaTopicName,ads)
             parseAds = [ParseLeboncoin(ad) for ad in ads]

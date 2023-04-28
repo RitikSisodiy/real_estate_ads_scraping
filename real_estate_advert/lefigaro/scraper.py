@@ -60,7 +60,7 @@ async def savedata(resjson,**kwargs):
         # now = datetime.now()
         ads = [ParseLefigaro(ad) for ad in ads]
         # ads = [{"id":ad.get("id"), "last_checked": now.isoformat(),"available":True} for ad in ads]
-        await producer.TriggerPushDataList(commonIdUpdate,ads)
+        await producer.TriggerPushDataList_v1(commonIdUpdate,ads)
     else:
         await producer.TriggerPushDataList(kafkaTopicName,ads)
         ads = [ParseLefigaro(ad) for ad in ads]
