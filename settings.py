@@ -38,6 +38,7 @@ PROXY = os.getenv("PROXY")
 
 # KAFKA TOPICS
 KAFKA_COMMON_PATTERN = "common-ads-data_v1"
+KAFKA_COMMON_ES_INDEX = "search-common-ads-data_v2"
 KAFKA_AVENDREALOUER = "avendrealouer-data_v1"
 KAFKA_BIENICI="bienici_data_v1"
 KAFKA_GENSDECONFIANCE = "gensdeconfiance_data_v1"

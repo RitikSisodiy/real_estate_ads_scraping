@@ -21,6 +21,7 @@ from HttpRequest.uploader import AsyncKafkaTopicProducer
 from HttpRequest.requestsModules import HttpRequest
 kafkaTopicName = settings.KAFKA_SELOGER
 commonTopicName = settings.KAFKA_COMMON_PATTERN
+commonIndexName = settings.KAFKA_COMMON_ES_INDEX
 website= "seloger.com"
 commonIdUpdate = f"activeid-{website}"
 class SelogerScraper(HttpRequest):
@@ -345,7 +346,7 @@ class SelogerScraper(HttpRequest):
         deleted = scraped.intersection(ids)
         self.save(ads)
         if deleted:
-            deleted = [{"index":commonTopicName,"id":id} for id in deleted]
+            deleted = [{"index":commonIndexName,"id":id} for id in deleted]
             self.producer.PushDataList_v1("Delete_doc_es",deleted)
     def Crawlparam(self,param,allPage = True,first=False,save=True,page=1,sid=0,onlyid=False):
         if allPage:param['pageIndex'] = page
