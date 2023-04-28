@@ -145,25 +145,11 @@ class AsyncKafkaTopicProducer:
         # await s3client.close()
     async def TriggerPushDataList_v1(self,topic,data):
         tasks = []
-        hashimage = ImageHash()
         producer = AIOKafkaProducer(bootstrap_servers=bootstrap_server)
         await producer.start()
         # s3client = S3(os.getenv("BUCKET_NAME"))
         # data = await bulkuploadAdImages(data,s3client)
-        tasks = []
-        datas = []
         for da in data:
-            tasks.append(asyncio.ensure_future(hashimage.getHashByUrl(da)))
-             # If the number of tasks reaches "size"
-            if len(tasks)>50:
-                # Wait for all tasks to complete
-                datas += await asyncio.gather(*tasks)
-                # Reset the list of tasks
-                tasks = [] 
-        if tasks:
-            datas += await asyncio.gather(*tasks)
-            tasks = []
-        for da in datas:
             da = json.dumps(da)
             tasks.append(asyncio.ensure_future(self.send_one_v1(producer,topic,da)))
         await asyncio.gather(*tasks)
