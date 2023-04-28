@@ -175,7 +175,7 @@ class PapScraper:
             adinfo = self.fetchJson(adurl)
             if adinfo:adlist.append(adinfo)
         scraped = {ad["annonce"]["id"] for ad in adlist if ad.get("annonce")}
-        deleted = scraped.intersection(ids)
+        deleted = scraped.difference(ids)
         self.saveAdList(adlist)
         if deleted:
             deleted = [{"index":commonIndexName,"id":id} for id in deleted]

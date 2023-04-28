@@ -343,7 +343,7 @@ class SelogerScraper(HttpRequest):
         adslist = self.fetchId(ids)
         ads = [ad for ad in adslist if ad.get("errorCode")!=404]
         scraped = {ad["id"] for ad in ads if ad.get("id")}
-        deleted = scraped.intersection(ids)
+        deleted = scraped.difference(ids)
         self.save(ads)
         if deleted:
             deleted = [{"index":commonIndexName,"id":id} for id in deleted]
