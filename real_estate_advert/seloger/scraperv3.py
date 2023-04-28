@@ -343,7 +343,7 @@ class SelogerScraper(HttpRequest):
         ads = [ad for ad in adslist if ad.get("errorCode")!=404]
         scraped = {ad["id"] for ad in ads if ad.get("id")}
         deleted = scraped.intersection(ids)
-        self.save()
+        self.save(ads)
         if deleted:
             deleted = [{"index":commonTopicName,"id":id} for id in deleted]
             self.producer.PushDataList_v1("Delete_doc_es",deleted)
