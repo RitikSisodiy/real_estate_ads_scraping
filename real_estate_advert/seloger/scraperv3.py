@@ -340,7 +340,7 @@ class SelogerScraper(HttpRequest):
         return fetchedads
     def updateId(self, ids):
         adslist = self.fetchId(ids)
-        self.save(adslist)
+        self.save([ad for ad in adslist if ad])
     def Crawlparam(self,param,allPage = True,first=False,save=True,page=1,sid=0,onlyid=False):
         if allPage:param['pageIndex'] = page
         # input()
