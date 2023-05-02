@@ -70,6 +70,16 @@ def ParseAvendrealouer(data):
             url = urld.get("aval").get("url") if urld.get("aval") else ""
             if "http" not in url:
                 url = "https://www.avendrealouer.fr" + url
+        orientation = {
+            1:"Nord",
+            2:"Nord Est",
+            3:"Est",
+            4:"Sud Est",
+            5:"Sud",
+            6:"Sud Ouest",
+            7:"Ouest",
+            8:"Nord Ouest"
+        }
     # try
         sdata = {
             "id":"aven"+str(data.get("id")),
@@ -130,6 +140,19 @@ def ParseAvendrealouer(data):
             "ges":data.get("diagnostics").get("gasSymbol"),
             "dpe":data.get("diagnostics").get("energySymbol"),  
             "last_checked": now.isoformat(),
+
+
+
+            "energyClass":{
+                "dpe":data.get("diagnostics").get("energySymbol"),
+                "ges":data.get("diagnostics").get("gasSymbol"),
+            },
+            "estage":data.get("floorNumber",0),
+            "floorCount": data.get("floorCount",0),
+            "bathrooms":data.get("bathroomsCount",0),
+            "toilets":data.get("restroomsCount"),
+            "yearOfConstruction":data.get("constructionDate","NA"),
+            "exposure":(data.get("orientationIds") or "") and orientation.get(data.get("orientationIds")[0],""),
         }
         return sdata
     except:
