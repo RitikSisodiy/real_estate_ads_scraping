@@ -57,7 +57,6 @@ def ParseBienici(data):
           "last_checked_at": data.get("@timestamp"),
           "elevator": data.get("hasElevator") or any(word in data.get("description").lower() for word in ["elevator","ascenseur"]),
           "pool": bool(data.get("hasPool")) or any(word in data.get("description").lower() for word in ["piscine","piscina"]),
-          "floor": data.get("floorQuantity"),
           "balcony": bool(data.get("balconyQuantity") and int(data.get("balconyQuantity"))) or any(word in data.get("description").lower() for word in ["balcon","balcons","balcony"]),
           "terrace": bool(data.get("terracesQuantity")) or any(word in data.get("description").lower() for word in ["terrace","terrasse",]),
           "insee_code": data.get("district").get("insee_code"),
@@ -74,9 +73,16 @@ def ParseBienici(data):
             **getFieldLlstStartWith("has",data),
           },
           "url":f"https://www.bienici.com/annonce/{data.get('id')}",
-          "ges":"NA",
-          "dpe":"NA",
-            "last_checked": now.isoformat(),
+          "last_checked": now.isoformat(),
+
+
+          "estage":data.get("floor",0),
+          "floorCount": data.get("floorQuantity"),
+          "bathrooms":data.get("bathroomsQuantity",0),
+          "energyClass":{
+            "dpe":data.get("energyClassification","NA"),
+            "ges":data.get("greenhouseGazClassification","NA"),
+          }
         }
     return sdata
   except:
