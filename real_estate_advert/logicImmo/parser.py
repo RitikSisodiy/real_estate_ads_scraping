@@ -93,9 +93,7 @@ def ParseLogicImmo(data):
         "estage":data.get("floor",0),
         "floorCount": data.get("floors",0),
         "bathrooms":data.get("bathrooms",0),
-        "toilets":data.get("restroomsCount"),
-        "yearOfConstruction":data.get("constructionDate","NA"),
-        "exposure":(data.get("orientationIds") or "") and orientation.get(data.get("orientationIds")[0],""),
+        "toilets":data.get("showers",0)
       }
   except:
     traceback.print_exc()
