@@ -140,13 +140,6 @@ def ParseAvendrealouer(data):
             "ges":data.get("diagnostics").get("gasSymbol"),
             "dpe":data.get("diagnostics").get("energySymbol"),  
             "last_checked": now.isoformat(),
-
-
-
-            "energyClass":{
-                "dpe":data.get("diagnostics").get("energySymbol"),
-                "ges":data.get("diagnostics").get("gasSymbol"),
-            },
             "estage":data.get("floorNumber",0),
             "floorCount": data.get("floorCount",0),
             "bathrooms":data.get("bathroomsCount",0),

@@ -91,10 +91,8 @@ def ParseLefigaro(data):
       "last_checked": now.isoformat(),
 
       "exposure":data.get("exposure"),
-      "energyClass":{
-          "dpe":data.get("dpe").get("energyconsumptioncategory") or "",
-          "ges":data.get("dpe").get("gesemissioncategory") or "",
-      },
+      "dpe":data.get("dpe").get("energyconsumptioncategory") or "",
+      "ges":data.get("dpe").get("gesemissioncategory") or "",
       "estage":data.get("floor_number",0),
       "floorCount": data.get("nb_floors_building",0),
       "bathrooms":data.get("bathRoomCount",0)

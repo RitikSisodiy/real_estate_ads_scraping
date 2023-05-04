@@ -86,10 +86,6 @@ def ParseLogicImmo(data):
         "last_checked": now.isoformat(),
 
 
-        "energyClass":{
-            "dpe":dpe,
-            "ges":ges,
-        },
         "estage":data.get("floor",0),
         "floorCount": data.get("floors",0),
         "bathrooms":data.get("bathrooms",0),

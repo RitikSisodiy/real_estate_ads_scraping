@@ -130,15 +130,11 @@ def ParseOuestfrance(data):
           "ges":data.get("ges_lettre") or "",
           "dpe":data.get("dpe_lettre") or "",        
         },
-        "ges":data.get("ges_lettre") or "",
-        "dpe":data.get("dpe_lettre") or "",
 
 
 
-        "energyClass":{
-            "dpe":data.get("dpe_lettre","NA"),
-            "ges":data.get("ges_lettre","NA"),
-        },
+        "dpe":data.get("dpe_lettre","NA"),
+        "ges":data.get("ges_lettre","NA"),
         "estage":data.get("etage",0),
         "floorCount": data.get("nb_etages",0),
         "bathrooms":data.get("nb_salles_de_bain",0),

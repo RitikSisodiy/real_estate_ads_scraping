@@ -85,16 +85,12 @@ def ParseLeboncoin(data):
             "dpe":features.get("energy_rate"),        
             },
             "url": data.get("url"),
-            "ges":features.get("ges"),
-            "dpe":features.get("energy_rate"),  
             "last_checked": now.isoformat(),
 
 
 
-            "energyClass":{
-                "dpe":features.get("energy_rate","NA"),
-                "ges":features.get("ges","NA"),
-            },
+            "dpe":features.get("energy_rate","NA"),
+            "ges":features.get("ges","NA"),
             "estage":data.get("floor_number",0),
             "floorCount": data.get("nb_floors_building",0),
         }

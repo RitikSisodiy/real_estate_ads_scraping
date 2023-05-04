@@ -79,10 +79,8 @@ def ParseBienici(data):
           "estage":data.get("floor",0),
           "floorCount": data.get("floorQuantity"),
           "bathrooms":data.get("bathroomsQuantity",0),
-          "energyClass":{
-            "dpe":data.get("energyClassification","NA"),
-            "ges":data.get("greenhouseGazClassification","NA"),
-          }
+          "dpe":data.get("energyClassification","NA"),
+          "ges":data.get("greenhouseGazClassification","NA"),
         }
     return sdata
   except:
