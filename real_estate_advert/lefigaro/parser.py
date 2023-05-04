@@ -88,10 +88,19 @@ def ParseLefigaro(data):
         "assets":[opt for opt in data.get("options")] if  data.get("options") else []
       },
       "url": data.get("recordLink"),
-      "dpe": data.get("dpe").get("energyconsumptioncategory") or "",
-      "ges": data.get("dpe").get("gesemissioncategory") or "",
-            "last_checked": now.isoformat(),
-      }
+      "last_checked": now.isoformat(),
+
+      "exposure":data.get("exposure"),
+      "energyClass":{
+          "dpe":data.get("dpe").get("energyconsumptioncategory") or "",
+          "ges":data.get("dpe").get("gesemissioncategory") or "",
+      },
+      "estage":data.get("floor_number",0),
+      "floorCount": data.get("nb_floors_building",0),
+      "bathrooms":data.get("bathRoomCount",0)
+    }
+    
+
     return sdata
   except:
     open("lefigaroerror.json",'w').write(json.dumps(data)+"\n")
