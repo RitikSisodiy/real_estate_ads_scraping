@@ -19,10 +19,10 @@ def ParseLogicImmo(data):
   if data.get("rooms"): title += str(data.get("rooms"))+ "pièce"
   energy = data.get("energyBalance")
   if energy:
-    ges = energy.get("ges").get("category") or 0
-    dpe = energy.get("dpe").get("category") or 0
+    ges = energy.get("ges").get("category") or "NA"
+    dpe = energy.get("dpe").get("category") or "NA"
   else:
-    ges,dep = 0,0
+    ges,dpe = "NA","NA"
   try:
     sdata = {
         "id":data.get("id"),
@@ -83,7 +83,19 @@ def ParseLogicImmo(data):
         "url": data.get("url"),
         "ges":ges,
         "dpe":dpe ,
-            "last_checked": now.isoformat(),
+        "last_checked": now.isoformat(),
+
+
+        "energyClass":{
+            "dpe":dpe,
+            "ges":ges,
+        },
+        "estage":data.get("floor",0),
+        "floorCount": data.get("floors",0),
+        "bathrooms":data.get("bathrooms",0),
+        "toilets":data.get("restroomsCount"),
+        "yearOfConstruction":data.get("constructionDate","NA"),
+        "exposure":(data.get("orientationIds") or "") and orientation.get(data.get("orientationIds")[0],""),
       }
   except:
     traceback.print_exc()
