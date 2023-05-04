@@ -47,7 +47,9 @@ class ImageHash:
     async def getHashByUrl(self, doc, imagelipath="images_url", destpath="imagehash", binary=False):
         # Create a list of tasks to fetch and calculate hash of all images
         if doc.get(imagelipath):
-            tasks = [asyncio.ensure_future(self.getHash(url)) for url in doc[imagelipath]]
+            if doc.get(imagelipath):
+                tasks = [asyncio.ensure_future(self.getHash(url)) for url in doc[imagelipath]]
+            else:return doc
             # Gather all the results from the tasks and filter out None values
             doc[destpath] = [hash_value for hash_value in await asyncio.gather(*tasks) if hash_value is not None]
             # Return the document with the image hashes added to it
