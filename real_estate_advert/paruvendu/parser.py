@@ -38,6 +38,10 @@ def ParseParuvendu(data):
     if bedroomscount and "/" in bedroomscount:bedroomscount = bedroomscount[bedroomscount.find("/")+1:]
     
     pinRegx = r'(\d{5}\-?\d{0,4})'
+    ges = detailT.get("GES") 
+    if ges:ges = ges if "-" not in ges else ges.split("-",1)[0].strip()
+    dpe = detailT.get("DPE")
+    if dpe:dpe = dpe if "-" not in dpe else dpe.split("-",1)[0].strip()
     sdata = {
       "id": data.get("id"),
       "ads_type": adtyp,
@@ -96,8 +100,8 @@ def ParseParuvendu(data):
       "last_checked": now.isoformat(),
 
 
-      "dpe": detailT.get("CEL"),
-      "ges": detailT.get("GES"),
+      "dpe": dpe,
+      "ges": ges,
       "estage":detailT.get("9999999_80",0),
       "floorCount": detailT.get("9999999_85",0),
       "bathrooms":detailT.get("9999999_30",0) or detailT.get("7770503_180",0),
