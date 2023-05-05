@@ -21,7 +21,7 @@ class ImageHash:
                 r.raise_for_status()
                 # Read the response content as bytes
                 content = await r.read()
-        except aiohttp.ClientError as e:
+        except :
             # Retry request if it failed and retry limit hasn't been reached
             if retry >= self.retry_limit:
                 return None
