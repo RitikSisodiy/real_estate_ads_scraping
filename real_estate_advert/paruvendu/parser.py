@@ -96,8 +96,8 @@ def ParseParuvendu(data):
       "last_checked": now.isoformat(),
 
 
-      "dpe": detailT.get("GES"),
-      "ges": detailT.get("CEL"),
+      "dpe": detailT.get("CEL"),
+      "ges": detailT.get("GES"),
       "estage":detailT.get("9999999_80",0),
       "floorCount": detailT.get("9999999_85",0),
       "bathrooms":detailT.get("9999999_30",0) or detailT.get("7770503_180",0),
