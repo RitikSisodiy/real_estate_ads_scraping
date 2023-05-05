@@ -15,7 +15,6 @@ class OuestFranceScraper:
         self.logfile = open(f"{cpath}/error.log",'a')
         self.timeout = timeout
         self.headers = {
-            "Host": "api-phalcon.ouestfrance-immo.com",
             "Connection": "keep-alive",
             "sec-ch-ua": '"Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"',
             "Accept": "application/json, text/plain, */*",
