@@ -17,6 +17,34 @@ def getOrNone(dic,path):
     return val
   except:
      return None
+
+# Loop through each element in the list
+def featuresToDict(lst):
+    dct = {}
+    pattern = r'(\d+\.\d+|\d+)'
+    for element in lst:
+        # Use regular expression to find all the numbers or floats in the string
+        matches = re.findall(pattern, element)
+        
+        # If there are no matches, skip to the next element
+        if not matches:
+            continue
+        print(matches)
+        # Loop through each match and add a new key-value pair to the dictionary
+        for match in matches:
+            try:
+              try:value = int(match)
+              except:value= float(match)
+              key = element.replace(match, '').strip()
+              dct[key] = value
+            except:
+               pass
+    return dct
+def getOrientation(strFeatures):
+   for feature in strFeatures:
+      if "orientation" in feature.lower():
+         return feature.split(" ",1)[1]
+   return "NA"
 def ParseSeloger(data):
   now = datetime.now()
   assetlist = []
@@ -25,6 +53,7 @@ def ParseSeloger(data):
   if data.get("features"):
     for d in data.get("features"):
       if d:assetlist.append(d.get("label") )
+  features = featuresToDict(assetlist)
   isdata = {
     "Balcon": False,
     "Parking": False,
@@ -98,9 +127,18 @@ def ParseSeloger(data):
           "dpe":getOrNone(data,"energyBalance.dpe.category"),        
         },
         "url": data.get("permalink"),
+        "last_checked": now.isoformat(),
+
+
+
         "ges":getOrNone(data,"energyBalance.ges.category"),
         "dpe":getOrNone(data,"energyBalance.dpe.category"),
-        "last_checked": now.isoformat(),
+        "estage":features.get("Au ème étage",0),
+        "floorCount": features.get("Bâtiment de  étages",0),
+        "bathrooms":features.get("Salle de bain",0),
+        "toilets":features.get("Toilette"),
+        "yearOfConstruction":features.get("Année de construction","NA"),
+        "exposure":getOrientation(assetlist),
       }
   except:
     traceback.print_exc()
