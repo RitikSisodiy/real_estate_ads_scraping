@@ -1,6 +1,125 @@
+# Real Estate Ads Scraper
+
+This is a Python-based web scraper that extracts real estate ad data from multiple websites. The project is organized in a modular and scalable manner, allowing developers to easily add new portals to the scraper and extend its functionality.
+
+## Project Structure
+
+The folder structure of Real Estate Ads Scraper is as follows:
+
+```
+real-estate-ads-scraper/
+├── HttpRequest/
+│   ├── AioProxy.py
+│   ├── AsyncProxy.py
+│   ├── requestsModules.py
+│   ├── s3Client.py
+│   └── uploader.py
+├── real_estate_advert/
+│   ├── avendrealouer/
+│   │   ├── scraper.py
+│   │   └── parser.py
+│   ├── bienci/
+│   │   ├── scraper.py
+│   │   └── parser.py
+│   ├── gensdeconfiance/
+│   │   ├── scraper.py
+│   │   └── parser.py
+│   ├── leboncoin/
+│   │   ├── scraperv4.py
+│   │   └── parser.py
+│   ├── lefigaro/
+│   │   ├── scraper.py
+│   │   └── parser.py
+│   ├── logicImmo/
+│   │   ├── logicImmo.py
+│   │   └── parser.py
+│   ├── ouestfrance/
+│   │   ├── scraper.py
+│   │   └── parser.py
+│   ├── pap/
+│   │   ├── scraper2.py
+│   │   └── parser.py
+│   ├── paruvendu/
+│   │   ├── scraperv2.py
+│   │   └── parser.py
+│   └── seloger/
+│       ├── scraperv3.py
+│       └── parser.py
+├── api.py
+├── celery_commands.txt
+├── Dockerfile
+├── kafka_publisher.py
+├── main.py
+├── readme.md
+├── requirements.txt
+├── run.py
+├── saveLastCheck.py
+├── settings.py
+├── status.py
+└── tasks.py
+
+```
+
+### HttpRequest/
+
+The `HttpRequest` directory contains modules used for making HTTP requests, handling proxies, uploading images to S3, and sending scraped data to Kafka topics.
+
+### real_estate_advert/
+
+The `real_estate_advert` directory contains subdirectories for each real estate portal that the scraper can crawl. Each portal subdirectory contains `scraper.py` for scraping ads from the portal and `parser.py` for parsing the data into a common structure.
+
+### api.py
+
+`api.py` contains endpoints that can be used to start individual scraper tasks.
+
+### celery_commands.txt
+
+`celery_commands.txt` contains commands to start the project using Celery.
+
+### Dockerfile
+
+`Dockerfile` can be used to containerize the project.
+
+### kafka_publisher.py
+
+`kafka_publisher.py` sends data to Kafka topics, but it has been replaced with `HttpRequest/uploader.py`.
+
+### main.py
+
+`main.py` is the main file for FastAPI.
+
+### readme.md
+
+`readme.md` contains project setup instructions.
+
+### requirements.txt
+
+`requirements.txt` lists Python dependencies.
+
+### run.py
+
+`run.py` runs all required commands at once.
+
+### saveLastCheck.py
+
+`saveLastCheck.py` changes the status of deleted ads in Elasticsearch by the last check time.
+
+### settings.py
+
+`settings.py` contains project configuration and settings.
+
+### status.py 
+`status.py` This file is used to manually check if an ad exists or not (Deprecated).
+
+### tasks.py 
+`tasks.py`  This file contains the Celery app configuration and all tasks, including task configuration to scrape, update, and check deleted ads, as well as cronjobs to run scheduled tasks at specified intervals.
+
+
+
 ## Web Scraping Service
 
 This web scraping server is responsible for scraping data from different resources. It's built on a REST API server that is built on FAST API.
+
 
 ### Getting Started
 
@@ -37,13 +156,31 @@ A powerful and flexible toolkit for building web scraping.
     pip install -r requirements.txt
     ```
 
-5. To install RabbitMQ Server in Ubuntu 22.04|20.04|18.04, update apt list first:
-
+5. ## Installing and Configuring Redis 
     ```
     sudo apt update
-    sudo apt install rabbitmq-server
-    systemctl status rabbitmq-server.service
     ```
+
+    Then, install Redis by typing:
+
+    ```
+    sudo apt install redis-server
+    ```
+
+    restart redis server:
+
+    ```
+    sudo systemctl restart redis.service
+    ```
+
+    ## Testing Redis
+
+    Start by checking that the Redis service is running:
+
+    ```
+    sudo systemctl status redis
+    ```
+
 
 6. Install the Celery Package in Ubuntu:
 
