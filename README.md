@@ -180,7 +180,21 @@ A powerful and flexible toolkit for building web scraping.
     ```
     sudo systemctl status redis
     ```
-
+    If it is running without any errors, this command will produce output similar to the following:
+    ```
+    Output● redis-server.service - Advanced key-value store
+    Loaded: loaded (/lib/systemd/system/redis-server.service; enabled; vendor preset: enabled)
+    Active: active (running) since Wed 2018-06-27 18:48:52 UTC; 12s ago
+    Docs: http://redis.io/documentation,
+           man:redis-server(1)
+    Process: 2421 ExecStop=/bin/kill -s TERM $MAINPID (code=exited, status=0/SUCCESS)
+    Process: 2424 ExecStart=/usr/bin/redis-server /etc/redis/redis.conf (code=exited, status=0/SUCCESS)
+    Main PID: 2445 (redis-server)
+    Tasks: 4 (limit: 4704)
+    CGroup: /system.slice/redis-server.service
+           └─2445 /usr/bin/redis-server 127.0.0.1:6379
+    . . .
+    ```
 
 6. Install the Celery Package in Ubuntu:
 
