@@ -147,7 +147,7 @@ A powerful and flexible toolkit for building web scraping.
 3.  Git clone this repo to your PC:
     
     ```
-    git clone https://git.kifwat.net/ki/services/real-estate-ads-scraping.git
+    git clone --branch dev/release_02 https://git.kifwat.net/ki/services/real-estate-ads-scraping.git
     
     ```
     
