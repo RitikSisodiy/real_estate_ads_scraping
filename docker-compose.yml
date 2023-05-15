@@ -2,9 +2,9 @@ version: '3'
 services:
   realscraper:
     container_name: realscraper
-    image: realscraper
     volumes:
-      - /apps/KI/real-estate-ads-scraping:/app
+      - ./:/app
+    build: .
     ports:
       - "38000:38000"
       - "8000:8000"
