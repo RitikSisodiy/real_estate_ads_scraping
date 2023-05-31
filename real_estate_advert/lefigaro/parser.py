@@ -11,7 +11,7 @@ def getTimeStamp(strtime,formate=None):
 def ParseLefigaro(data):
   now = datetime.now()
   try:
-    adtyp = "sale" if data.get("transactionType")=="vente" else "rent"
+    adtyp = "buy" if data.get("transactionType")=="vente" else "rent"
     prize  = data.get("priceLabel")
     prize = float(re.search("[0-9.]+",prize).group())
     location = data.get("location")
