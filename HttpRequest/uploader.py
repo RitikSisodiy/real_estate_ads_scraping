@@ -156,7 +156,13 @@ class AsyncKafkaTopicProducer:
         await producer.stop()
         # await s3client.close()
     def PushDataList(self,topic,data):
-        data = [da for da in data if da]
+        datali = []
+        for da in data:
+            if da:
+                if data.get("price") and data.get("area"):
+                    try:data["price_m2"] = float(data.get("price")) / float(data.get("area"))
+                    except:pass
+                da.append(da)
         asyncio.run(self.TriggerPushDataList(topic,data))
     def PushDataList_v1(self,topic,data):
         data = [da for da in data if da]
