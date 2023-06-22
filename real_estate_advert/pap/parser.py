@@ -46,8 +46,11 @@ def ParsePap(data):
     except:price = 0
     area = caracteristiquesdic.get("mA2") or caracteristiquesdic.get("m2") or ""
     if area: area = str(area).replace(",",'.')
+    terrain_pattern = "terrain\s*(\d+)"
+    terrain = re.findall(terrain_pattern,title.lower())
     sdata = {
       "id":data.get("id"),
+      "terrain":terrain or 0,
       "ads_type": adtype,
       "price": float(price),
       "original_price": float(price),
