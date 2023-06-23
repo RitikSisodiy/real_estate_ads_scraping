@@ -126,6 +126,7 @@ def ParseAvendrealouer(data):
             "parking": any(word in data.get("description").lower() for word in ["parking","garage"]),
             "images_url": images,
             "is_new": True,
+            "terrain":data.get("landSurface"),
             "website": "avendrealouer.fr",
             "property_type": data.get("title").split(" ")[0] if data.get("title").split(" ") else "",
             "published_at": getTimeStamp(data.get("releaseDate")),
