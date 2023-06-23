@@ -38,7 +38,7 @@ def ParsePap(data):
       if "Terrain" in key:
         caracteristiquesdic[key[0]] = key[1]
       else:
-        caracteristiquesdic[key[1]] = key[0]
+        caracteristiquesdic[key[1]] = key[0] 
     try:
       price = re.findall(r"\b\d+\b",unidecode(data.get("prix")))
       if price:price= "".join(price)
@@ -50,7 +50,7 @@ def ParsePap(data):
     terrain = re.findall(terrain_pattern,title.lower())
     sdata = {
       "id":data.get("id"),
-      "terrain":terrain or 0,
+      "terrain":(terrain and terrain[0]) or 0,
       "ads_type": adtype,
       "price": float(price),
       "original_price": float(price),
