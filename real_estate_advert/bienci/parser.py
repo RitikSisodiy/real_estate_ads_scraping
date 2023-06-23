@@ -74,8 +74,7 @@ def ParseBienici(data):
           },
           "url":f"https://www.bienici.com/annonce/{data.get('id')}",
           "last_checked": now.isoformat(),
-
-
+          "terrain":data.get("landSurfaceArea"),
           "estage":data.get("floor",0),
           "floorCount": data.get("floorQuantity"),
           "bathrooms":data.get("bathroomsQuantity",0),
