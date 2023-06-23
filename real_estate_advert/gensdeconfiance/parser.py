@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 def ParseGensdeconfiance(data):
     try:
         now = datetime.now()
@@ -15,6 +16,9 @@ def ParseGensdeconfiance(data):
         if len(adtype)==2:
             adtype = adtype[1]
         else:adtype= adtype[0]
+        terrain_pattern = "terrain\s*(\d+.\d+|\d+)\s*m"
+        terrain = re.findall(terrain_pattern,data.get('description')) or re.findall(terrain_pattern,data.get('description'))
+        terrain = (terrain and terrain[0].replace(".","")) or 0
         sdata = {
         "id": data.get("uuid"),
         "ads_type": "rent" if adtype=="rent" else "buy",
@@ -24,7 +28,8 @@ def ParseGensdeconfiance(data):
         "city": data.get("city"),     # "Poitiers (86000)"
         "declared_habitable_surface": attrs.get("nbSquareMeters") ,
         "declared_land_surface": attrs.get("nbSquareMeters") ,
-        "land_surface": attrs.get("nbSquareMeters") ,
+        "land_surface": attrs.get("nbSquareMeters"),
+        "terrain" : terrain,
         "declared_rooms": attrs.get("nbPieces")  or 0,
         "declared_bedrooms":  attrs.get("nbRooms") or 0,
         "rooms": attrs.get("nbPieces")  or 0,
