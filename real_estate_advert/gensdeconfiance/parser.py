@@ -17,7 +17,7 @@ def ParseGensdeconfiance(data):
             adtype = adtype[1]
         else:adtype= adtype[0]
         terrain_pattern = "terrain\s*(\d+.\d+|\d+)\s*m"
-        terrain = re.findall(terrain_pattern,data.get('description')) or re.findall(terrain_pattern,data.get('description'))
+        terrain = re.findall(terrain_pattern,data.get('description')) or re.findall(terrain_pattern,data.get('title'))
         terrain = (terrain and terrain[0].replace(".","")) or 0
         sdata = {
         "id": data.get("uuid"),
