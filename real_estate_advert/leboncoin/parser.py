@@ -38,6 +38,7 @@ def ParseLeboncoin(data):
             "declared_habitable_surface": features.get("square"),
             "declared_land_surface": features.get("land_plot_surface"),
             "land_surface": features.get("land_plot_surface"),
+            "terrain": features.get("land_plot_surface"),
             "declared_rooms": features.get("rooms"),
             "declared_bedrooms": features.get("bedrooms"),
             "rooms": features.get("rooms"),
