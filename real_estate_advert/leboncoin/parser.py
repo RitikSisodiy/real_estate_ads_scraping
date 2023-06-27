@@ -87,9 +87,6 @@ def ParseLeboncoin(data):
             },
             "url": data.get("url"),
             "last_checked": now.isoformat(),
-
-
-
             "dpe":features.get("energy_rate","NA"),
             "ges":features.get("ges","NA"),
             "estage":data.get("floor_number",0),

@@ -3,7 +3,7 @@ import requests,time
 import settings
 from elasticsearch import Elasticsearch
 commonIdUpdate = "common-ads-portal-lastcheck"
-commonIndex = "search-common-ads-data_v2"
+commonIndex = "search-common-ads-data_alias"
 cred = {
     "hosts":settings.ES_HOSTS,
     "http_auth":(settings.ES_USER, settings.ES_PASSWORD)
