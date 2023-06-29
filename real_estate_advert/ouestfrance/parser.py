@@ -80,6 +80,7 @@ def ParseOuestfrance(data):
         "declared_habitable_surface": data.get("surface") or 0,
         "declared_land_surface": data.get("surface_terrain") or 0,
         "land_surface": data.get("surface_terrain") or 0,
+        "terrain":data.get("surface_terrain") or 0,
         "declared_rooms": data.get("nb_pieces") or 0,
         "declared_bedrooms": data.get("nb_chambre") or 0,
         "rooms": data.get("nb_pieces") or 0,
