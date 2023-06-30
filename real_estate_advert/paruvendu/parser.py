@@ -52,6 +52,7 @@ def ParseParuvendu(data):
       "declared_habitable_surface": int(detailV.get("SUR")) if detailV.get("SUR") else 0,
       "declared_land_surface": detailT.get("9999999_125"),
       "land_surface": detailT.get("9999999_125"),
+      "terrain" : detailT.get("9999999_125"),
       "declared_rooms": roomscount,
       "declared_bedrooms": bedroomscount,
       "rooms": roomscount,
