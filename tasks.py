@@ -6,9 +6,9 @@ from real_estate_advert.paruvendu.scraperv2 import rescrapActiveId as rescrapPar
 from real_estate_advert.gensdeconfiance.scraper import main_scraper as gensdeconfianceScraper
 from real_estate_advert.gensdeconfiance.scraper import rescrapActiveId as rescrapGensdeconfianceActiveId
 from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
-from real_estate_advert.pap.scraper2 import pap_scraper as PapScraper
-from real_estate_advert.pap.scraper2 import UpdatePap
-from real_estate_advert.pap.scraper2 import rescrapActiveId as rescrapPapActiveId
+from real_estate_advert.pap.scraper import pap_scraper as PapScraper
+from real_estate_advert.pap.scraper import UpdatePap
+from real_estate_advert.pap.scraper import rescrapActiveId as rescrapPapActiveId
 from real_estate_advert.bienci.scraper import main_scraper as bienciScraper
 from real_estate_advert.bienci.scraper import UpdateBienci,rescrapActiveId
 from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
