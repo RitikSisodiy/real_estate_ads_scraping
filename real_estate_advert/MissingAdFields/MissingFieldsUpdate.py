@@ -1,6 +1,6 @@
 from .scrollfilter import scroll_filtered_docs
 import settings,time,concurrent.futures
-from real_estate_advert.pap.scraper2 import PapScraper
+from real_estate_advert.pap.scraper import PapScraper
 from real_estate_advert.seloger.scraperv3 import SelogerScraper
 from real_estate_advert.paruvendu.scraperv2 import UpdateId as paruvenduUpdateFields
 # Define query and scroll parameters
