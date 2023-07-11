@@ -1,11 +1,11 @@
 import time
 from real_estate_advert.leboncoin.scraper import leboncoinAdScraper
 from real_estate_advert.leboncoin.scraper import rescrapActiveId as rescrapLeboncoinActiveId
-from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
-from real_estate_advert.paruvendu.scraperv2 import rescrapActiveId as rescrapParuvenduActiveId
+from real_estate_advert.paruvendu.scraper import main_scraper as ParuvenduScraper
+from real_estate_advert.paruvendu.scraper import rescrapActiveId as rescrapParuvenduActiveId
 from real_estate_advert.gensdeconfiance.scraper import main_scraper as gensdeconfianceScraper
 from real_estate_advert.gensdeconfiance.scraper import rescrapActiveId as rescrapGensdeconfianceActiveId
-from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
+from real_estate_advert.paruvendu.scraper import UpdateParuvendu
 from real_estate_advert.pap.scraper import pap_scraper as PapScraper
 from real_estate_advert.pap.scraper import UpdatePap
 from real_estate_advert.pap.scraper import rescrapActiveId as rescrapPapActiveId
