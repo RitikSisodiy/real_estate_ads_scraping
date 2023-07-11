@@ -1,5 +1,4 @@
 import time
-from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
 from real_estate_advert.leboncoin.scraperv4 import leboncoinAdScraper
 from real_estate_advert.leboncoin.scraperv4 import rescrapActiveId as rescrapLeboncoinActiveId
 from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
@@ -106,16 +105,6 @@ def task_postrun_handler(task_id, task, args, kwargs, **kw):
     print('completed task:', task.name)
 
 
-@celery_app.task(base=Singleton,name="real estate")
-def real_estate_task(payload):
-    print("Task start ================>")
-    print("payload : ", payload)
-    obj = leboncoinAd()
-    obj.visit_url()
-
-    # Scraping task obj start here
-
-    print("Task End ================> ")
 import traceback
 @celery_app.task(base=Singleton,name="bienci task")
 def scrap_bienci_task(payload):
