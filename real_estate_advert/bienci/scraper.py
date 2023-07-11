@@ -21,9 +21,7 @@ commanTopicName = settings.KAFKA_COMMON_PATTERN
 commonIdUpdate = f"activeid-{website}"
 # define your filter here
 cpath =os.path.dirname(__file__) or "." 
-citys = open(f"{cpath}/finalcitys.json",'r').readlines()
-citys = [[json.loads(d)['name'],json.loads(d)['zoneIds'] ] for d in citys]
-citys.sort()
+
 lastpin ,lastpage = None,1
 if lastpin:start = False
 else:start = True
@@ -154,46 +152,7 @@ def genFilter(parameter,typ,onlyid=False,low="minPrice",max="maxPrice",session=N
     writeGenFilter(typ,filterurllist)
 
 asyncpage = 10
-# change the url of filter data to scrap all the ads
-# async def main():
-#     tasks = []
-#     count = 0
-#     global start
-#     global lastpin
-#     global lastpage
-#     session = AsyncHTMLSession()
-#     producer = AsyncKafkaTopicProducer()
-#     # await producer.statProducer()
-#     # session.proxies.update({"http": "socks5://218.1.142.41:57114", "https": "socks5://218.1.142.41:57114"})
-#     print(lastpin, "this ", start)
-#     Filter = {
-#     "size":pageSize,
-#     "from":0,
-#     "showAllModels":False,
-#     "filterType":"buy",
-#     "propertyType":["house","flat"],
-#     "newProperty":False,
-#     "sortBy":"relevance",
-#     "sortOrder":"desc",
-#     "onTheMarket":[True],
-#     }
-#     for pin,zonid in citys:
-#         if lastpin == pin:
-#             print("this is last pin")
-#             start = True 
-#         if start:
-#             count +=1
-#             Filter['zoneIdsByTypes']['zoneIds'] = zonid
-#             baseurl = getFilterUrl(Filter)
-#             tasks.append(asyncio.ensure_future(GetAllPages(baseurl,session,first=True,Filter=Filter,producer=producer)))
-#             if len(tasks) == asyncpage or count == len(citys):
-#                 await asyncio.gather(*tasks)
-#                 t=random.randint(5,15)
-#                 print(f"wait for {t} seconds")
-#                 await asyncio.sleep(t)
-#                 tasks=[]
-#     await asyncio.gather(*tasks)
-#     await producer.stopProducer()
+
 
 def saveRealstateAds(ads,**kwargs):
     producer = kwargs.get("producer")
@@ -205,11 +164,7 @@ def saveRealstateAds(ads,**kwargs):
         ads = [ParseBienici(ad) for ad in ads]
         producer.PushDataList(commanTopicName,ads)
 
-    # allads = ''
-    # for ad in ads:
-    #     allads+= json.dumps(ad)+"\n"
-    # with open("output/output.json",'a') as file:
-    #     file.write(allads)
+    
 def getPage(total,size):
     totalpage = total/size
     totalpage = int(totalpage)+1 if totalpage>int(totalpage) else int(totalpage)
