@@ -4,53 +4,79 @@ import imagehash
 import asyncio
 import aiohttp
 
+
 class ImageHash:
     def __init__(self):
-        # Initialize aiohttp client session
+        # Create a session for making asynchronous HTTP requests
         self.session = aiohttp.ClientSession()
-        # Set retry limit for failed requests
         self.retry_limit = 3
-        
+
     async def fetch(self, url, retry=0):
-        # Print URL being fetched for debugging
+        """
+        Fetch the content of an image from the specified URL.
+
+        Args:
+            url (str): URL of the image.
+            retry (int): Number of retries (used for recursion).
+
+        Returns:
+            The content of the image as bytes, or None if the request fails.
+        """
         print(url)
         try:
-            # Send GET request using aiohttp client session with a timeout of 10 seconds
             async with self.session.get(url=url, timeout=10) as r:
-                # Raise exception for any errors in response
                 r.raise_for_status()
-                # Read the response content as bytes
                 content = await r.read()
-        except :
-            # Retry request if it failed and retry limit hasn't been reached
+        except:
             if retry >= self.retry_limit:
                 return None
             retry += 1
             return await self.fetch(url, retry)
-        # Return the response content as bytes
         return content
-        
+
     async def getHash(self, url):
-        # Fetch the content of the image at the URL
+        """
+        Calculate the image hash for the image at the specified URL.
+
+        Args:
+            url (str): URL of the image.
+
+        Returns:
+            The image hash as a string, or None if the image cannot be processed.
+        """
         content = await self.fetch(url)
-        # If fetching the content was successful
         if content:
             try:
-                # Open the image using PIL Image module
                 img = Image.open(BytesIO(content))
-                # Calculate the hash of the image using imagehash module and return as string
                 return str(imagehash.average_hash(img))
             except (OSError, ValueError):
-                # If there was an error in opening the image or calculating its hash, do nothing
                 pass
-    
-    async def getHashByUrl(self, doc, imagelipath="images_url", destpath="imagehash", binary=False):
-        # Create a list of tasks to fetch and calculate hash of all images
+
+    async def getHashByUrl(
+        self, doc, imagelipath="images_url", destpath="imagehash", binary=False
+    ):
+        """
+        Calculate the image hashes for a list of image URLs in a document.
+
+        Args:
+            doc (dict): The document containing the image URLs.
+            imagelipath (str): Path to the list of image URLs in the document.
+            destpath (str): Path to store the image hashes in the document.
+            binary (bool): Flag indicating whether to calculate binary hashes.
+
+        Returns:
+            The updated document with image hashes.
+        """
         if doc.get(imagelipath):
             if doc.get(imagelipath):
-                tasks = [asyncio.ensure_future(self.getHash(url)) for url in doc[imagelipath]]
-            else:return doc
-            # Gather all the results from the tasks and filter out None values
-            doc[destpath] = [hash_value for hash_value in await asyncio.gather(*tasks) if hash_value is not None]
-            # Return the document with the image hashes added to it
+                tasks = [
+                    asyncio.ensure_future(self.getHash(url)) for url in doc[imagelipath]
+                ]
+            else:
+                return doc
+            doc[destpath] = [
+                hash_value
+                for hash_value in await asyncio.gather(*tasks)
+                if hash_value is not None
+            ]
         return doc
