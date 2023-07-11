@@ -192,13 +192,6 @@ class ProxyScraper:
         return False
 
 
-def getProxyasstring():
-    # Get the current time for measuring execution time
-    stat = time.time()
-    asyncio.run(main())
-    return restext
-
-
 if __name__ == "__main__":
     stat = time.time()
     LEBONCOIN_CHECK_URL = "https://api.leboncoin.fr/finder/classified/2130999715"
