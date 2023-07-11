@@ -12,7 +12,7 @@ import os
 import gzip
 import requests,settings
 
-# from .scrapProxy import ProxyScraper
+
 from HttpRequest.AioProxy import ProxyScraper
 from saveLastChaeck import saveLastCheck
 from .parser import ParseLeboncoin
