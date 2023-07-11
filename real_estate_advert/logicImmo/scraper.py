@@ -5,7 +5,7 @@ import urllib,settings
 import os,uuid
 
 from saveLastChaeck import saveLastCheck
-# from .scrapProxy import ProxyScraper
+
 
 from .parser import ParseLogicImmo
 import traceback
