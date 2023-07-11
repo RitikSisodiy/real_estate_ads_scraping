@@ -11,8 +11,8 @@ from real_estate_advert.pap.scraper import UpdatePap
 from real_estate_advert.pap.scraper import rescrapActiveId as rescrapPapActiveId
 from real_estate_advert.bienci.scraper import main_scraper as bienciScraper
 from real_estate_advert.bienci.scraper import UpdateBienci,rescrapActiveId
-from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
-from real_estate_advert.seloger.scraperv3 import rescrapActiveId as rescrapSelogerActiveId
+from real_estate_advert.seloger.scraper import main_scraper as selogerScraper
+from real_estate_advert.seloger.scraper import rescrapActiveId as rescrapSelogerActiveId
 from real_estate_advert.logicImmo.scraper import main_scraper as LogicImmoScraper
 from real_estate_advert.logicImmo.scraper import rescrapActiveId as rescraplogicImmoActiveId
 from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
