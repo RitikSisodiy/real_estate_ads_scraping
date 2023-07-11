@@ -1,6 +1,6 @@
 import time
-from real_estate_advert.leboncoin.scraperv4 import leboncoinAdScraper
-from real_estate_advert.leboncoin.scraperv4 import rescrapActiveId as rescrapLeboncoinActiveId
+from real_estate_advert.leboncoin.scraper import leboncoinAdScraper
+from real_estate_advert.leboncoin.scraper import rescrapActiveId as rescrapLeboncoinActiveId
 from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
 from real_estate_advert.paruvendu.scraperv2 import rescrapActiveId as rescrapParuvenduActiveId
 from real_estate_advert.gensdeconfiance.scraper import main_scraper as gensdeconfianceScraper
