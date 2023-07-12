@@ -379,7 +379,7 @@ class SelogerScraper(HttpRequest):
         if onlyid:
             fetchedads = ads
         else:
-            adslist = [ad["id"] for ad in adslist]
+            adslist = [ad["id"] for ad in ads]
             # fetch the information from id
             fetchedads = self.fetchId(adslist)
                     # excuter.shutdown(wait=True)
