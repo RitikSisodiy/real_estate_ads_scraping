@@ -190,9 +190,3 @@ class AsyncKafkaTopicProducer:
                         pass
                 da.append(da)
         asyncio.run(self.TriggerPushDataList_v1(topic, data))
-
-    # asyncio.run(main())
-
-    def PushDataList_v1(self, topic, data):
-        data = [da for da in data if da]
-        asyncio.run(self.TriggerPushDataList_v1(topic, data))
