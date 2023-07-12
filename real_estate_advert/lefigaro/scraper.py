@@ -71,7 +71,7 @@ def getTimeStamp(strtime):
 
 
 async def savedata(resjson, **kwargs):
-    # save the scraped data 
+    # save the scraped data
     ads = resjson["classifieds"]
     producer = kwargs["producer"]
     if kwargs.get("onlyid"):
