@@ -162,7 +162,7 @@ class AsyncKafkaTopicProducer:
                 if da.get("price") and da.get("area"):
                     try:da["price_m2"] = float(da.get("price")) / float(da.get("area"))
                     except:pass
-                da.append(da)
+                data.append(da)
         asyncio.run(self.TriggerPushDataList(topic,data))
     def PushDataList_v1(self,topic,data):
         data = [da for da in data if da]
@@ -171,7 +171,7 @@ class AsyncKafkaTopicProducer:
                 if da.get("price") and da.get("area"):
                     try:da["price_m2"] = float(da.get("price")) / float(da.get("area"))
                     except:pass
-                da.append(da)
+                data.append(da)
         asyncio.run(self.TriggerPushDataList_v1(topic,data))
 # asyncio.run(main())
 
