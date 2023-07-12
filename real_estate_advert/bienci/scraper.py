@@ -543,7 +543,7 @@ def rescrapActiveId():
 
 def main_scraper(payload):
     """
-    Main function to process ads data based on the provided ads type and onlyid flag.
+    Main function to process ads data based on the provided ads type.
 
     Args:
         payload: Dictionary containing types of ads to scrape(rental, sale, deleted etc)
