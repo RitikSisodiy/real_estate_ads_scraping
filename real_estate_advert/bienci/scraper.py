@@ -20,26 +20,15 @@ website = "bienici.com"
 kafkaTopicName = settings.KAFKA_BIENICI
 commanTopicName = settings.KAFKA_COMMON_PATTERN
 commonIdUpdate = f"activeid-{website}"
-cpath = os.path.dirname(__file__) or "."
-
-lastpin, lastpage = None, 1
-if lastpin:
-    start = False
-else:
-    start = True
-
-
-def getFilterUrl(Filter, page=None):
-    """
-    Constructs the URL for filtering real estate ads based on the provided filter parameters.
-
-    Args:
-    - Filter: A dictionary representing the filter parameters.
-    - page (optional): An integer representing the page number.
-
-    Returns:
-    - url: A string representing the constructed URL.
-    """
+# define your filter here
+cpath =os.path.dirname(__file__) or "." 
+citys = open(f"{cpath}/finalcitys.json",'r').readlines()
+citys = [[json.loads(d)['name'],json.loads(d)['zoneIds'] ] for d in citys]
+citys.sort()
+lastpin ,lastpage = None,1
+if lastpin:start = False
+else:start = True
+def getFilterUrl(Filter,page=None):
     if page:
         Filter["from"] = Filter["size"] * page + 1
     Filter = json.dumps(Filter)
@@ -260,10 +249,15 @@ def saveRealstateAds(ads, **kwargs):
         producer.PushDataList(commanTopicName, ads)
 
 
-def getPage(total, size):
-    totalpage = total / size
-    totalpage = int(totalpage) + 1 if totalpage > int(totalpage) else int(totalpage)
-    totalpage = 6 if totalpage > 6 else totalpage
+    # allads = ''
+    # for ad in ads:
+    #     allads+= json.dumps(ad)+"\n"
+    # with open("output/output.json",'a') as file:
+    #     file.write(allads)
+def getPage(total,size):
+    totalpage = total/size
+    totalpage = int(totalpage)+1 if totalpage>int(totalpage) else int(totalpage)
+    totalpage = 6 if totalpage>6 else totalpage
     return totalpage
 
 
