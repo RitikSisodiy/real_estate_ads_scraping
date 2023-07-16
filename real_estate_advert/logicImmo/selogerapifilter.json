@@ -2,14 +2,13 @@
     "searchParameters": {
         "limit": 1000,
         "offset": 0,
-        "sortBy": 0
+        "sortBy": 1
     },
     "listingSearchCriterias": {
         "advancedCriteriaIds": [],
         "fullText": [],
         "listingsIds": [],
         "locations": [],
-        "o": "0e79146b-b8be-4844-a094-97b9e08787d1",
         "transactionTypesIds": [
             2
         ],

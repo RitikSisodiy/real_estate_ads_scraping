@@ -58,6 +58,7 @@ humanize==4.2.3
 hyperframe==6.0.1
 idna==3.3
 importlib-metadata==4.12.0
+imagehash
 iniconfig==1.1.1
 itsdangerous==2.0.1
 Jinja2==3.0.3
@@ -74,6 +75,7 @@ outcome==1.1.0
 packaging==21.3
 pandas==1.4.4
 parse==1.19.0
+pillow
 playwright==1.17.2
 pluggy==1.0.0
 prometheus-client==0.14.1

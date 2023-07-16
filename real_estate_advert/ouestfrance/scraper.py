@@ -15,7 +15,6 @@ class OuestFranceScraper:
         self.logfile = open(f"{cpath}/error.log",'a')
         self.timeout = timeout
         self.headers = {
-            "Host": "api-phalcon.ouestfrance-immo.com",
             "Connection": "keep-alive",
             "sec-ch-ua": '"Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"',
             "Accept": "application/json, text/plain, */*",
@@ -67,8 +66,9 @@ class OuestFranceScraper:
         return r
     def save(self,adslist,onlyid=False):
         if onlyid:
-            now = datetime.now()
-            ads = [{"id":"quest-"+str(ad.get("id")), "last_checked": now.isoformat(),"available":True} for ad in adslist]
+            # now = datetime.now()
+            ads = [ParseOuestfrance(ad) for ad in adslist]
+            # ads = [{"id":"quest-"+str(ad.get("id")), "last_checked": now.isoformat(),"available":True} for ad in adslist]
             self.producer.PushDataList_v1(commonIdUpdate,ads)
         else:
             self.producer.PushDataList(kafkaTopicName,adslist)

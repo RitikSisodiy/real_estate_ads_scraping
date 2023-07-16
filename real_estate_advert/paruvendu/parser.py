@@ -29,9 +29,19 @@ def ParseParuvendu(data):
     else:adtyp="buy"
     area = data.get("title")[data.get("title").rfind("- ")+2:].replace("m²","").strip()
     try:area = int(area)
-    except: area = int(detailV.get("SUR")) if detailV.get("SUR") else 0
-
+    except: area = detailV.get("7770503_90")
+    roomscount = detailT.get("NBP")
+    bedroomscount = detailT.get("9999999_10")
+    if roomscount and "+" in roomscount:roomscount = roomscount.replace("+","").strip()
+    if roomscount and "/" in roomscount:roomscount = roomscount[roomscount.find("/")+1:]
+    if bedroomscount and "+" in bedroomscount:bedroomscount = bedroomscount.replace("+","").strip()
+    if bedroomscount and "/" in bedroomscount:bedroomscount = bedroomscount[bedroomscount.find("/")+1:]
+    
     pinRegx = r'(\d{5}\-?\d{0,4})'
+    ges = detailT.get("GES") 
+    if ges:ges = ges if "-" not in ges else ges.split("-",1)[0].strip()
+    dpe = detailT.get("DPE")
+    if dpe:dpe = dpe if "-" not in dpe else dpe.split("-",1)[0].strip()
     sdata = {
       "id": data.get("id"),
       "ads_type": adtyp,
@@ -42,14 +52,15 @@ def ParseParuvendu(data):
       "declared_habitable_surface": int(detailV.get("SUR")) if detailV.get("SUR") else 0,
       "declared_land_surface": detailT.get("9999999_125"),
       "land_surface": detailT.get("9999999_125"),
-      "declared_rooms": detailT.get("NBP"),
-      "declared_bedrooms": detailT.get("9999999_10"),
-      "rooms": detailT.get("NBP"),
-      "bedrooms": detailT.get("9999999_10"),
+      "terrain" : detailT.get("9999999_125"),
+      "declared_rooms": roomscount,
+      "declared_bedrooms": bedroomscount,
+      "rooms": roomscount,
+      "bedrooms": bedroomscount,
       "title": data.get("title"),
       "description": spec["text"],
       "postal_code": re.search(pinRegx,spec.get("address")).group() if re.search(pinRegx,spec.get("address")) else "",
-      "agency": sellerdetail.get(type)=="PRO",
+      "agency": sellerdetail.get("type")=="PRO",
       "agency_name": sellerdetail.get("company"),
       "agency_details": {
         "address":sellerdetail.get("address"),
@@ -86,10 +97,15 @@ def ParseParuvendu(data):
         "assets":assetlist
       },
       "url": data.get("shortURL"),
-      "dpe": detailT.get("GES"),
-      "ges": detailT.get("DPE"),
       "location":"0,0",
-            "last_checked": now.isoformat(),
+      "last_checked": now.isoformat(),
+
+
+      "dpe": dpe,
+      "ges": ges,
+      "estage":detailT.get("9999999_80",0),
+      "floorCount": detailT.get("9999999_85",0),
+      "bathrooms":detailT.get("9999999_30",0) or detailT.get("7770503_180",0),
       }
     return sdata
   except:

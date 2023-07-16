@@ -38,13 +38,19 @@ def ParsePap(data):
       if "Terrain" in key:
         caracteristiquesdic[key[0]] = key[1]
       else:
-        caracteristiquesdic[key[1]] = key[0]
-    try:price = re.search(r"[0-9.]+",unidecode(data.get("prix"))).group()
+        caracteristiquesdic[key[1]] = key[0] 
+    try:
+      price = re.findall(r"\b\d+\b",unidecode(data.get("prix")))
+      if price:price= "".join(price)
+      else:price = 0
     except:price = 0
     area = caracteristiquesdic.get("mA2") or caracteristiquesdic.get("m2") or ""
     if area: area = str(area).replace(",",'.')
+    terrain_pattern = "terrain\s*(\d+)"
+    terrain = re.findall(terrain_pattern,title.lower())
     sdata = {
       "id":data.get("id"),
+      "terrain":(terrain and terrain[0]) or 0,
       "ads_type": adtype,
       "price": float(price),
       "original_price": float(price),

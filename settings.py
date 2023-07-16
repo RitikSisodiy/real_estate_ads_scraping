@@ -28,15 +28,17 @@ BUCKET_NAME=os.getenv("BUCKET_NAME")
 
 # ES Client
 
-ES_HOSTS = os.getenv("BROKER_IPS").split(",")
+ES_HOSTS = os.getenv("ES_HOSTS").split(",")
 ES_USER =  os.getenv("ES_USER")
 ES_PASSWORD  = os.getenv("ES_PASSWORD")
+ES_COMMON_TOPIC = "search-common-ads-data_alias"
 
 # Proxy
 PROXY = os.getenv("PROXY")
 
 # KAFKA TOPICS
 KAFKA_COMMON_PATTERN = "common-ads-data_v1"
+KAFKA_COMMON_ES_INDEX = "search-common-ads-data_alias"
 KAFKA_AVENDREALOUER = "avendrealouer-data_v1"
 KAFKA_BIENICI="bienici_data_v1"
 KAFKA_GENSDECONFIANCE = "gensdeconfiance_data_v1"
@@ -47,3 +49,9 @@ KAFKA_OUESTFRANCE = "ouestfrance-immo-v1"
 KAFKA_PAP = "pap_data_v1"
 KAFKA_PARUVENDU = "paruvendu-data_v1"
 KAFKA_SELOGER = "seloger_data_v1"
+KAFKA_DELETE = "Delete_doc_es"
+
+MissingAdFieldsPortals = {
+    "pap.fr",
+    "seloger.com"
+}

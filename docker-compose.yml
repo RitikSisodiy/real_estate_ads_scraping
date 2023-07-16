@@ -1,0 +1,15 @@
+version: '3'
+services:
+  realscraper:
+    container_name: realscraper
+    volumes:
+      - ./:/app
+    build: .
+    ports:
+      - "38000:38000"
+      - "8000:8000"
+    extra_hosts:
+      - "node-2.kifwat.net:10.8.0.44"
+      - "node-3.kifwat.net:10.8.0.45"
+      - "node-4.kifwat.net:10.8.0.46"
+      - "node-1.kifwat.net:10.8.0.43"

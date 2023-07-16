@@ -14,7 +14,9 @@ def getFieldLlstStartWith(start,datadic):
   res = {}
   for key,val in datadic.items():
     if start in key:
-      res[key] = val
+      if val=="true":val=True
+      if val=="false":val=False
+      res[key+"s"] = bool(val)
   return res
 def getAjency(id):
     reqUrl = f"https://www-api.ouestfrance-immo.com/api/clients/{id}"
@@ -78,6 +80,7 @@ def ParseOuestfrance(data):
         "declared_habitable_surface": data.get("surface") or 0,
         "declared_land_surface": data.get("surface_terrain") or 0,
         "land_surface": data.get("surface_terrain") or 0,
+        "terrain":data.get("surface_terrain") or 0,
         "declared_rooms": data.get("nb_pieces") or 0,
         "declared_bedrooms": data.get("nb_chambre") or 0,
         "rooms": data.get("nb_pieces") or 0,
@@ -128,8 +131,16 @@ def ParseOuestfrance(data):
           "ges":data.get("ges_lettre") or "",
           "dpe":data.get("dpe_lettre") or "",        
         },
-        "ges":data.get("ges_lettre") or "",
-        "dpe":data.get("dpe_lettre") or ""
+
+
+
+        "dpe":data.get("dpe_lettre","NA"),
+        "ges":data.get("ges_lettre","NA"),
+        "estage":data.get("etage",0),
+        "floorCount": data.get("nb_etages",0),
+        "bathrooms":data.get("nb_salles_de_bain",0),
+        "toilets":data.get("nb_salles_d_eau",0),
+        "exposure":data.get("exposition","NA")
       }
   except:
     traceback.print_exc()

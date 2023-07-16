@@ -1,21 +1,20 @@
 import time
-from real_estate_advert.leboncoin.ad import Ad as leboncoinAd
-from real_estate_advert.leboncoin.scraperv4 import leboncoinAdScraper
-from real_estate_advert.leboncoin.scraperv4 import rescrapActiveId as rescrapLeboncoinActiveId
-from real_estate_advert.paruvendu.scraperv2 import main_scraper as ParuvenduScraper
-from real_estate_advert.paruvendu.scraperv2 import rescrapActiveId as rescrapParuvenduActiveId
+from real_estate_advert.leboncoin.scraper import leboncoinAdScraper
+from real_estate_advert.leboncoin.scraper import rescrapActiveId as rescrapLeboncoinActiveId
+from real_estate_advert.paruvendu.scraper import main_scraper as ParuvenduScraper
+from real_estate_advert.paruvendu.scraper import rescrapActiveId as rescrapParuvenduActiveId
 from real_estate_advert.gensdeconfiance.scraper import main_scraper as gensdeconfianceScraper
 from real_estate_advert.gensdeconfiance.scraper import rescrapActiveId as rescrapGensdeconfianceActiveId
-from real_estate_advert.paruvendu.scraperv2 import UpdateParuvendu
-from real_estate_advert.pap.scraper2 import pap_scraper as PapScraper
-from real_estate_advert.pap.scraper2 import UpdatePap
-from real_estate_advert.pap.scraper2 import rescrapActiveId as rescrapPapActiveId
+from real_estate_advert.paruvendu.scraper import UpdateParuvendu
+from real_estate_advert.pap.scraper import pap_scraper as PapScraper
+from real_estate_advert.pap.scraper import UpdatePap
+from real_estate_advert.pap.scraper import rescrapActiveId as rescrapPapActiveId
 from real_estate_advert.bienci.scraper import main_scraper as bienciScraper
 from real_estate_advert.bienci.scraper import UpdateBienci,rescrapActiveId
-from real_estate_advert.seloger.scraperv3 import main_scraper as selogerScraper
-from real_estate_advert.seloger.scraperv3 import rescrapActiveId as rescrapSelogerActiveId
-from real_estate_advert.logicImmo.logicImmo import main_scraper as LogicImmoScraper
-from real_estate_advert.logicImmo.logicImmo import rescrapActiveId as rescraplogicImmoActiveId
+from real_estate_advert.seloger.scraper import main_scraper as selogerScraper
+from real_estate_advert.seloger.scraper import rescrapActiveId as rescrapSelogerActiveId
+from real_estate_advert.logicImmo.scraper import main_scraper as LogicImmoScraper
+from real_estate_advert.logicImmo.scraper import rescrapActiveId as rescraplogicImmoActiveId
 from real_estate_advert.lefigaro.scraper import main_scraper as LefigaroScrapper
 from real_estate_advert.lefigaro.scraper import rescrapActiveId as rescrapLefigaroActiveId
 from real_estate_advert.ouestfrance.scraper import main_scraper as OuestFranceScrapper
@@ -23,6 +22,7 @@ from real_estate_advert.ouestfrance.scraper import rescrapActiveId as rescrapOue
 from real_estate_advert.avendrealouer.scraper import main_scraper as avendrealouerScrapper
 from real_estate_advert.avendrealouer.scraper import rescrapActiveId as rescrapAvendrealouerActiveId
 from real_estate_advert.green_acres.scraper import main_scraper as greenacresrScrapper
+from real_estate_advert.MissingAdFields.MissingFieldsUpdate import updateMissinField
 from celery import Celery
 from celery.schedules import crontab
 from celery.signals import task_prerun,task_postrun
@@ -105,16 +105,6 @@ def task_postrun_handler(task_id, task, args, kwargs, **kw):
     print('completed task:', task.name)
 
 
-@celery_app.task(base=Singleton,name="real estate")
-def real_estate_task(payload):
-    print("Task start ================>")
-    print("payload : ", payload)
-    obj = leboncoinAd()
-    obj.visit_url()
-
-    # Scraping task obj start here
-
-    print("Task End ================> ")
 import traceback
 @celery_app.task(base=Singleton,name="bienci task")
 def scrap_bienci_task(payload):
@@ -485,8 +475,15 @@ def rescrap_LeboncoinActiveId_task():
     except Exception as e:
         traceback.print_exc()
         print("Exception ==============>", e)
+@celery_app.task(base=Singleton,name="rescrap missing data in elasticsearch")
+def rescrap_updateMissinField_task():
+    try:
+        updateMissinField()
+    except Exception as e:
+        traceback.print_exc()
+        print("Exception ==============>", e)
 
-# rescrap_AvendrealouerbienciActiveId_task.apply_async()
+# rescrap_updateMissinField_task.apply_async()
 # rescrap_bienciActiveId_task.apply_async()
 # rescrap_papActiveId_task.apply_async()
 # rescrap_paruvenduActiveId_task.apply_async()
@@ -543,4 +540,4 @@ def setup_periodic_tasks(sender, **kwargs):
     # recscrap active ad id Gensdeconfiance every week
     sender.add_periodic_task(crontab(hour=7, minute=30, day_of_week=1), rescrap_GensdeconfianceActiveId_task.s(), name='checj Gensdeconfiance ads id in every week')
     # Calls check bienci active add every week
-    # sender.add_periodic_task(24*60*7, rescrap_bienciActiveId_task.s(), name='check bienci active add every week')
+    sender.add_periodic_task(60*60*24, rescrap_updateMissinField_task.s(), name='rescrap missing fields in From source portal')
