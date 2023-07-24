@@ -9,7 +9,8 @@ services:
       - "38000:38000"
       - "8000:8000"
     extra_hosts:
-      - "node-2.kifwat.net:10.8.0.44"
-      - "node-3.kifwat.net:10.8.0.45"
-      - "node-4.kifwat.net:10.8.0.46"
-      - "node-1.kifwat.net:10.8.0.43"
+      - es-data-node-1.kifwat.net:10.8.0.34
+      - es-data-node-2.kifwat.net:10.8.0.35
+      - es-data-node-3.kifwat.net:10.8.0.41
+      - node-6.kifwat.net:10.8.0.34
+      - node-7.kifwat.net:10.8.0.35
